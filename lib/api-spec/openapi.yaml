@@ -1,22 +1,34 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Tether API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: users
+    description: User management
+  - name: children
+    description: Child account management
+  - name: conversations
+    description: Conversation management
+  - name: messages
+    description: Messages
+  - name: contacts
+    description: Contact management
+  - name: alerts
+    description: Alert management
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +36,357 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/register:
+    post:
+      operationId: registerParent
+      tags: [auth]
+      summary: Register a parent account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterParentInput"
+      responses:
+        "201":
+          description: Parent registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/child-login:
+    post:
+      operationId: childLogin
+      tags: [auth]
+      summary: Child PIN login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChildLoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /users/me:
+    get:
+      operationId: getCurrentUser
+      tags: [users]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /children:
+    get:
+      operationId: getChildren
+      tags: [children]
+      summary: Get all children for parent
+      responses:
+        "200":
+          description: Children list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Child"
+    post:
+      operationId: addChild
+      tags: [children]
+      summary: Add a child account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddChildInput"
+      responses:
+        "201":
+          description: Child added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Child"
+
+  /children/{childId}:
+    patch:
+      operationId: updateChild
+      tags: [children]
+      summary: Update child settings
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateChildInput"
+      responses:
+        "200":
+          description: Child updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Child"
+
+  /children/{childId}/trust-level:
+    patch:
+      operationId: updateTrustLevel
+      tags: [children]
+      summary: Update child trust level
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrustLevelInput"
+      responses:
+        "200":
+          description: Trust level updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Child"
+
+  /conversations:
+    get:
+      operationId: getConversations
+      tags: [conversations]
+      summary: Get conversations for child
+      parameters:
+        - name: childId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversations list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+
+  /conversations/{conversationId}/messages:
+    get:
+      operationId: getMessages
+      tags: [messages]
+      summary: Get messages for conversation
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: before
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Messages list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+    post:
+      operationId: sendMessage
+      tags: [messages]
+      summary: Send a message
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageInput"
+      responses:
+        "201":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+  /contacts:
+    get:
+      operationId: getContacts
+      tags: [contacts]
+      summary: Get contacts for child
+      parameters:
+        - name: childId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Contacts list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contact"
+    post:
+      operationId: requestContact
+      tags: [contacts]
+      summary: Request a new contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestContactInput"
+      responses:
+        "201":
+          description: Contact request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+
+  /contacts/{contactId}/approve:
+    post:
+      operationId: approveContact
+      tags: [contacts]
+      summary: Approve contact request
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Contact approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+
+  /alerts:
+    get:
+      operationId: getAlerts
+      tags: [alerts]
+      summary: Get alerts for parent
+      parameters:
+        - name: childId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Alerts list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Alert"
+
+  /alerts/{alertId}/read:
+    post:
+      operationId: markAlertRead
+      tags: [alerts]
+      summary: Mark alert as read
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Alert marked read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alert"
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [users]
+      summary: Get parent dashboard stats
+      responses:
+        "200":
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/feed:
+    get:
+      operationId: getDashboardFeed
+      tags: [users]
+      summary: Get parent activity feed
+      responses:
+        "200":
+          description: Activity feed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeedItem"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +397,337 @@ components:
       required:
         - status
 
+    RegisterParentInput:
+      type: object
+      properties:
+        email:
+          type: string
+        displayName:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - displayName
+        - password
+
+    LoginInput:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    ChildLoginInput:
+      type: object
+      properties:
+        parentId:
+          type: integer
+        childName:
+          type: string
+        pin:
+          type: string
+      required:
+        - parentId
+        - childName
+        - pin
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+      required:
+        - user
+        - token
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          nullable: true
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [parent, child]
+        parentId:
+          type: integer
+          nullable: true
+        avatarColor:
+          type: string
+        trustLevel:
+          type: integer
+        faithModeEnabled:
+          type: boolean
+        isPaused:
+          type: boolean
+      required:
+        - id
+        - displayName
+        - role
+
+    Child:
+      type: object
+      properties:
+        id:
+          type: integer
+        displayName:
+          type: string
+        avatarColor:
+          type: string
+        grade:
+          type: string
+          nullable: true
+        age:
+          type: integer
+          nullable: true
+        trustLevel:
+          type: integer
+        faithModeEnabled:
+          type: boolean
+        isPaused:
+          type: boolean
+        flagCount:
+          type: integer
+        messageCount:
+          type: integer
+      required:
+        - id
+        - displayName
+        - trustLevel
+
+    AddChildInput:
+      type: object
+      properties:
+        displayName:
+          type: string
+        pin:
+          type: string
+        grade:
+          type: string
+        age:
+          type: integer
+        avatarColor:
+          type: string
+      required:
+        - displayName
+        - pin
+
+    UpdateChildInput:
+      type: object
+      properties:
+        displayName:
+          type: string
+        grade:
+          type: string
+        age:
+          type: integer
+        trustLevel:
+          type: integer
+        faithModeEnabled:
+          type: boolean
+        isPaused:
+          type: boolean
+        avatarColor:
+          type: string
+
+    TrustLevelInput:
+      type: object
+      properties:
+        trustLevel:
+          type: integer
+          minimum: 1
+          maximum: 5
+      required:
+        - trustLevel
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        contactId:
+          type: integer
+        contactName:
+          type: string
+        contactAvatarColor:
+          type: string
+        lastMessagePreview:
+          type: string
+          nullable: true
+        lastMessageAt:
+          type: string
+          nullable: true
+        unreadCount:
+          type: integer
+        isPaused:
+          type: boolean
+      required:
+        - id
+        - childId
+        - contactId
+        - contactName
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        senderId:
+          type: integer
+        senderName:
+          type: string
+        content:
+          type: string
+        alertLevel:
+          type: string
+          enum: [none, level1, level2, level3, level4, level5]
+        flagReason:
+          type: string
+          nullable: true
+        isBlocked:
+          type: boolean
+        isDelivered:
+          type: boolean
+        createdAt:
+          type: string
+      required:
+        - id
+        - conversationId
+        - senderId
+        - content
+        - createdAt
+
+    SendMessageInput:
+      type: object
+      properties:
+        senderId:
+          type: integer
+        content:
+          type: string
+      required:
+        - senderId
+        - content
+
+    Contact:
+      type: object
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        contactChildId:
+          type: integer
+        contactName:
+          type: string
+        approvedByParent:
+          type: boolean
+        parentIntroSent:
+          type: boolean
+        createdAt:
+          type: string
+      required:
+        - id
+        - childId
+        - contactName
+
+    RequestContactInput:
+      type: object
+      properties:
+        childId:
+          type: integer
+        contactName:
+          type: string
+      required:
+        - childId
+        - contactName
+
+    Alert:
+      type: object
+      properties:
+        id:
+          type: integer
+        parentId:
+          type: integer
+        childId:
+          type: integer
+        childName:
+          type: string
+        messageId:
+          type: integer
+          nullable: true
+        alertLevel:
+          type: string
+          enum: [none, level1, level2, level3, level4, level5]
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+      required:
+        - id
+        - parentId
+        - childId
+        - alertLevel
+        - title
+        - createdAt
+
+    DashboardStats:
+      type: object
+      properties:
+        totalMessages:
+          type: integer
+        flaggedMessages:
+          type: integer
+        activeContacts:
+          type: integer
+        unreadAlerts:
+          type: integer
+      required:
+        - totalMessages
+        - flaggedMessages
+        - activeContacts
+        - unreadAlerts
+
+    FeedItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        childName:
+          type: string
+        contactName:
+          type: string
+        alertLevel:
+          type: string
+          enum: [none, level1, level2, level3, level4, level5]
+        alertLabel:
+          type: string
+        preview:
+          type: string
+        time:
+          type: string
+      required:
+        - id
+        - childName
+        - alertLevel
+        - preview
+        - time

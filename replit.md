@@ -91,6 +91,36 @@ Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used b
 
 Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
 
+### `artifacts/mobile` (`@workspace/mobile`)
+
+Expo React Native mobile app for **Tether** — a supervised kids communication app. Two roles: parent and child.
+
+- **Framework**: Expo SDK 53, expo-router (file-based routing)
+- **Fonts**: Fraunces (headings) + Nunito (body) via expo-font
+- **Colors/Theme**: `constants/colors.ts` (primary #6B9E8A, accent #7B8EC4, 5 alert levels, faith gold)
+- **Typography**: `constants/typography.ts` (Fonts.heading, body, bodyBold, bodySemiBold)
+- **Auth**: `context/AuthContext.tsx` with AsyncStorage persistence (mock auth, no real backend calls yet)
+- **Demo Data**: `hooks/useDemoData.ts` provides all mock data for development
+
+Navigation structure:
+- `/index` — splash screen → redirect to `/onboarding`
+- `/onboarding` — slides, role selection, parent signup/login, child PIN login
+- `/(parent)/` — tab layout: dashboard, messages, alerts, community, settings
+- `/(child)/` — tab layout: home (chat list), profile
+- `/conversation/[id]` — chat screen with emoji picker (child) or shield button (parent)
+- `/child-detail/[id]` — parent view of child: trust level slider, faith mode toggle, contacts, conversations
+- `/alert-detail/[id]` — alert detail with flagged message, level tag, and navigation to conversation
+
+Shared UI components in `components/ui/`: Avatar, Badge, AlertLevelTag, StatCard, TetherButton, TetherInput
+Custom EmojiPicker in `components/EmojiPicker.tsx` — 5 categories, replaces native keyboard for child accounts
+
+Key features:
+- Trust levels 1–5 with color-coded dots and descriptions
+- Content filtering with 5 alert levels (visual tags in UI)
+- Faith Mode toggle (Christian values layer, per-child setting)
+- Contact approval flow (parent approves contacts)
+- COPPA compliant design: no ads, subscription-only model
+
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.

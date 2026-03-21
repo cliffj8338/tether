@@ -1,0 +1,204 @@
+import React from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert } from "react-native";
+import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import Colors from "@/constants/colors";
+import { Fonts } from "@/constants/typography";
+import { useAuth } from "@/context/AuthContext";
+import { Avatar } from "@/components/ui/Avatar";
+
+export default function SettingsScreen() {
+  const insets = useSafeAreaInsets();
+  const { user, logout, updateUser } = useAuth();
+
+  const handleLogout = () => {
+    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Sign Out",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          router.replace("/onboarding");
+        },
+      },
+    ]);
+  };
+
+  const toggleFaithMode = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    updateUser({ faithModeEnabled: !user?.faithModeEnabled });
+  };
+
+  return (
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Settings</Text>
+      </View>
+
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.profileCard}>
+          <Avatar name={user?.displayName ?? "P"} color={Colors.primary} size={56} />
+          <View style={styles.profileBody}>
+            <Text style={styles.profileName}>{user?.displayName}</Text>
+            <Text style={styles.profileEmail}>{user?.email ?? "Parent Account"}</Text>
+          </View>
+          <Pressable style={styles.editBtn}>
+            <Feather name="edit-2" size={16} color={Colors.accent} />
+          </Pressable>
+        </View>
+
+        <Text style={styles.sectionLabel}>ACCOUNT</Text>
+        <View style={styles.group}>
+          <SettingsRow icon="user" label="Profile" />
+          <SettingsRow icon="bell" label="Notifications" />
+          <SettingsRow icon="lock" label="Privacy & Security" />
+        </View>
+
+        <Text style={styles.sectionLabel}>CONTENT FILTERS</Text>
+        <View style={styles.group}>
+          <SettingsRow icon="shield" label="Filter Settings" />
+          <SettingsRow icon="alert-triangle" label="Alert Preferences" />
+          <View style={styles.row}>
+            <View style={[styles.rowIcon, { backgroundColor: `${Colors.faithGold}16` }]}>
+              <Feather name="book-open" size={18} color={Colors.faithGold} />
+            </View>
+            <View style={styles.rowBody}>
+              <Text style={styles.rowLabel}>Faith Mode</Text>
+              <Text style={styles.rowSub}>Christian values layer</Text>
+            </View>
+            <Switch
+              value={!!user?.faithModeEnabled}
+              onValueChange={toggleFaithMode}
+              trackColor={{ false: Colors.border, true: Colors.faithGold }}
+              thumbColor={Colors.white}
+            />
+          </View>
+        </View>
+
+        <Text style={styles.sectionLabel}>SUPPORT</Text>
+        <View style={styles.group}>
+          <SettingsRow icon="help-circle" label="Help & FAQ" />
+          <SettingsRow icon="file-text" label="Terms of Service" />
+          <SettingsRow icon="shield" label="Privacy Policy" />
+        </View>
+
+        <Pressable style={styles.logoutBtn} onPress={handleLogout}>
+          <Feather name="log-out" size={18} color={Colors.alert4} />
+          <Text style={styles.logoutText}>Sign Out</Text>
+        </Pressable>
+
+        <Text style={styles.version}>Tether v1.0.0</Text>
+      </ScrollView>
+    </View>
+  );
+}
+
+function SettingsRow({ icon, label }: { icon: keyof typeof Feather.glyphMap; label: string }) {
+  return (
+    <Pressable style={styles.row}>
+      <View style={[styles.rowIcon, { backgroundColor: Colors.surface }]}>
+        <Feather name={icon} size={18} color={Colors.textMid} />
+      </View>
+      <View style={styles.rowBody}>
+        <Text style={styles.rowLabel}>{label}</Text>
+      </View>
+      <Feather name="chevron-right" size={18} color={Colors.sand} />
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: Colors.background },
+  header: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  title: { fontFamily: Fonts.heading, fontSize: 28, color: Colors.text },
+  profileCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.white,
+    marginHorizontal: 16,
+    padding: 18,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    marginBottom: 24,
+    gap: 14,
+  },
+  profileBody: { flex: 1 },
+  profileName: { fontFamily: Fonts.bodyBold, fontSize: 18, color: Colors.text },
+  profileEmail: { fontFamily: Fonts.body, fontSize: 13, color: Colors.textMid, marginTop: 2 },
+  editBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: `${Colors.accent}14`,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sectionLabel: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 0.6,
+    color: Colors.textMid,
+    paddingHorizontal: 20,
+    marginBottom: 8,
+    marginTop: 8,
+  },
+  group: {
+    backgroundColor: Colors.white,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    marginBottom: 20,
+    overflow: "hidden",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.surface,
+  },
+  rowIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rowBody: { flex: 1 },
+  rowLabel: { fontFamily: Fonts.bodySemiBold, fontSize: 14, color: Colors.text },
+  rowSub: { fontFamily: Fonts.body, fontSize: 12, color: Colors.textMid, marginTop: 1 },
+  logoutBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 16,
+    marginHorizontal: 16,
+    marginTop: 8,
+    backgroundColor: `${Colors.alert4}08`,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: `${Colors.alert4}20`,
+  },
+  logoutText: { fontFamily: Fonts.bodyBold, fontSize: 15, color: Colors.alert4 },
+  version: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
+    color: Colors.sand,
+    textAlign: "center",
+    marginTop: 20,
+  },
+});
