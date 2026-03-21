@@ -118,10 +118,19 @@ Custom EmojiPicker in `components/EmojiPicker.tsx` — 5 categories, replaces na
 
 Key features:
 - Trust levels 1–5 with color-coded dots and descriptions
-- Content filtering with 5 alert levels (visual tags in UI)
-- Faith Mode toggle (Christian values layer, per-child setting)
+- Two-pass content filtering: pattern-based (instant) + Claude AI (contextual) with 5 alert levels
+- Faith Mode toggle (Christian values layer, per-child setting) — AI filter adds faith-aware analysis when enabled
 - Contact approval flow (parent approves contacts)
 - COPPA compliant design: no ads, subscription-only model
+
+### `lib/integrations-anthropic-ai` (`@workspace/integrations-anthropic-ai`)
+
+Anthropic Claude SDK client configured via Replit AI Integrations proxy. Used by the API server for AI-powered content moderation. No API key required — charges billed to Replit credits.
+
+- Uses `claude-haiku-4-5` model for fast, low-cost content analysis
+- `ai-content-filter.ts` in `api-server/src/lib/` implements the second-pass filter
+- Catches subtle bullying, grooming, peer pressure, social manipulation that pattern matching misses
+- Faith Mode adds Christian values analysis when enabled per-child
 
 ### `scripts` (`@workspace/scripts`)
 

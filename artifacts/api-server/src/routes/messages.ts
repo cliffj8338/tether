@@ -5,6 +5,7 @@ import { eq, desc, asc, lt, and } from "drizzle-orm";
 import { SendMessageBody } from "@workspace/api-zod";
 import { getUserFromToken } from "../lib/auth";
 import { scanContent } from "../lib/content-filter";
+import { aiScanContent } from "../lib/ai-content-filter";
 
 const router: IRouter = Router();
 
@@ -66,24 +67,45 @@ router.post("/conversations/:conversationId/messages", async (req, res) => {
     }
 
     const senderId = user.id;
-    const scanResult = scanContent(content);
+    const patternResult = scanContent(content);
+
+    const levelOrder: Record<string, number> = {
+      none: 0, level1: 1, level2: 2, level3: 3, level4: 4, level5: 5,
+    };
+
+    let finalResult = patternResult;
+
+    if (user.role === "child") {
+      const [convoForFaith] = await db.select().from(conversationsTable).where(eq(conversationsTable.id, conversationId));
+      let faithMode = false;
+      if (convoForFaith) {
+        const [childUser] = await db.select().from(usersTable).where(eq(usersTable.id, convoForFaith.childId));
+        faithMode = childUser?.faithModeEnabled ?? false;
+      }
+
+      const aiResult = await aiScanContent(content, faithMode);
+
+      const patternLevel = levelOrder[patternResult.alertLevel] ?? 0;
+      const aiLevel = levelOrder[aiResult.alertLevel] ?? 0;
+      finalResult = aiLevel > patternLevel ? aiResult : patternResult;
+    }
 
     const [message] = await db.insert(messagesTable).values({
       conversationId,
       senderId,
       content,
-      alertLevel: scanResult.alertLevel,
-      flagReason: scanResult.reason,
-      isBlocked: scanResult.alertLevel === "level5",
-      isDelivered: scanResult.alertLevel !== "level5",
+      alertLevel: finalResult.alertLevel,
+      flagReason: finalResult.reason,
+      isBlocked: finalResult.alertLevel === "level5",
+      isDelivered: finalResult.alertLevel !== "level5",
     }).returning();
 
     await db.update(conversationsTable).set({
-      lastMessagePreview: scanResult.alertLevel === "level5" ? "[Message blocked]" : content,
+      lastMessagePreview: finalResult.alertLevel === "level5" ? "[Message blocked]" : content,
       lastMessageAt: new Date(),
     }).where(eq(conversationsTable.id, conversationId));
 
-    if (scanResult.alertLevel !== "none") {
+    if (finalResult.alertLevel !== "none") {
       const [convo] = await db.select().from(conversationsTable).where(eq(conversationsTable.id, conversationId));
       if (convo) {
         const [child] = await db.select().from(usersTable).where(eq(usersTable.id, convo.childId));
@@ -92,9 +114,9 @@ router.post("/conversations/:conversationId/messages", async (req, res) => {
             parentId: child.parentId,
             childId: convo.childId,
             messageId: message.id,
-            alertLevel: scanResult.alertLevel,
-            title: scanResult.title,
-            description: scanResult.reason,
+            alertLevel: finalResult.alertLevel,
+            title: finalResult.title,
+            description: finalResult.reason,
           });
         }
       }
