@@ -18,6 +18,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { StatCard } from "@/components/ui/StatCard";
 import { AlertLevelTag } from "@/components/ui/AlertLevelTag";
 import { useDemoData } from "@/hooks/useDemoData";
+import { TetherMark } from "@/components/icons/TetherMark";
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -32,10 +33,8 @@ export default function DashboardScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.topbar}>
         <View style={styles.topbarLeft}>
-          <View style={styles.logoBox}>
-            <View style={styles.logoDot} />
-          </View>
-          <Text style={styles.logoText}>tether</Text>
+          <TetherMark size={30} color={Colors.primary} endpointOpacity={0.55} />
+          <Text style={styles.logoText}>Tether</Text>
         </View>
         <View style={styles.topbarRight}>
           <Pressable
@@ -257,21 +256,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   topbarLeft: { flexDirection: "row", alignItems: "center", gap: 9 },
-  logoBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 9,
-    backgroundColor: Colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  logoDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "white",
-  },
-  logoText: { fontFamily: Fonts.heading, fontSize: 19, color: Colors.text },
+  logoText: { fontFamily: Fonts.headingItalic, fontSize: 19, color: Colors.text, letterSpacing: -0.5 },
   topbarRight: { flexDirection: "row", alignItems: "center", gap: 10 },
   iconBtn: {
     width: 36,

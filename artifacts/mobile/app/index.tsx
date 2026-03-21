@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/typography";
 import { useAuth } from "@/context/AuthContext";
+import { TetherMark } from "@/components/icons/TetherMark";
 
 export default function SplashRouter() {
   const { user, isLoading, isOnboarded } = useAuth();
@@ -35,14 +36,8 @@ export default function SplashRouter() {
       style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
     >
       <View style={styles.logoWrap}>
-        <View style={styles.logoIcon}>
-          <View style={styles.logoDot} />
-          <View style={[styles.logoLine, styles.lineTop]} />
-          <View style={[styles.logoLine, styles.lineBottom]} />
-          <View style={[styles.logoLine, styles.lineLeft]} />
-          <View style={[styles.logoLine, styles.lineRight]} />
-        </View>
-        <Text style={styles.logoText}>tether</Text>
+        <TetherMark size={72} color="white" endpointOpacity={0.55} />
+        <Text style={styles.logoText}>Tether</Text>
       </View>
       <Text style={styles.tagline}>Safe conversations for growing minds</Text>
       <ActivityIndicator color="rgba(255,255,255,0.6)" style={styles.loader} />
@@ -60,52 +55,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 14,
   },
-  logoIcon: {
-    width: 64,
-    height: 64,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  logoDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "white",
-  },
-  logoLine: {
-    position: "absolute",
-    backgroundColor: "rgba(255,255,255,0.7)",
-    borderRadius: 2,
-  },
-  lineTop: {
-    width: 3,
-    height: 18,
-    top: 0,
-    left: 30.5,
-  },
-  lineBottom: {
-    width: 3,
-    height: 18,
-    bottom: 0,
-    left: 30.5,
-  },
-  lineLeft: {
-    width: 18,
-    height: 3,
-    left: 0,
-    top: 30.5,
-  },
-  lineRight: {
-    width: 18,
-    height: 3,
-    right: 0,
-    top: 30.5,
-  },
   logoText: {
-    fontFamily: Fonts.heading,
+    fontFamily: Fonts.headingItalic,
     fontSize: 36,
     color: "white",
-    letterSpacing: 1,
+    letterSpacing: -1,
   },
   tagline: {
     fontFamily: Fonts.body,

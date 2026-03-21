@@ -21,7 +21,12 @@ const Colors = {
   alert5: "#A03030",
 
   faithGold: "#B8953A",
+  faithGoldLight: "#D4B060",
+  faithGoldBg: "#FBF7EE",
+  faithGoldBorder: "#E8D8A8",
   faithVirtue: "#7A6EA8",
+  faithVirtueBg: "#F2F0FA",
+  faithVirtueBorder: "#C8C0E8",
 
   trustLevel1: "#6B9E8A",
   trustLevel2: "#7B8EC4",
