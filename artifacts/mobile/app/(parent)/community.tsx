@@ -6,11 +6,12 @@ import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/typography";
 import { Avatar } from "@/components/ui/Avatar";
-import { useDemoData } from "@/hooks/useDemoData";
+import { useContacts, useDashboard } from "@/hooks/useApiData";
 
 export default function CommunityScreen() {
   const insets = useSafeAreaInsets();
-  const { contacts, children } = useDemoData();
+  const { contacts, approve } = useContacts();
+  const { children } = useDashboard();
 
   const pendingContacts = contacts.filter((c) => !c.approvedByParent);
   const approvedContacts = contacts.filter((c) => c.approvedByParent);
@@ -77,7 +78,10 @@ export default function CommunityScreen() {
                 <View style={styles.approveActions}>
                   <Pressable
                     style={styles.approveBtn}
-                    onPress={() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)}
+                    onPress={() => {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      approve(contact.id);
+                    }}
                   >
                     <Feather name="check" size={16} color={Colors.white} />
                   </Pressable>

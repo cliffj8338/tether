@@ -18,6 +18,7 @@ import { Fonts } from "@/constants/typography";
 import { useAuth } from "@/context/AuthContext";
 import { TetherButton } from "@/components/ui/TetherButton";
 import { TetherInput } from "@/components/ui/TetherInput";
+import { api } from "@/services/api";
 
 const { width } = Dimensions.get("window");
 
@@ -55,6 +56,7 @@ export default function OnboardingScreen() {
   const [parentName, setParentName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [childParentEmail, setChildParentEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
@@ -64,24 +66,17 @@ export default function OnboardingScreen() {
     }
     setLoading(true);
     try {
-      const id = Date.now();
-      const user = {
-        id,
+      const result = await api.auth.register({
         email: email.trim(),
         displayName: parentName.trim(),
-        role: "parent" as const,
-        parentId: null,
-        avatarColor: Colors.primary,
-        trustLevel: 1,
-        faithModeEnabled: false,
-        isPaused: false,
-      };
-      await login(user, `mock-token-${id}`);
+        password: password.trim(),
+      });
+      await login(result.user, result.token);
       await setOnboarded();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/(parent)/dashboard");
-    } catch {
-      Alert.alert("Error", "Something went wrong. Please try again.");
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -94,50 +89,39 @@ export default function OnboardingScreen() {
     }
     setLoading(true);
     try {
-      const id = Date.now();
-      const user = {
-        id,
+      const result = await api.auth.login({
         email: email.trim(),
-        displayName: "Parent",
-        role: "parent" as const,
-        parentId: null,
-        avatarColor: Colors.primary,
-        trustLevel: 1,
-        faithModeEnabled: false,
-        isPaused: false,
-      };
-      await login(user, `mock-token-${id}`);
+        password: password.trim(),
+      });
+      await login(result.user, result.token);
       await setOnboarded();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/(parent)/dashboard");
-    } catch {
-      Alert.alert("Error", "Something went wrong. Please try again.");
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Invalid credentials. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleChildLogin = async () => {
+    if (!childParentEmail.trim() || !parentName.trim() || !password.trim()) {
+      Alert.alert("Missing Info", "Please fill in all fields.");
+      return;
+    }
     setLoading(true);
     try {
-      const id = Date.now();
-      const user = {
-        id,
-        email: null,
-        displayName: parentName.trim() || "Kid",
-        role: "child" as const,
-        parentId: 1,
-        avatarColor: Colors.accent,
-        trustLevel: 1,
-        faithModeEnabled: false,
-        isPaused: false,
-      };
-      await login(user, `mock-token-child-${id}`);
+      const result = await api.auth.childLogin({
+        parentEmail: childParentEmail.trim(),
+        childName: parentName.trim(),
+        pin: password.trim(),
+      });
+      await login(result.user, result.token);
       await setOnboarded();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/(child)/home");
-    } catch {
-      Alert.alert("Error", "Something went wrong.");
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Invalid PIN or account not found.");
     } finally {
       setLoading(false);
     }
@@ -320,9 +304,18 @@ export default function OnboardingScreen() {
           <Feather name="arrow-left" size={22} color={Colors.text} />
         </Pressable>
         <Text style={styles.formTitle}>Kid Login</Text>
-        <Text style={styles.formSubtitle}>Enter your name and PIN</Text>
+        <Text style={styles.formSubtitle}>Enter your parent's email, your name, and PIN</Text>
       </View>
       <View style={styles.formBody}>
+        <TetherInput
+          label="Parent's Email"
+          placeholder="parent@example.com"
+          value={childParentEmail}
+          onChangeText={setChildParentEmail}
+          icon="mail"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
         <TetherInput
           label="Your Name"
           placeholder="e.g. Olivia"

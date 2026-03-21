@@ -99,8 +99,10 @@ Expo React Native mobile app for **Tether** — a supervised kids communication 
 - **Fonts**: Fraunces (headings) + Nunito (body) via expo-font
 - **Colors/Theme**: `constants/colors.ts` (primary #6B9E8A, accent #7B8EC4, 5 alert levels, faith gold)
 - **Typography**: `constants/typography.ts` (Fonts.heading, body, bodyBold, bodySemiBold)
-- **Auth**: `context/AuthContext.tsx` with AsyncStorage persistence (mock auth, no real backend calls yet)
-- **Demo Data**: `hooks/useDemoData.ts` provides all mock data for development
+- **Auth**: `context/AuthContext.tsx` with real API auth + AsyncStorage token persistence
+- **API Service**: `services/api.ts` — typed fetch wrapper for all API endpoints (auth, children, conversations, messages, contacts, alerts, dashboard)
+- **API Hooks**: `hooks/useApiData.ts` — React hooks (useDashboard, useConversations, useMessages, useContacts, useAlerts, useChildDetail) for live data
+- **Demo Data**: `hooks/useDemoData.ts` (legacy, no longer imported — kept for reference)
 
 Navigation structure:
 - `/index` — splash screen → redirect to `/onboarding`

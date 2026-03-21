@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { alertsTable, usersTable } from "@workspace/db";
+import { alertsTable, usersTable, messagesTable, conversationsTable } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
 import { getUserFromToken } from "../lib/auth";
 
@@ -25,6 +25,22 @@ router.get("/alerts", async (req, res) => {
 
     const result = await Promise.all(alerts.map(async (a) => {
       const [child] = await db.select().from(usersTable).where(eq(usersTable.id, a.childId));
+      let messagePreview = "";
+      let conversationId: number | null = null;
+      if (a.messageId) {
+        const [msg] = await db.select().from(messagesTable).where(eq(messagesTable.id, a.messageId));
+        if (msg) {
+          messagePreview = msg.isBlocked ? "[Message blocked]" : msg.content;
+          conversationId = msg.conversationId;
+        }
+      }
+      const diff = Date.now() - a.createdAt.getTime();
+      const mins = Math.floor(diff / 60000);
+      let time = "Just now";
+      if (mins >= 60 * 24) time = `${Math.floor(mins / (60 * 24))}d ago`;
+      else if (mins >= 60) time = `${Math.floor(mins / 60)}h ago`;
+      else if (mins >= 1) time = `${mins}m ago`;
+
       return {
         id: a.id,
         parentId: a.parentId,
@@ -33,9 +49,12 @@ router.get("/alerts", async (req, res) => {
         messageId: a.messageId,
         alertLevel: a.alertLevel,
         title: a.title,
-        description: a.description,
+        description: a.description ?? "",
+        messagePreview,
         isRead: a.isRead ?? false,
         createdAt: a.createdAt.toISOString(),
+        time,
+        conversationId,
       };
     }));
 

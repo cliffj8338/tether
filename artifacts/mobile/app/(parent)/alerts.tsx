@@ -6,7 +6,8 @@ import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/typography";
 import { AlertLevelTag } from "@/components/ui/AlertLevelTag";
-import { useDemoData } from "@/hooks/useDemoData";
+import { useAlerts } from "@/hooks/useApiData";
+import { router } from "expo-router";
 
 function getAlertColor(level: string): string {
   const colors: Record<string, string> = {
@@ -21,7 +22,7 @@ function getAlertColor(level: string): string {
 
 export default function AlertsScreen() {
   const insets = useSafeAreaInsets();
-  const { alerts } = useDemoData();
+  const { alerts, markRead } = useAlerts();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -44,7 +45,11 @@ export default function AlertsScreen() {
           return (
             <Pressable
               style={[styles.alertCard, !item.isRead && styles.alertCardUnread]}
-              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                if (!item.isRead) markRead(item.id);
+                router.push(`/alert-detail/${item.id}`);
+              }}
             >
               <View style={[styles.alertStrip, { backgroundColor: alertColor }]} />
               <View style={[styles.alertIconWrap, { backgroundColor: `${alertColor}16` }]}>

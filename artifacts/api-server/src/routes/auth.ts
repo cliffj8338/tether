@@ -81,15 +81,26 @@ router.post("/auth/login", async (req, res) => {
 
 router.post("/auth/child-login", async (req, res) => {
   try {
-    const body = ChildLoginBody.parse(req.body);
+    const { parentEmail, childName, pin } = req.body;
+    if (!parentEmail || !childName || !pin) {
+      res.status(400).json({ error: "parentEmail, childName, and pin are required" });
+      return;
+    }
+    const [parent] = await db.select().from(usersTable).where(
+      and(eq(usersTable.email, parentEmail), eq(usersTable.role, "parent"))
+    );
+    if (!parent) {
+      res.status(401).json({ error: "Parent account not found" });
+      return;
+    }
     const [user] = await db.select().from(usersTable).where(
       and(
-        eq(usersTable.parentId, body.parentId),
-        eq(usersTable.displayName, body.childName),
+        eq(usersTable.parentId, parent.id),
+        eq(usersTable.displayName, childName),
         eq(usersTable.role, "child"),
       )
     );
-    if (!user || user.pin !== body.pin) {
+    if (!user || user.pin !== pin) {
       res.status(401).json({ error: "Invalid PIN" });
       return;
     }

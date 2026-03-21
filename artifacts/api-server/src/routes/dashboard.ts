@@ -82,12 +82,14 @@ router.get("/dashboard/feed", async (req, res) => {
 
     const allMessages: Array<{
       id: number;
+      type: string;
       childName: string;
       contactName: string;
       alertLevel: string;
-      alertLabel: string;
       preview: string;
       time: string;
+      childAvatarColor: string;
+      _sortKey: number;
     }> = [];
 
     for (const child of children) {
@@ -108,21 +110,30 @@ router.get("/dashboard/feed", async (req, res) => {
             level4: "Level 4 — High Priority",
             level5: "Level 5 — Critical",
           };
+          const diff = Date.now() - msg.createdAt.getTime();
+          const mins = Math.floor(diff / 60000);
+          let timeAgo = "Just now";
+          if (mins >= 60 * 24) timeAgo = `${Math.floor(mins / (60 * 24))}d ago`;
+          else if (mins >= 60) timeAgo = `${Math.floor(mins / 60)}h ago`;
+          else if (mins >= 1) timeAgo = `${mins}m ago`;
+
           allMessages.push({
             id: msg.id,
+            type: msg.alertLevel !== "none" ? "alert" : "message",
             childName: child.displayName,
             contactName: contact?.contactName ?? "Unknown",
             alertLevel: msg.alertLevel ?? "none",
-            alertLabel: alertLabels[msg.alertLevel ?? "none"] ?? "Conversation",
             preview: msg.isBlocked ? "[Message blocked]" : msg.content,
-            time: msg.createdAt.toISOString(),
+            time: timeAgo,
+            childAvatarColor: child.avatarColor ?? "#7B8EC4",
+            _sortKey: msg.createdAt.getTime(),
           });
         }
       }
     }
 
-    allMessages.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-    res.json(allMessages.slice(0, 20));
+    allMessages.sort((a, b) => b._sortKey - a._sortKey);
+    res.json(allMessages.slice(0, 20).map(({ _sortKey, ...rest }) => rest));
   } catch (error) {
     req.log.error(error, "Failed to get dashboard feed");
     res.status(500).json({ error: "Failed to get dashboard feed" });

@@ -17,13 +17,13 @@ import { useAuth } from "@/context/AuthContext";
 import { Avatar } from "@/components/ui/Avatar";
 import { StatCard } from "@/components/ui/StatCard";
 import { AlertLevelTag } from "@/components/ui/AlertLevelTag";
-import { useDemoData } from "@/hooks/useDemoData";
+import { useDashboard } from "@/hooks/useApiData";
 import { TetherMark } from "@/components/icons/TetherMark";
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const { children, feedItems, stats, refreshAll, isRefreshing } = useDemoData();
+  const { children, feedItems, stats, isRefreshing, refresh } = useDashboard();
   const [activeChild, setActiveChild] = useState(0);
 
   const hour = new Date().getHours();
@@ -62,7 +62,7 @@ export default function DashboardScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={isRefreshing} onRefresh={refreshAll} tintColor={Colors.primary} />
+          <RefreshControl refreshing={isRefreshing} onRefresh={refresh} tintColor={Colors.primary} />
         }
       >
         <View style={styles.greeting}>
@@ -174,7 +174,7 @@ export default function DashboardScreen() {
                   <Text style={styles.feedTime}>{item.time}</Text>
                 </View>
                 <Text style={styles.feedPreview} numberOfLines={1}>{item.preview}</Text>
-                <AlertLevelTag level={item.alertLevel} label={item.alertLabel} />
+                <AlertLevelTag level={item.alertLevel ?? "none"} />
               </View>
             </Pressable>
           ))}

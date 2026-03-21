@@ -7,11 +7,13 @@ import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/typography";
 import { Avatar } from "@/components/ui/Avatar";
-import { useDemoData } from "@/hooks/useDemoData";
+import { useConversations } from "@/hooks/useApiData";
+import { useDashboard } from "@/hooks/useApiData";
 
 export default function MessagesScreen() {
   const insets = useSafeAreaInsets();
-  const { conversations, children } = useDemoData();
+  const { conversations } = useConversations();
+  const { children } = useDashboard();
   const [selectedChild, setSelectedChild] = useState<number | null>(null);
 
   const filtered = selectedChild

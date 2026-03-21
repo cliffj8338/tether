@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { messagesTable, conversationsTable, usersTable, alertsTable } from "@workspace/db";
-import { eq, desc, lt, and } from "drizzle-orm";
+import { eq, desc, asc, lt, and } from "drizzle-orm";
 import { SendMessageBody } from "@workspace/api-zod";
 import { getUserFromToken } from "../lib/auth";
 import { scanContent } from "../lib/content-filter";
@@ -23,7 +23,7 @@ router.get("/conversations/:conversationId/messages", async (req, res) => {
       before
         ? and(eq(messagesTable.conversationId, conversationId), lt(messagesTable.id, before))
         : eq(messagesTable.conversationId, conversationId)
-    ).orderBy(desc(messagesTable.createdAt)).limit(limit);
+    ).orderBy(asc(messagesTable.createdAt)).limit(limit);
 
     const messages = await query;
 
@@ -40,6 +40,7 @@ router.get("/conversations/:conversationId/messages", async (req, res) => {
         isBlocked: m.isBlocked ?? false,
         isDelivered: m.isDelivered ?? true,
         createdAt: m.createdAt.toISOString(),
+        isMine: m.senderId === user.id,
       };
     }));
 
@@ -58,14 +59,19 @@ router.post("/conversations/:conversationId/messages", async (req, res) => {
       return;
     }
     const conversationId = parseInt(req.params.conversationId);
-    const body = SendMessageBody.parse(req.body);
+    const { content } = req.body;
+    if (!content || typeof content !== "string") {
+      res.status(400).json({ error: "content is required" });
+      return;
+    }
 
-    const scanResult = scanContent(body.content);
+    const senderId = user.id;
+    const scanResult = scanContent(content);
 
     const [message] = await db.insert(messagesTable).values({
       conversationId,
-      senderId: body.senderId,
-      content: body.content,
+      senderId,
+      content,
       alertLevel: scanResult.alertLevel,
       flagReason: scanResult.reason,
       isBlocked: scanResult.alertLevel === "level5",
@@ -73,7 +79,7 @@ router.post("/conversations/:conversationId/messages", async (req, res) => {
     }).returning();
 
     await db.update(conversationsTable).set({
-      lastMessagePreview: scanResult.alertLevel === "level5" ? "[Message blocked]" : body.content,
+      lastMessagePreview: scanResult.alertLevel === "level5" ? "[Message blocked]" : content,
       lastMessageAt: new Date(),
     }).where(eq(conversationsTable.id, conversationId));
 
@@ -94,19 +100,18 @@ router.post("/conversations/:conversationId/messages", async (req, res) => {
       }
     }
 
-    const [sender] = await db.select().from(usersTable).where(eq(usersTable.id, body.senderId));
-
     res.status(201).json({
       id: message.id,
       conversationId: message.conversationId,
       senderId: message.senderId,
-      senderName: sender?.displayName ?? "Unknown",
+      senderName: user.displayName,
       content: message.content,
       alertLevel: message.alertLevel ?? "none",
       flagReason: message.flagReason,
       isBlocked: message.isBlocked ?? false,
       isDelivered: message.isDelivered ?? true,
       createdAt: message.createdAt.toISOString(),
+      isMine: true,
     });
   } catch (error) {
     req.log.error(error, "Failed to send message");

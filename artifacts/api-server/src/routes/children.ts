@@ -111,6 +111,13 @@ router.patch("/children/:childId", async (req, res) => {
       return;
     }
 
+    const [flagResult] = await db.select({
+      count: sql<number>`count(*)::int`,
+    }).from(alertsTable).where(eq(alertsTable.childId, child.id));
+    const [msgResult] = await db.select({
+      count: sql<number>`count(*)::int`,
+    }).from(messagesTable).where(eq(messagesTable.senderId, child.id));
+
     res.json({
       id: child.id,
       displayName: child.displayName,
@@ -120,6 +127,8 @@ router.patch("/children/:childId", async (req, res) => {
       trustLevel: child.trustLevel ?? 1,
       faithModeEnabled: child.faithModeEnabled ?? false,
       isPaused: child.isPaused ?? false,
+      flagCount: flagResult?.count ?? 0,
+      messageCount: msgResult?.count ?? 0,
     });
   } catch (error) {
     req.log.error(error, "Failed to update child");
@@ -148,6 +157,13 @@ router.patch("/children/:childId/trust-level", async (req, res) => {
       return;
     }
 
+    const [flagResult2] = await db.select({
+      count: sql<number>`count(*)::int`,
+    }).from(alertsTable).where(eq(alertsTable.childId, child.id));
+    const [msgResult2] = await db.select({
+      count: sql<number>`count(*)::int`,
+    }).from(messagesTable).where(eq(messagesTable.senderId, child.id));
+
     res.json({
       id: child.id,
       displayName: child.displayName,
@@ -157,6 +173,8 @@ router.patch("/children/:childId/trust-level", async (req, res) => {
       trustLevel: child.trustLevel ?? 1,
       faithModeEnabled: child.faithModeEnabled ?? false,
       isPaused: child.isPaused ?? false,
+      flagCount: flagResult2?.count ?? 0,
+      messageCount: msgResult2?.count ?? 0,
     });
   } catch (error) {
     req.log.error(error, "Failed to update trust level");

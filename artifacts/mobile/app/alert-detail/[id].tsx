@@ -7,13 +7,13 @@ import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/typography";
 import { AlertLevelTag } from "@/components/ui/AlertLevelTag";
 import { TetherButton } from "@/components/ui/TetherButton";
-import { useDemoData } from "@/hooks/useDemoData";
+import { useAlerts } from "@/hooks/useApiData";
 
 export default function AlertDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const alertId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
-  const { alerts } = useDemoData();
+  const { alerts } = useAlerts();
 
   const alert = alerts.find((a) => a.id === alertId);
 

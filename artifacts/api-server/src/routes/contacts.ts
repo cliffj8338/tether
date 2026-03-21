@@ -1,9 +1,15 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { contactsTable, conversationsTable } from "@workspace/db";
+import { contactsTable, conversationsTable, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { RequestContactBody } from "@workspace/api-zod";
 import { getUserFromToken } from "../lib/auth";
+
+const AVATAR_COLORS = ["#7B8EC4", "#6B9E8A", "#C49A3A", "#C4603A", "#A03030", "#7A6EA8", "#4E7D6A"];
+
+function randomAvatarColor(): string {
+  return AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
+}
 
 const router: IRouter = Router();
 
@@ -14,18 +20,30 @@ router.get("/contacts", async (req, res) => {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
-    const childId = parseInt(req.query.childId as string);
-    if (isNaN(childId)) {
-      res.status(400).json({ error: "childId is required" });
-      return;
+
+    let contacts;
+    if (req.query.childId) {
+      const childId = parseInt(req.query.childId as string);
+      contacts = await db.select().from(contactsTable).where(eq(contactsTable.childId, childId));
+    } else if (user.role === "child") {
+      contacts = await db.select().from(contactsTable).where(eq(contactsTable.childId, user.id));
+    } else {
+      const children = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.parentId, user.id));
+      const childIds = children.map(c => c.id);
+      const allContacts = [];
+      for (const cid of childIds) {
+        const c = await db.select().from(contactsTable).where(eq(contactsTable.childId, cid));
+        allContacts.push(...c);
+      }
+      contacts = allContacts;
     }
 
-    const contacts = await db.select().from(contactsTable).where(eq(contactsTable.childId, childId));
     res.json(contacts.map(c => ({
       id: c.id,
       childId: c.childId,
       contactChildId: c.contactChildId,
       contactName: c.contactName,
+      avatarColor: c.avatarColor ?? "#7B8EC4",
       approvedByParent: c.approvedByParent ?? false,
       parentIntroSent: c.parentIntroSent ?? false,
       createdAt: c.createdAt.toISOString(),
@@ -48,6 +66,7 @@ router.post("/contacts", async (req, res) => {
       childId: body.childId,
       contactChildId: 0,
       contactName: body.contactName,
+      avatarColor: randomAvatarColor(),
       approvedByParent: false,
       parentIntroSent: false,
     }).returning();
@@ -57,6 +76,7 @@ router.post("/contacts", async (req, res) => {
       childId: contact.childId,
       contactChildId: contact.contactChildId,
       contactName: contact.contactName,
+      avatarColor: contact.avatarColor,
       approvedByParent: contact.approvedByParent ?? false,
       parentIntroSent: contact.parentIntroSent ?? false,
       createdAt: contact.createdAt.toISOString(),

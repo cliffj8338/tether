@@ -17,7 +17,7 @@ import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/typography";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar } from "@/components/ui/Avatar";
-import { useDemoData } from "@/hooks/useDemoData";
+import { useMessages, useConversations } from "@/hooks/useApiData";
 import { EmojiPicker } from "@/components/EmojiPicker";
 
 export default function ConversationScreen() {
@@ -25,33 +25,26 @@ export default function ConversationScreen() {
   const convoId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const { conversations, getMessages } = useDemoData();
+  const { conversations } = useConversations();
+  const { messages, send } = useMessages(convoId);
   const isChild = user?.role === "child";
 
   const convo = conversations.find((c) => c.id === convoId);
-  const messages = getMessages(convoId);
 
   const [inputText, setInputText] = useState("");
-  const [localMessages, setLocalMessages] = useState(messages);
   const [showEmoji, setShowEmoji] = useState(false);
 
-  const handleSend = useCallback(() => {
+  const handleSend = useCallback(async () => {
     if (!inputText.trim()) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const newMsg = {
-      id: Date.now(),
-      senderId: user?.id ?? 0,
-      senderName: user?.displayName ?? "Me",
-      content: inputText.trim(),
-      alertLevel: "none",
-      isBlocked: false,
-      createdAt: "Just now",
-      isMine: true,
-    };
-    setLocalMessages((prev) => [...prev, newMsg]);
+    try {
+      await send(inputText.trim());
+    } catch (err) {
+      console.warn("Send failed:", err);
+    }
     setInputText("");
     setShowEmoji(false);
-  }, [inputText, user]);
+  }, [inputText, send]);
 
   const handleEmojiSelect = (emoji: string) => {
     setInputText((prev) => prev + emoji);
@@ -81,7 +74,7 @@ export default function ConversationScreen() {
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
         <FlatList
-          data={localMessages}
+          data={messages}
           keyExtractor={(item) => item.id.toString()}
           inverted={false}
           contentContainerStyle={styles.messageList}

@@ -8,14 +8,14 @@ import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/typography";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar } from "@/components/ui/Avatar";
-import { useDemoData } from "@/hooks/useDemoData";
+import { useConversations } from "@/hooks/useApiData";
 
 export default function ChildHomeScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const { conversations } = useDemoData();
+  const { conversations } = useConversations();
 
-  const myConvos = conversations.filter((c) => c.childId === (user?.childId ?? user?.id ?? 1));
+  const myConvos = conversations;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>

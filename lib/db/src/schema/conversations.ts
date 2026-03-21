@@ -9,6 +9,7 @@ export const contactsTable = pgTable("contacts", {
   childId: integer("child_id").notNull(),
   contactChildId: integer("contact_child_id").notNull(),
   contactName: text("contact_name").notNull(),
+  avatarColor: text("avatar_color").default("#7B8EC4").notNull(),
   approvedByParent: boolean("approved_by_parent").default(false),
   parentIntroSent: boolean("parent_intro_sent").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),

@@ -14,7 +14,7 @@ import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/typography";
 import { Avatar } from "@/components/ui/Avatar";
-import { useDemoData } from "@/hooks/useDemoData";
+import { useChildDetail } from "@/hooks/useApiData";
 
 const trustLevelDescriptions = [
   "",
@@ -38,11 +38,7 @@ export default function ChildDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const childId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
-  const { children, conversations, contacts } = useDemoData();
-
-  const child = children.find((c) => c.id === childId);
-  const childConvos = conversations.filter((c) => c.childId === childId);
-  const childContacts = contacts.filter((c) => c.childId === childId);
+  const { child, conversations: childConvos, contacts: childContacts, updateTrustLevel, updateSettings } = useChildDetail(childId);
 
   const [trustLevel, setTrustLevel] = useState(child?.trustLevel ?? 1);
   const [faithMode, setFaithMode] = useState(child?.faithModeEnabled ?? false);
@@ -124,6 +120,7 @@ export default function ChildDetailScreen() {
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   setTrustLevel(level);
+                  updateTrustLevel(level);
                 }}
               >
                 <Text style={[
@@ -150,6 +147,7 @@ export default function ChildDetailScreen() {
               onValueChange={(v) => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setIsPaused(v);
+                updateSettings({ isPaused: v });
               }}
               trackColor={{ false: Colors.border, true: Colors.alert4 }}
               thumbColor={Colors.white}
@@ -168,6 +166,7 @@ export default function ChildDetailScreen() {
               onValueChange={(v) => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setFaithMode(v);
+                updateSettings({ faithModeEnabled: v });
               }}
               trackColor={{ false: Colors.border, true: Colors.faithGold }}
               thumbColor={Colors.white}
