@@ -6,7 +6,7 @@ export const waitlistRoleEnum = pgEnum("waitlist_role", ["parent", "school", "ch
 
 export const waitlistTable = pgTable("waitlist", {
   id: serial("id").primaryKey(),
-  email: text("email").notNull(),
+  email: text("email").notNull().unique(),
   name: text("name"),
   role: waitlistRoleEnum("role").notNull().default("parent"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
