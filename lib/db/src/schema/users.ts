@@ -17,6 +17,9 @@ export const usersTable = pgTable("users", {
   trustLevel: integer("trust_level").default(1),
   faithModeEnabled: boolean("faith_mode_enabled").default(false),
   isPaused: boolean("is_paused").default(false),
+  pushToken: text("push_token"),
+  phone: text("phone"),
+  passwordHash: text("password_hash"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

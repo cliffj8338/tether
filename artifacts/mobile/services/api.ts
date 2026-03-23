@@ -210,6 +210,15 @@ export const api = {
     },
   },
 
+  pushToken: {
+    register(token: string): Promise<{ success: boolean }> {
+      return request("/push-token", { method: "POST", body: JSON.stringify({ token }) });
+    },
+    remove(): Promise<{ success: boolean }> {
+      return request("/push-token", { method: "DELETE" });
+    },
+  },
+
   dashboard: {
     stats(): Promise<DashboardStats> {
       return request("/dashboard/stats");

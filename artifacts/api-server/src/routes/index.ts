@@ -7,6 +7,7 @@ import messagesRouter from "./messages";
 import contactsRouter from "./contacts";
 import alertsRouter from "./alerts";
 import dashboardRouter from "./dashboard";
+import pushRouter from "./push";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(messagesRouter);
 router.use(contactsRouter);
 router.use(alertsRouter);
 router.use(dashboardRouter);
+router.use(pushRouter);
 
 export default router;

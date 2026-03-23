@@ -6,6 +6,7 @@ import { SendMessageBody } from "@workspace/api-zod";
 import { getUserFromToken } from "../lib/auth";
 import { scanContent } from "../lib/content-filter";
 import { aiScanContent } from "../lib/ai-content-filter";
+import { sendPushNotification, buildAlertPushMessage } from "../lib/push-notifications";
 
 const router: IRouter = Router();
 
@@ -110,14 +111,30 @@ router.post("/conversations/:conversationId/messages", async (req, res) => {
       if (convo) {
         const [child] = await db.select().from(usersTable).where(eq(usersTable.id, convo.childId));
         if (child?.parentId) {
-          await db.insert(alertsTable).values({
+          const [alert] = await db.insert(alertsTable).values({
             parentId: child.parentId,
             childId: convo.childId,
             messageId: message.id,
             alertLevel: finalResult.alertLevel,
             title: finalResult.title,
             description: finalResult.reason,
-          });
+          }).returning();
+
+          const [parent] = await db.select().from(usersTable).where(eq(usersTable.id, child.parentId));
+          if (parent?.pushToken) {
+            const { pushTitle, pushBody } = buildAlertPushMessage(
+              finalResult.alertLevel,
+              child.displayName,
+              finalResult.title,
+              finalResult.reason
+            );
+            sendPushNotification(parent.pushToken, pushTitle, pushBody, {
+              type: "alert",
+              alertId: alert.id,
+              alertLevel: finalResult.alertLevel,
+              childId: convo.childId,
+            }).catch(() => {});
+          }
         }
       }
     }
