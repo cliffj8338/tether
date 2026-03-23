@@ -5,12 +5,14 @@ import { WaitlistModal } from "@/components/WaitlistModal";
 import { cn } from "@/lib/utils";
 import { useSEO } from "@/hooks/useSEO";
 
-const FADE_UP = {
+import type { Variants } from "framer-motion";
+
+const FADE_UP: Variants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
 };
 
-const STAGGER = {
+const STAGGER: Variants = {
   visible: { transition: { staggerChildren: 0.1 } }
 };
 

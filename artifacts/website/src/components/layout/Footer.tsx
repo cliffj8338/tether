@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { LinkIcon } from "lucide-react";
+import { LinkIcon, Twitter, Instagram, Linkedin } from "lucide-react";
 
 export function Footer() {
   return (
@@ -16,6 +16,17 @@ export function Footer() {
             <p className="text-text-mid max-w-sm mb-6 font-medium leading-relaxed">
               Messaging for kids. Supervised by design. Built for trust. The first app that should come before all the others.
             </p>
+            <div className="flex items-center gap-4">
+              <a href="https://twitter.com/tetherapp" target="_blank" rel="noopener noreferrer" aria-label="Follow Tether on Twitter" className="w-10 h-10 bg-surface rounded-full flex items-center justify-center text-text-mid hover:bg-primary hover:text-white transition-colors">
+                <Twitter className="w-5 h-5" />
+              </a>
+              <a href="https://instagram.com/tetherapp" target="_blank" rel="noopener noreferrer" aria-label="Follow Tether on Instagram" className="w-10 h-10 bg-surface rounded-full flex items-center justify-center text-text-mid hover:bg-primary hover:text-white transition-colors">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="https://linkedin.com/company/tetherapp" target="_blank" rel="noopener noreferrer" aria-label="Follow Tether on LinkedIn" className="w-10 h-10 bg-surface rounded-full flex items-center justify-center text-text-mid hover:bg-primary hover:text-white transition-colors">
+                <Linkedin className="w-5 h-5" />
+              </a>
+            </div>
           </div>
           
           <div>
