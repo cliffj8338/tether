@@ -45,13 +45,11 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
         const firstInput = dialogRef.current?.querySelector<HTMLElement>("input, button");
         firstInput?.focus();
       }, 100);
+      return () => {
+        document.removeEventListener("keydown", handleKeyDown);
+        previousFocusRef.current?.focus();
+      };
     }
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      if (!isOpen && previousFocusRef.current) {
-        previousFocusRef.current.focus();
-      }
-    };
   }, [isOpen, handleKeyDown]);
 
   const handleSubmit = (e: React.FormEvent) => {

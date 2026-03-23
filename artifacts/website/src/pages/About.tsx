@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { WaitlistModal } from "@/components/WaitlistModal";
-import { Heart, Target, Star, CheckCircle, Code, BookOpen } from "lucide-react";
+import { Heart, Target, Star, CheckCircle, Code, BookOpen, Cpu } from "lucide-react";
 import { useSEO } from "@/hooks/useSEO";
 
 export default function About() {
@@ -71,7 +71,7 @@ export default function About() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
                 icon: Target,
@@ -92,6 +92,11 @@ export default function About() {
                 icon: BookOpen,
                 title: "Faith as a foundation",
                 desc: "For Cliff and his family, faith is not a feature — it's the reason the company exists. The conviction that children are worth protecting, that accountability builds character, and that communities thrive when adults take responsibility."
+              },
+              {
+                icon: Cpu,
+                title: "AI-assisted development advantage",
+                desc: "Tether leverages AI-assisted development to move at startup speed with enterprise quality. Architectural decisions, content moderation, and code generation are accelerated by AI tooling — allowing a lean team to build and ship what would traditionally require a much larger engineering organization."
               },
             ].map((item, i) => (
               <motion.div
