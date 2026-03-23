@@ -20,7 +20,7 @@ runButton = "Project"
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true
-integrations = ["twilio:1.0.0"]
+integrations = ["twilio:1.0.0", "revenuecat:1.0.0"]
 
 [postMerge]
 path = "scripts/post-merge.sh"
@@ -28,3 +28,14 @@ timeoutMs = 20000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+EXPO_PUBLIC_REVENUECAT_TEST_API_KEY = "test_oldevxrYuvIpeeHGNBjONMUTMoL"
+EXPO_PUBLIC_REVENUECAT_IOS_API_KEY = "appl_YjtqNXXLJMfxPwuyTpIpISAeMZm"
+EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY = "goog_pxcZOARIqIlCbIcsaprqGZfKwgL"
+REVENUECAT_PROJECT_ID = "projd5c73dce"
+REVENUECAT_TEST_STORE_APP_ID = "app9f5ca7a9d3"
+REVENUECAT_APPLE_APP_STORE_APP_ID = "appe4aaa88bf8"
+REVENUECAT_GOOGLE_PLAY_STORE_APP_ID = "appc4aa2645bf"

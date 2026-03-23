@@ -132,6 +132,25 @@ Anthropic Claude SDK client configured via Replit AI Integrations proxy. Used by
 - Catches subtle bullying, grooming, peer pressure, social manipulation that pattern matching misses
 - Faith Mode adds Christian values analysis when enabled per-child
 
+### Push Notifications & SMS
+
+- **Push**: `expo-notifications` + `expo-device` for Expo push tokens. `pushToken` column in users table. `lib/push-notifications.ts` sends via Expo Push API. All alert levels trigger push to parent.
+- **SMS**: Twilio via Replit connector (`conn_twilio_01KMC6SHEP3313FJVQE7HJXC92`). `lib/sms.ts` fetches credentials at runtime. Only Level 4-5 alerts trigger SMS to parent's `phone` column.
+- **Settings**: Parent can add/update phone number in settings screen. `PATCH /users/me` endpoint.
+
+### RevenueCat Subscriptions
+
+- **Integration**: RevenueCat connected via Replit connector
+- **Project**: "Tether" (projd5c73dce)
+- **Product**: `tether_family_monthly` — $9.99/mo monthly subscription
+- **Entitlement**: `premium` — gates app access
+- **Client SDK**: `react-native-purchases` initialized in `_layout.tsx`, `SubscriptionProvider` wraps app
+- **Client lib**: `artifacts/mobile/lib/revenuecat.tsx` — `useSubscription()` hook provides `isSubscribed`, `purchase`, `restore`, `offerings`
+- **Paywall**: `/paywall` screen with feature list, price card, confirm modal
+- **Settings**: Subscription status shown in parent settings, "Subscribe Now" button if not subscribed, "Restore Purchases" option
+- **Seed script**: `scripts/src/seedRevenueCat.ts` — creates project, apps, products, entitlements, offerings, packages
+- **Env vars**: `EXPO_PUBLIC_REVENUECAT_TEST_API_KEY`, `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY`, `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY`, `REVENUECAT_PROJECT_ID`, `REVENUECAT_TEST_STORE_APP_ID`, `REVENUECAT_APPLE_APP_STORE_APP_ID`, `REVENUECAT_GOOGLE_PLAY_STORE_APP_ID`
+
 ### `scripts` (`@workspace/scripts`)
 
-Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts exec tsx src/<script>.ts`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.

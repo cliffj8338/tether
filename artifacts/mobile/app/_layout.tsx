@@ -27,8 +27,10 @@ import {
   sendPushTokenToServer,
   addNotificationResponseListener,
 } from "@/services/pushNotifications";
+import { initializeRevenueCat, SubscriptionProvider, loginRevenueCat, logoutRevenueCat } from "@/lib/revenuecat";
 
 SplashScreen.preventAutoHideAsync();
+initializeRevenueCat();
 
 const queryClient = new QueryClient();
 
@@ -38,7 +40,14 @@ function PushNotificationManager() {
   const responseListener = useRef<ReturnType<typeof addNotificationResponseListener>>();
 
   useEffect(() => {
-    if (!user || Platform.OS === "web") return;
+    if (!user) {
+      logoutRevenueCat();
+      return;
+    }
+
+    loginRevenueCat(String(user.id));
+
+    if (Platform.OS === "web") return;
 
     registerForPushNotifications().then((token) => {
       if (token) {
@@ -75,6 +84,7 @@ function RootLayoutNav() {
         <Stack.Screen name="conversation/[id]" options={{ animation: "slide_from_right" }} />
         <Stack.Screen name="child-detail/[id]" options={{ animation: "slide_from_right" }} />
         <Stack.Screen name="alert-detail/[id]" options={{ animation: "slide_from_right" }} />
+        <Stack.Screen name="paywall" options={{ animation: "slide_from_bottom", presentation: "modal" }} />
       </Stack>
     </>
   );
@@ -110,11 +120,13 @@ export default function RootLayout() {
       <ErrorBoundary>
         <AuthProvider>
           <QueryClientProvider client={queryClient}>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
+            <SubscriptionProvider>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <KeyboardProvider>
+                  <RootLayoutNav />
+                </KeyboardProvider>
+              </GestureHandlerRootView>
+            </SubscriptionProvider>
           </QueryClientProvider>
         </AuthProvider>
       </ErrorBoundary>

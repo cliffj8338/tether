@@ -9,10 +9,12 @@ import { Fonts } from "@/constants/typography";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar } from "@/components/ui/Avatar";
 import { api } from "@/services/api";
+import { useSubscription } from "@/lib/revenuecat";
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { user, logout, updateUser } = useAuth();
+  const { isSubscribed, offerings, restore, isRestoring } = useSubscription();
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [savingPhone, setSavingPhone] = useState(false);
   const [phoneError, setPhoneError] = useState("");
@@ -112,6 +114,53 @@ export default function SettingsScreen() {
           {phoneError ? <Text style={styles.phoneError}>{phoneError}</Text> : null}
           <SettingsRow icon="bell" label="Notifications" />
           <SettingsRow icon="lock" label="Privacy & Security" />
+        </View>
+
+        <Text style={styles.sectionLabel}>SUBSCRIPTION</Text>
+        <View style={styles.group}>
+          <View style={styles.row}>
+            <View style={[styles.rowIcon, { backgroundColor: `${Colors.primary}16` }]}>
+              <Feather name="credit-card" size={18} color={Colors.primary} />
+            </View>
+            <View style={styles.rowBody}>
+              <Text style={styles.rowLabel}>Plan</Text>
+              <Text style={styles.rowSub}>
+                {isSubscribed ? "Tether Family — Active" : "No active subscription"}
+              </Text>
+            </View>
+            {isSubscribed ? (
+              <View style={styles.activeBadge}>
+                <Text style={styles.activeBadgeText}>Active</Text>
+              </View>
+            ) : null}
+          </View>
+          {!isSubscribed ? (
+            <Pressable
+              style={styles.subscribeBtn}
+              onPress={() => router.push("/paywall" as any)}
+            >
+              <Feather name="star" size={16} color={Colors.white} />
+              <Text style={styles.subscribeBtnText}>Subscribe Now</Text>
+            </Pressable>
+          ) : null}
+          <Pressable
+            style={styles.row}
+            onPress={async () => {
+              try {
+                await restore();
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              } catch {}
+            }}
+            disabled={isRestoring}
+          >
+            <View style={[styles.rowIcon, { backgroundColor: Colors.surface }]}>
+              <Feather name="refresh-cw" size={18} color={Colors.textMid} />
+            </View>
+            <View style={styles.rowBody}>
+              <Text style={styles.rowLabel}>Restore Purchases</Text>
+              {isRestoring ? <ActivityIndicator size="small" style={{ marginTop: 4 }} /> : null}
+            </View>
+          </Pressable>
         </View>
 
         <Text style={styles.sectionLabel}>CONTENT FILTERS</Text>
@@ -273,6 +322,33 @@ const styles = StyleSheet.create({
     color: Colors.alert4,
     paddingHorizontal: 14,
     paddingBottom: 10,
+  },
+  activeBadge: {
+    backgroundColor: `${Colors.primary}16`,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  activeBadgeText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+    color: Colors.primary,
+  },
+  subscribeBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginHorizontal: 14,
+    marginVertical: 10,
+    paddingVertical: 12,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+  },
+  subscribeBtnText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 14,
+    color: Colors.white,
   },
   logoutBtn: {
     flexDirection: "row",
