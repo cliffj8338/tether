@@ -10,6 +10,7 @@ interface NavLink {
   href: string;
   label: string;
   children?: { href: string; label: string }[];
+  static?: boolean;
 }
 
 const NAV_LINKS: NavLink[] = [
@@ -26,6 +27,7 @@ const NAV_LINKS: NavLink[] = [
   { href: "/pricing", label: "Pricing" },
   { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
+  { href: "/investors", label: "Investors", static: true },
 ];
 
 function DesktopDropdown({ link, location }: { link: NavLink; location: string }) {
@@ -129,6 +131,14 @@ export function Navbar() {
               {NAV_LINKS.map((link) =>
                 link.children ? (
                   <DesktopDropdown key={link.href} link={link} location={location} />
+                ) : link.static ? (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="text-sm font-semibold transition-colors hover:text-primary text-text-mid"
+                  >
+                    {link.label}
+                  </a>
                 ) : (
                   <Link
                     key={link.href}
@@ -212,6 +222,14 @@ export function Navbar() {
                       )}
                     </AnimatePresence>
                   </div>
+                ) : link.static ? (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="block px-4 py-3 rounded-xl text-lg font-semibold text-foreground hover:bg-surface transition-colors"
+                  >
+                    {link.label}
+                  </a>
                 ) : (
                   <Link
                     key={link.href}

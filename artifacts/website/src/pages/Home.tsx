@@ -65,6 +65,12 @@ export default function Home() {
             >
               Join the Waitlist <ArrowRight className="w-5 h-5" />
             </button>
+            <a
+              href="/investors"
+              className="w-full sm:w-auto px-8 py-4 bg-white text-foreground border-2 border-border rounded-xl font-bold text-lg hover:border-primary/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              Investor Overview <ArrowRight className="w-5 h-5" />
+            </a>
           </motion.div>
         </motion.div>
       </section>
