@@ -8,6 +8,7 @@ import contactsRouter from "./contacts";
 import alertsRouter from "./alerts";
 import dashboardRouter from "./dashboard";
 import pushRouter from "./push";
+import waitlistRouter from "./waitlist";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(contactsRouter);
 router.use(alertsRouter);
 router.use(dashboardRouter);
 router.use(pushRouter);
+router.use(waitlistRouter);
 
 export default router;

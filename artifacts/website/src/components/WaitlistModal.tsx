@@ -4,18 +4,36 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
+type WaitlistRole = "parent" | "school" | "church";
+
 interface WaitlistModalProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultRole?: WaitlistRole;
 }
 
-export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
+const ROLES: { value: WaitlistRole; label: string }[] = [
+  { value: "parent", label: "Parent / Family" },
+  { value: "school", label: "School Administrator" },
+  { value: "church", label: "Church / Community Leader" },
+];
+
+const API_BASE = import.meta.env.DEV ? "" : "";
+
+export function WaitlistModal({ isOpen, onClose, defaultRole = "parent" }: WaitlistModalProps) {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [role, setRole] = useState<WaitlistRole>(defaultRole);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState("");
   const { toast } = useToast();
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setRole(defaultRole);
+  }, [defaultRole]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === "Escape") {
@@ -51,13 +69,30 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
     };
   }, [isOpen, handleKeyDown]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setError("");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/waitlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name: name || undefined, role }),
+      });
+
+      if (res.status === 409) {
+        setError("This email is already on the waitlist.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error("Failed to submit");
+      }
+
       setIsSuccess(true);
       toast({
         title: "You're on the list!",
@@ -67,8 +102,15 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
         onClose();
         setIsSuccess(false);
         setEmail("");
+        setName("");
+        setRole(defaultRole);
+        setError("");
       }, 2000);
-    }, 1000);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -111,8 +153,8 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                 <h2 id="waitlist-title" className="text-2xl sm:text-3xl font-bold mb-2">
                   Join the Founding Cohort
                 </h2>
-                <p id="waitlist-desc" className="text-text-mid mb-8">
-                  Be among the first families to experience a new standard of digital communication for children.
+                <p id="waitlist-desc" className="text-text-mid mb-6">
+                  Be among the first to experience a new standard of digital communication for children.
                 </p>
 
                 {isSuccess ? (
@@ -127,17 +169,51 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <label htmlFor="email" className="sr-only">Email address</label>
+                      <label htmlFor="waitlist-name" className="block text-sm font-semibold text-foreground mb-1">Name <span className="text-text-light font-normal">(optional)</span></label>
                       <input
-                        id="email"
+                        id="waitlist-name"
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Your name"
+                        className="w-full px-4 py-3 rounded-xl bg-surface border-2 border-transparent focus:border-primary focus:bg-white focus:outline-none transition-all duration-200 placeholder:text-text-light"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="waitlist-email" className="block text-sm font-semibold text-foreground mb-1">Email</label>
+                      <input
+                        id="waitlist-email"
                         type="email"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="parent@example.com"
-                        className="w-full px-5 py-4 rounded-xl bg-surface border-2 border-transparent focus:border-primary focus:bg-white focus:outline-none transition-all duration-200 placeholder:text-text-light"
+                        className="w-full px-4 py-3 rounded-xl bg-surface border-2 border-transparent focus:border-primary focus:bg-white focus:outline-none transition-all duration-200 placeholder:text-text-light"
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-foreground mb-2">I am a...</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {ROLES.map((r) => (
+                          <button
+                            key={r.value}
+                            type="button"
+                            onClick={() => setRole(r.value)}
+                            className={cn(
+                              "px-3 py-2 rounded-xl text-xs font-semibold border-2 transition-all duration-200",
+                              role === r.value
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border bg-surface text-text-mid hover:border-primary/30"
+                            )}
+                          >
+                            {r.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {error && (
+                      <p className="text-sm text-destructive font-medium">{error}</p>
+                    )}
                     <button
                       type="submit"
                       disabled={isSubmitting}

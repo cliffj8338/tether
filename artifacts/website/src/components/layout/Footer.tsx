@@ -6,7 +6,7 @@ export function Footer() {
     <footer className="bg-white border-t border-border pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          <div className="col-span-1 md:col-span-2">
+          <div className="col-span-1 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 text-2xl font-display font-bold text-primary mb-4">
               <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center text-white">
                 <LinkIcon className="w-4 h-4" />
@@ -14,7 +14,7 @@ export function Footer() {
               <span className="tracking-tight">Tether</span>
             </Link>
             <p className="text-text-mid max-w-sm mb-6 font-medium leading-relaxed">
-              Messaging for kids. Supervised by design. Built for trust. The first app that should come before all the others.
+              Messaging for kids. Supervised by design. Built for trust.
             </p>
             <div className="flex items-center gap-4">
               <a href="https://twitter.com/tetherapp" target="_blank" rel="noopener noreferrer" aria-label="Follow Tether on Twitter" className="w-10 h-10 bg-surface rounded-full flex items-center justify-center text-text-mid hover:bg-primary hover:text-white transition-colors">
@@ -28,17 +28,27 @@ export function Footer() {
               </a>
             </div>
           </div>
-          
+
           <div>
             <h4 className="font-bold text-foreground mb-6">Product</h4>
             <ul className="space-y-4">
               <li><Link href="/how-it-works" className="text-text-mid hover:text-primary transition-colors">How It Works</Link></li>
-              <li><Link href="/for-schools" className="text-text-mid hover:text-primary transition-colors">For Schools</Link></li>
               <li><Link href="/pricing" className="text-text-mid hover:text-primary transition-colors">Pricing</Link></li>
               <li><Link href="/about" className="text-text-mid hover:text-primary transition-colors">About Us</Link></li>
+              <li><Link href="/waitlist" className="text-text-mid hover:text-primary transition-colors">Join Waitlist</Link></li>
             </ul>
           </div>
-          
+
+          <div>
+            <h4 className="font-bold text-foreground mb-6">Solutions</h4>
+            <ul className="space-y-4">
+              <li><Link href="/for-schools" className="text-text-mid hover:text-primary transition-colors">For Schools</Link></li>
+              <li><Link href="/for-churches" className="text-text-mid hover:text-primary transition-colors">For Churches</Link></li>
+              <li><Link href="/faith-mode" className="text-text-mid hover:text-primary transition-colors">Faith Mode</Link></li>
+              <li><Link href="/blog" className="text-text-mid hover:text-primary transition-colors">Blog</Link></li>
+            </ul>
+          </div>
+
           <div>
             <h4 className="font-bold text-foreground mb-6">Contact</h4>
             <ul className="space-y-4">
@@ -46,7 +56,7 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        
+
         <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-text-light text-sm">
             &copy; {new Date().getFullYear()} Tether App, Inc. All rights reserved.
