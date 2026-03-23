@@ -1,0 +1,19 @@
+packages:
+  "framer-motion": "For page transitions, scroll animations, and fluid UI micro-interactions"
+  "clsx": "Utility for conditionally joining class names"
+  "tailwind-merge": "Utility for merging tailwind classes without style conflicts"
+
+images:
+  - path: "artifacts/website/public/images/hero-bg.png"
+    description: "Soft, organic gradient mesh background in very light cool gray with subtle hints of sage green and soft blue. Extremely minimalist, premium, elegant, conveying safety and trust. High key, low contrast."
+    aspect_ratio: "16:9"
+  - path: "artifacts/website/public/images/organic-shapes.png"
+    description: "Abstract soft wavy shapes in light muted sage green and slate blue on a transparent background, overlapping gently like watercolor layers. Friendly, organic, sophisticated."
+    aspect_ratio: "16:9"
+  - path: "artifacts/website/public/images/family-abstract.png"
+    description: "A beautiful, minimalist line-art style illustration of a parent and child interacting, drawn in soft sage green (#6B9E8A) on a clean background. Modern editorial illustration style, warm, trustworthy."
+    aspect_ratio: "4:3"
+
+notes:
+  - The waitlist form uses a simulated API request (setTimeout) since this is a static marketing frontend.
+  - Using framer-motion for all scroll reveals to give a highly polished, premium SaaS feel.
