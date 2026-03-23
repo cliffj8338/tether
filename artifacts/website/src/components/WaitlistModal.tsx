@@ -18,8 +18,6 @@ const ROLES: { value: WaitlistRole; label: string }[] = [
   { value: "church", label: "Church / Community Leader" },
 ];
 
-const API_BASE = import.meta.env.DEV ? "" : "";
-
 export function WaitlistModal({ isOpen, onClose, defaultRole = "parent" }: WaitlistModalProps) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -77,7 +75,7 @@ export function WaitlistModal({ isOpen, onClose, defaultRole = "parent" }: Waitl
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/waitlist`, {
+      const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, name: name || undefined, role }),

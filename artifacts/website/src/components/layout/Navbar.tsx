@@ -29,7 +29,7 @@ const NAV_LINKS: NavLink[] = [
 
 function DesktopDropdown({ link, location }: { link: NavLink; location: string }) {
   const [open, setOpen] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const isActive = link.children?.some((c) => location === c.href);
 
   const handleEnter = () => {
