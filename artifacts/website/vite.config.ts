@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import type { Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
@@ -7,9 +8,24 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 const port = Number(process.env.PORT) || 5173;
 const basePath = process.env.BASE_PATH || "/";
 
+function staticHtmlPages(): Plugin {
+  return {
+    name: "static-html-pages",
+    configureServer(server) {
+      server.middlewares.use((req, _res, next) => {
+        if (req.url === "/investors" || req.url === "/investors/") {
+          req.url = "/investors.html";
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
   base: basePath,
   plugins: [
+    staticHtmlPages(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),

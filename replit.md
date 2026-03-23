@@ -167,7 +167,9 @@ Marketing website for Tether (tetherapp.app). React + Vite, client-side SPA.
 - **Framework**: React + Vite with Tailwind CSS v4 + wouter routing
 - **Fonts**: Fraunces (headings, Google Fonts) + Nunito (body)
 - **Colors**: Brand colors in CSS custom properties — primary #6B9E8A, accent #7B8EC4, background #F5F6FA
+- **Logo**: `TetherLogo` component (`src/components/TetherLogo.tsx`) — SVG cross/connection mark matching the investor site logo. Used in Navbar and Footer.
 - **Pages**: Home (`/`), How It Works (`/how-it-works`), For Schools (`/for-schools`), For Churches (`/for-churches`), Faith Mode (`/faith-mode`), Pricing (`/pricing`), About (`/about`), Waitlist (`/waitlist`), Blog (`/blog`), Blog Post (`/blog/:slug`)
+- **Investor Page**: Static HTML at `/investors` (served via Vite middleware rewrite from `public/investors.html`). Self-contained 5,600-line pitch deck with `noindex, nofollow`. Not part of the React SPA.
 - **Layout**: Shared Navbar (sticky, scroll-aware, mobile hamburger, Solutions dropdown for institutional pages) + Footer with Solutions column
 - **Features**: Waitlist modal + dedicated page (role selection: parent/school/church, API submission to POST /api/waitlist), animated sections (framer-motion), per-route SEO metadata
 - **Blog**: Static blog with 4 seed articles in `src/lib/blog.ts`, index page + individual post pages

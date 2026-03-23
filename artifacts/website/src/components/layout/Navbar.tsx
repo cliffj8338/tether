@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, Link as LinkIcon, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { WaitlistModal } from "../WaitlistModal";
+import { TetherLogo } from "../TetherLogo";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -120,9 +121,7 @@ export function Navbar() {
               href="/"
               className="flex items-center gap-2 text-2xl font-display font-bold text-primary group"
             >
-              <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform">
-                <LinkIcon className="w-4 h-4" />
-              </div>
+              <TetherLogo size={32} className="group-hover:scale-105 transition-transform" />
               <span className="tracking-tight">Tether</span>
             </Link>
 

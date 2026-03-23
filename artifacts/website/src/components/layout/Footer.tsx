@@ -1,5 +1,6 @@
 import { Link } from "wouter";
-import { LinkIcon, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Twitter, Instagram, Linkedin } from "lucide-react";
+import { TetherLogo } from "../TetherLogo";
 
 export function Footer() {
   return (
@@ -8,9 +9,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 text-2xl font-display font-bold text-primary mb-4">
-              <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center text-white">
-                <LinkIcon className="w-4 h-4" />
-              </div>
+              <TetherLogo size={32} />
               <span className="tracking-tight">Tether</span>
             </Link>
             <p className="text-text-mid max-w-sm mb-6 font-medium leading-relaxed">
