@@ -41,6 +41,7 @@
   --color-faith-gold: hsl(43 52% 47%); /* #B8953A */
   --color-faith-gold-light: hsl(41 57% 60%); /* #D4B060 */
   --color-faith-gold-bg: hsl(42 68% 96%); /* #FBF7EE */
+  --color-faith-gold-border: hsl(42 40% 85%); /* #DDD0B0 */
   
   --color-card: hsl(0 0% 100%);
   --color-card-foreground: hsl(233 21% 17%);
