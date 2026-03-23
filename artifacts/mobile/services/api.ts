@@ -49,6 +49,7 @@ export interface User {
   trustLevel: number;
   faithModeEnabled: boolean;
   isPaused: boolean;
+  phone: string | null;
 }
 
 export interface AuthResponse {
@@ -151,6 +152,9 @@ export const api = {
     },
     me(): Promise<User> {
       return request("/users/me");
+    },
+    updateProfile(data: { phone?: string; displayName?: string }): Promise<User> {
+      return request("/users/me", { method: "PATCH", body: JSON.stringify(data) });
     },
   },
 

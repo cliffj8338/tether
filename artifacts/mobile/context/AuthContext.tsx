@@ -13,6 +13,7 @@ interface User {
   trustLevel: number;
   faithModeEnabled: boolean;
   isPaused: boolean;
+  phone: string | null;
 }
 
 interface AuthState {

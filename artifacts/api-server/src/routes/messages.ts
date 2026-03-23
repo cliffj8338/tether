@@ -7,6 +7,7 @@ import { getUserFromToken } from "../lib/auth";
 import { scanContent } from "../lib/content-filter";
 import { aiScanContent } from "../lib/ai-content-filter";
 import { sendPushNotification, buildAlertPushMessage } from "../lib/push-notifications";
+import { sendAlertSMS } from "../lib/sms";
 
 const router: IRouter = Router();
 
@@ -134,6 +135,18 @@ router.post("/conversations/:conversationId/messages", async (req, res) => {
               alertLevel: finalResult.alertLevel,
               childId: convo.childId,
             }).catch(() => {});
+          }
+
+          if (
+            (finalResult.alertLevel === "level4" || finalResult.alertLevel === "level5") &&
+            parent?.phone
+          ) {
+            sendAlertSMS(
+              parent.phone,
+              finalResult.alertLevel,
+              child.displayName,
+              finalResult.title
+            ).catch(() => {});
           }
         }
       }

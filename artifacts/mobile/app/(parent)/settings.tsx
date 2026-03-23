@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert } from "react-native";
+import React, { useState, useCallback } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert, TextInput, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -8,10 +8,14 @@ import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/typography";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar } from "@/components/ui/Avatar";
+import { api } from "@/services/api";
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { user, logout, updateUser } = useAuth();
+  const [phone, setPhone] = useState(user?.phone ?? "");
+  const [savingPhone, setSavingPhone] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
 
   const handleLogout = () => {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
@@ -31,6 +35,25 @@ export default function SettingsScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     updateUser({ faithModeEnabled: !user?.faithModeEnabled });
   };
+
+  const savePhone = useCallback(async () => {
+    const cleaned = phone.replace(/[^+\d]/g, "");
+    if (cleaned && !/^\+?\d{10,15}$/.test(cleaned)) {
+      setPhoneError("Enter a valid phone number (e.g. +15551234567)");
+      return;
+    }
+    setPhoneError("");
+    setSavingPhone(true);
+    try {
+      const updated = await api.auth.updateProfile({ phone: cleaned || "" });
+      updateUser({ phone: updated.phone });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch {
+      setPhoneError("Failed to save phone number");
+    } finally {
+      setSavingPhone(false);
+    }
+  }, [phone, updateUser]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -55,7 +78,38 @@ export default function SettingsScreen() {
 
         <Text style={styles.sectionLabel}>ACCOUNT</Text>
         <View style={styles.group}>
-          <SettingsRow icon="user" label="Profile" />
+          <View style={styles.row}>
+            <View style={[styles.rowIcon, { backgroundColor: `${Colors.primary}16` }]}>
+              <Feather name="phone" size={18} color={Colors.primary} />
+            </View>
+            <View style={styles.rowBody}>
+              <Text style={styles.rowLabel}>Phone Number</Text>
+              <Text style={styles.rowSub}>For emergency SMS alerts (Level 4-5)</Text>
+            </View>
+          </View>
+          <View style={styles.phoneRow}>
+            <TextInput
+              style={styles.phoneInput}
+              placeholder="+1 (555) 123-4567"
+              placeholderTextColor={Colors.sand}
+              value={phone}
+              onChangeText={(t) => { setPhone(t); setPhoneError(""); }}
+              keyboardType="phone-pad"
+              autoComplete="tel"
+            />
+            <Pressable
+              style={[styles.phoneSaveBtn, savingPhone && { opacity: 0.6 }]}
+              onPress={savePhone}
+              disabled={savingPhone}
+            >
+              {savingPhone ? (
+                <ActivityIndicator size="small" color={Colors.white} />
+              ) : (
+                <Text style={styles.phoneSaveText}>Save</Text>
+              )}
+            </Pressable>
+          </View>
+          {phoneError ? <Text style={styles.phoneError}>{phoneError}</Text> : null}
           <SettingsRow icon="bell" label="Notifications" />
           <SettingsRow icon="lock" label="Privacy & Security" />
         </View>
@@ -180,6 +234,46 @@ const styles = StyleSheet.create({
   rowBody: { flex: 1 },
   rowLabel: { fontFamily: Fonts.bodySemiBold, fontSize: 14, color: Colors.text },
   rowSub: { fontFamily: Fonts.body, fontSize: 12, color: Colors.textMid, marginTop: 1 },
+  phoneRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    paddingBottom: 14,
+    gap: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.surface,
+  },
+  phoneInput: {
+    flex: 1,
+    fontFamily: Fonts.body,
+    fontSize: 15,
+    color: Colors.text,
+    backgroundColor: Colors.surface,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  phoneSaveBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+  },
+  phoneSaveText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 14,
+    color: Colors.white,
+  },
+  phoneError: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
+    color: Colors.alert4,
+    paddingHorizontal: 14,
+    paddingBottom: 10,
+  },
   logoutBtn: {
     flexDirection: "row",
     alignItems: "center",

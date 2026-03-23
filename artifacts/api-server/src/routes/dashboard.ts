@@ -157,10 +157,56 @@ router.get("/users/me", async (req, res) => {
       trustLevel: user.trustLevel,
       faithModeEnabled: user.faithModeEnabled,
       isPaused: user.isPaused,
+      phone: user.phone,
     });
   } catch (error) {
     req.log.error(error, "Failed to get current user");
     res.status(500).json({ error: "Failed to get current user" });
+  }
+});
+
+router.patch("/users/me", async (req, res) => {
+  try {
+    const user = await getUserFromToken(req);
+    if (!user) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const updates: Record<string, unknown> = {};
+    if (typeof req.body.phone === "string") {
+      updates.phone = req.body.phone || null;
+    }
+    if (typeof req.body.displayName === "string" && req.body.displayName.trim()) {
+      updates.displayName = req.body.displayName.trim();
+    }
+
+    if (Object.keys(updates).length === 0) {
+      res.status(400).json({ error: "No valid fields to update" });
+      return;
+    }
+
+    const [updated] = await db
+      .update(usersTable)
+      .set(updates)
+      .where(eq(usersTable.id, user.id))
+      .returning();
+
+    res.json({
+      id: updated.id,
+      email: updated.email,
+      displayName: updated.displayName,
+      role: updated.role,
+      parentId: updated.parentId,
+      avatarColor: updated.avatarColor,
+      trustLevel: updated.trustLevel,
+      faithModeEnabled: updated.faithModeEnabled,
+      isPaused: updated.isPaused,
+      phone: updated.phone,
+    });
+  } catch (error) {
+    req.log.error(error, "Failed to update user");
+    res.status(500).json({ error: "Failed to update user" });
   }
 });
 

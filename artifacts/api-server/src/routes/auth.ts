@@ -41,6 +41,7 @@ router.post("/auth/register", async (req, res) => {
         trustLevel: user.trustLevel,
         faithModeEnabled: user.faithModeEnabled,
         isPaused: user.isPaused,
+        phone: user.phone,
       },
       token,
     });
@@ -70,6 +71,7 @@ router.post("/auth/login", async (req, res) => {
         trustLevel: user.trustLevel,
         faithModeEnabled: user.faithModeEnabled,
         isPaused: user.isPaused,
+        phone: user.phone,
       },
       token,
     });
@@ -116,6 +118,7 @@ router.post("/auth/child-login", async (req, res) => {
         trustLevel: user.trustLevel,
         faithModeEnabled: user.faithModeEnabled,
         isPaused: user.isPaused,
+        phone: user.phone,
       },
       token,
     });
