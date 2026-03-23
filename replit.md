@@ -167,7 +167,7 @@ Marketing website for Tether (tetherapp.app). React + Vite, client-side SPA.
 - **Framework**: React + Vite with Tailwind CSS v4 + wouter routing
 - **Fonts**: Fraunces (headings, Google Fonts) + Nunito (body)
 - **Colors**: Brand colors in CSS custom properties — primary #6B9E8A, accent #7B8EC4, background #F5F6FA
-- **Pages**: Home (`/`), How It Works (`/how-it-works`), Pricing (`/pricing`), About (`/about`)
+- **Pages**: Home (`/`), How It Works (`/how-it-works`), For Schools (`/for-schools`), Pricing (`/pricing`), About (`/about`)
 - **Layout**: Shared Navbar (sticky, scroll-aware, mobile hamburger) + Footer
 - **Features**: Waitlist modal (accessible dialog with focus trap), animated sections (framer-motion), per-route SEO metadata
 - **SEO**: `useSEO` hook sets document.title + meta description + OG/Twitter tags per route

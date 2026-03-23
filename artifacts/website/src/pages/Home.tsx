@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ShieldCheck, Activity, Users, ArrowRight, EyeOff, MessageSquareX, Smartphone, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, Activity, Users, ArrowRight, EyeOff, MessageSquareX, Smartphone, CheckCircle2, GraduationCap, Heart, Shield } from "lucide-react";
 import { useState } from "react";
 import { WaitlistModal } from "@/components/WaitlistModal";
 import { cn } from "@/lib/utils";
@@ -20,9 +20,7 @@ export default function Home() {
 
   return (
     <div className="overflow-hidden">
-      {/* HERO SECTION */}
       <section className="relative pt-16 pb-24 lg:pt-32 lg:pb-40 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
-        {/* Decorative background image */}
         <div className="absolute inset-0 -z-10 w-full h-full opacity-60">
           <img 
             src={`${import.meta.env.BASE_URL}images/hero-bg.png`} 
@@ -51,7 +49,10 @@ export default function Home() {
             <span className="italic text-primary font-normal">The one that should come before all the others.</span>
           </motion.h1>
           
-          <motion.p variants={FADE_UP} className="text-lg sm:text-xl text-text-mid max-w-2xl mx-auto mb-10 leading-relaxed text-balance">
+          <motion.p variants={FADE_UP} className="text-lg sm:text-xl text-text-mid max-w-2xl mx-auto mb-4 leading-relaxed text-balance">
+            Messaging for kids. Supervised by design. Built for trust.
+          </motion.p>
+          <motion.p variants={FADE_UP} className="text-base text-text-light max-w-2xl mx-auto mb-10 leading-relaxed">
             Tether is a supervised messaging platform where children build real communication skills inside a community their parents trust. Accountability is woven into the design — not bolted on.
           </motion.p>
           
@@ -62,12 +63,57 @@ export default function Home() {
             >
               Join the Waitlist <ArrowRight className="w-5 h-5" />
             </button>
-            <p className="text-sm text-text-light sm:hidden mt-2">No credit card required.</p>
           </motion.div>
         </motion.div>
       </section>
 
-      {/* DIFFERENTIATORS GRID */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Built for everyone in the family</h2>
+            <p className="text-text-mid text-lg">Three stakeholders. One platform that serves all of them.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: Heart,
+                title: "Children Get",
+                desc: "A real social experience. Friends, photos, group chats, community spaces. The app feels normal because communication is the point. The structure is invisible to the child using it — until it matters.",
+                color: "bg-primary/10 text-primary"
+              },
+              {
+                icon: Shield,
+                title: "Parents Get",
+                desc: "Visibility calibrated to trust level — full real-time access early on, stepping back as children earn independence. Alerts always fire for harmful content regardless of trust level. A community of other parents navigating the same decisions.",
+                color: "bg-accent/10 text-accent"
+              },
+              {
+                icon: GraduationCap,
+                title: "Schools Get",
+                desc: "Event-only notification when a serious alert fires — a flag and a timestamp, never message content. Enough to act. A documented safety record without becoming data custodians.",
+                color: "bg-alert-3/10 text-alert-3"
+              }
+            ].map((feature, i) => (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                key={i} 
+                className="bg-surface p-8 rounded-3xl border border-border hover:shadow-lg transition-all duration-300"
+              >
+                <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-6", feature.color)}>
+                  <feature.icon className="w-7 h-7" />
+                </div>
+                <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
+                <p className="text-text-mid leading-relaxed">{feature.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="py-24 bg-surface relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -80,19 +126,19 @@ export default function Home() {
               {
                 icon: ShieldCheck,
                 title: "Secure by Design",
-                desc: "No vanish mode. No unsend. No edit. The architecture structurally cannot do the things that cause harm — it removes the tools that enable them.",
+                desc: "No vanish mode. No unsend. No edit. The architecture structurally cannot do the things that cause harm — it removes the tools that enable them, rather than filtering after the fact.",
                 color: "bg-alert-1/10 text-alert-1"
               },
               {
                 icon: Activity,
                 title: "Graduated Trust",
-                desc: "Privacy grows, safety never shrinks. Parents see every message initially, stepping back as children earn independence. Alerts remain active at all levels.",
+                desc: "Five trust levels from full oversight to full independence. Privacy grows as children demonstrate responsible behavior. But safety never shrinks — the alert system remains active at every level.",
                 color: "bg-accent/10 text-accent"
               },
               {
                 icon: Users,
                 title: "The Trust Loop",
-                desc: "Before two children can message, both parents introduce themselves. Kids connect within a network of adults who know each other.",
+                desc: "Before two children can message, both parents introduce themselves — name, phone, email exchanged. Kids connect within a network of adults who know each other, mirroring how friendships work in the physical world.",
                 color: "bg-primary/10 text-primary"
               }
             ].map((feature, i) => (
@@ -115,7 +161,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* STATS STRIP */}
       <section className="py-20 bg-primary text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <img src={`${import.meta.env.BASE_URL}images/organic-shapes.png`} alt="" className="w-full h-full object-cover filter brightness-0 invert" />
@@ -124,7 +169,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 divide-y md:divide-y-0 md:divide-x divide-white/20">
             <div className="text-center pt-8 md:pt-0">
               <div className="text-6xl font-display font-bold mb-2">73%</div>
-              <p className="text-primary-foreground/80 font-medium">of children aged 8-12 use messaging apps designed for adults</p>
+              <p className="text-primary-foreground/80 font-medium">of children aged 8–12 use messaging apps designed for adults</p>
             </div>
             <div className="text-center pt-8 md:pt-0">
               <div className="text-6xl font-display font-bold mb-2">0</div>
@@ -132,13 +177,12 @@ export default function Home() {
             </div>
             <div className="text-center pt-8 md:pt-0">
               <div className="text-6xl font-display font-bold mb-2">$2.8B</div>
-              <p className="text-primary-foreground/80 font-medium">parental safety market largely unsolved at the communication layer</p>
+              <p className="text-primary-foreground/80 font-medium">parental safety market by 2027 — largely unsolved at the communication layer</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* THE VANISH PROBLEM */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-16">
@@ -150,9 +194,9 @@ export default function Home() {
               
               <ul className="space-y-6">
                 {[
-                  { icon: EyeOff, title: "Snapchat", desc: "Built on disappearing. Messages vanish after viewing." },
-                  { icon: Smartphone, title: "Instagram & TikTok", desc: "Vanish modes and engagement-optimized DMs between minors." },
-                  { icon: MessageSquareX, title: "iMessage", desc: "Unsend within 2 minutes, edit within 15. Zero parent visibility." },
+                  { icon: EyeOff, title: "Snapchat", desc: "Built on disappearing. Messages vanish after viewing. 6.5 million harassment incidents in 2024." },
+                  { icon: Smartphone, title: "Instagram & TikTok", desc: "Vanish modes, engagement-optimized DMs, algorithmic feeds designed for time-on-platform." },
+                  { icon: MessageSquareX, title: "iMessage", desc: "Unsend within 2 minutes, edit within 15. Zero parent visibility. Zero content scanning." },
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0 mt-1">
@@ -182,11 +226,15 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />
-                    <span className="text-text-mid font-medium">No age bypass possible (parents own accounts).</span>
+                    <span className="text-text-mid font-medium">No age bypass possible — parents own every account.</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />
-                    <span className="text-text-mid font-medium">No unknown strangers sliding into DMs.</span>
+                    <span className="text-text-mid font-medium">No unknown contacts. No algorithmic manipulation.</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />
+                    <span className="text-text-mid font-medium">No ads. No data sold. Ever.</span>
                   </div>
                 </div>
               </div>
@@ -195,7 +243,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* QUOTE BANNER */}
       <section className="py-24 bg-foreground text-white text-center px-4">
         <div className="max-w-4xl mx-auto">
           <QuoteIcon className="w-12 h-12 text-primary mx-auto mb-8 opacity-50" />
@@ -206,7 +253,7 @@ export default function Home() {
             onClick={() => setIsWaitlistOpen(true)}
             className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-white text-foreground font-bold hover:bg-primary hover:text-white transition-colors duration-300"
           >
-            Get Started Today
+            Join the Founding Cohort
           </button>
         </div>
       </section>
