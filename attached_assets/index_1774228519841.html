@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- TETHER INVESTMENT OVERVIEW — tetherapp.app
-     Version : 4.6.7
+     Version : 4.6.6
      Date    : 2026-03-21
      Changes : Full mobile overhaul — hamburger menu (mobile + tablet), comprehensive
                single-column collapse for all grid classes and inline grids, tablet
@@ -924,13 +924,6 @@
     .card { overflow: hidden; }
     .sx { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
 
-    /* Cards — tighten padding on mobile */
-    .card { padding: 16px !important; }
-    .mkt-channel { padding: 16px; }
-
-    /* g2 vertical gap tightened on mobile */
-    .g2 { gap: 14px !important; }
-
     /* Stat rows inside dark hero cards */
     .raise-grid { gap: 10px; }
 
@@ -1305,7 +1298,7 @@
   </div>
   <div class="nav-actions">
     <button id="modeToggle" onclick="toggleInvestorMode()" style="display:flex;align-items:center;gap:7px;background:var(--primary);border:1px solid var(--primary-d);color:white;border-radius:8px;padding:5px 12px 5px 6px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;letter-spacing:.03em;transition:all .2s;white-space:nowrap;"><span style="width:22px;height:22px;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-family:'Fraunces',serif;font-size:14px;font-weight:600;font-style:italic;color:var(--primary);line-height:1">$</span></span>Investor View</button>
-    <span class="nav-version">v4.6.7</span>
+    <span class="nav-version">v4.6.6</span>
     <button class="nav-btn" onclick="window.print()">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       Export PDF
@@ -1427,7 +1420,7 @@ window.addEventListener('scroll',function(){clearTimeout(_st);_st=setTimeout(fun
 
   <div class="cover-bottom">
     <div class="cover-footer">
-      <div class="cover-date">Version 4.6.7 · March 2026</div>
+      <div class="cover-date">Version 4.6.6 · March 2026</div>
       <div class="cover-conf">Confidential — Not for Distribution</div>
     </div>
   </div>
@@ -4473,10 +4466,7 @@ setTimeout(()=>{ if(window.innerWidth>=700) selectPlat('child-1'); },80);
           <td style="font-size:12px;color:var(--text-mid)">6 people. Fully remote. Every role essential, nothing redundant.</td>
         </tr>
       </tbody>
-    </table></div>
-  </div><!-- end Full Team Annual Cost card -->
-
-  <!-- INFRASTRUCTURE SCALING -->
+    </table></div><!-- INFRASTRUCTURE SCALING -->
   <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px">Infrastructure Scaling Costs — As Families Grow</div>
   <div style="font-size:12px;color:var(--text-mid);margin-bottom:14px">Firebase, Twilio, Expo, and Claude API costs scale with usage — but remain a small fraction of revenue at every milestone due to the high gross contribution margin per family.</div>
   <div class="card" style="padding:20px;margin-bottom:20px">
@@ -4507,8 +4497,9 @@ setTimeout(()=>{ if(window.innerWidth>=700) selectPlat('child-1'); },80);
         <tr class="total-row"><td><strong>Total</strong></td><td><strong>$1,000,000</strong></td><td><strong>100%</strong></td><td style="font-size:12px;color:var(--text-mid)">24 months runway to 2,500+ families, 10+ school partnerships, App Store launch, self-funding break-even, and Series A readiness</td><td></td></tr>
       </tbody>
     </table></div>
-  </div><!-- end Use of Funds card -->
-</div><!-- end section div -->
+</div>
+</div>
+</div>
 </section><hr class="rule">
 
 <!-- ══ FOUNDER ══ -->
@@ -5627,7 +5618,7 @@ Cliff has been in recovery from alcohol for more than 12 years. He found his Chr
   </div>
   <div style="font-size:12px;color:var(--text-mid);text-align:right;line-height:1.65">
     <div>tetherapp.app</div>
-    <div>Version 4.6.7 · March 2026</div>
+    <div>Version 4.6.6 · March 2026</div>
     <div style="font-size:11px;color:var(--text-dim);margin-top:4px">Confidential — Not for Distribution</div>
   </div>
 </div>
@@ -5659,14 +5650,9 @@ function toggleInvestorMode() {
   });
 }
 document.addEventListener('DOMContentLoaded', function() {
-  var params = new URLSearchParams(window.location.search);
-  if (params.get('investor') === 'true') {
-    toggleInvestorMode();
-  } else {
-    document.querySelectorAll('.investor-only').forEach(function(el) {
-      el.style.display = 'none';
-    });
-  }
+  document.querySelectorAll('.investor-only').forEach(function(el) {
+    el.style.display = 'none';
+  });
 });
 </script>
 
