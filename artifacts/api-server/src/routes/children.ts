@@ -4,6 +4,11 @@ import { usersTable, messagesTable, alertsTable } from "@workspace/db";
 import { eq, and, sql } from "drizzle-orm";
 import { AddChildBody, UpdateChildBody, UpdateTrustLevelBody } from "@workspace/api-zod";
 import { getUserFromToken } from "../lib/auth";
+import crypto from "crypto";
+
+function hashPassword(password: string): string {
+  return crypto.createHash("sha256").update(password).digest("hex");
+}
 
 const router: IRouter = Router();
 
@@ -60,7 +65,7 @@ router.post("/children", async (req, res) => {
       displayName: body.displayName,
       role: "child",
       parentId: user.id,
-      pin: body.pin,
+      pin: hashPassword(body.pin),
       grade: body.grade,
       age: body.age,
       avatarColor: body.avatarColor ?? "#7B8EC4",

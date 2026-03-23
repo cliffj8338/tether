@@ -20,6 +20,7 @@ export const usersTable = pgTable("users", {
   pushToken: text("push_token"),
   phone: text("phone"),
   passwordHash: text("password_hash"),
+  familyCode: text("family_code").unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

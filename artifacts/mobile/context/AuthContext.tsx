@@ -14,6 +14,7 @@ interface User {
   faithModeEnabled: boolean;
   isPaused: boolean;
   phone: string | null;
+  familyCode: string | null;
 }
 
 interface AuthState {

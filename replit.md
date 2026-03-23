@@ -106,7 +106,7 @@ Expo React Native mobile app for **Tether** — a supervised kids communication 
 
 Navigation structure:
 - `/index` — splash screen → redirect to `/onboarding`
-- `/onboarding` — slides, role selection, parent signup/login, child PIN login
+- `/onboarding` — slides, role selection, parent signup/login, child enrollment (family code join, family code login, email login)
 - `/(parent)/` — tab layout: dashboard, messages, alerts, community, settings
 - `/(child)/` — tab layout: home (chat list), profile
 - `/conversation/[id]` — chat screen with emoji picker (child) or shield button (parent)
@@ -150,6 +150,15 @@ Anthropic Claude SDK client configured via Replit AI Integrations proxy. Used by
 - **Settings**: Subscription status shown in parent settings, "Subscribe Now" button if not subscribed, "Restore Purchases" option
 - **Seed script**: `scripts/src/seedRevenueCat.ts` — creates project, apps, products, entitlements, offerings, packages
 - **Env vars**: `EXPO_PUBLIC_REVENUECAT_TEST_API_KEY`, `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY`, `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY`, `REVENUECAT_PROJECT_ID`, `REVENUECAT_TEST_STORE_APP_ID`, `REVENUECAT_APPLE_APP_STORE_APP_ID`, `REVENUECAT_GOOGLE_PLAY_STORE_APP_ID`
+
+### Family Code Enrollment
+
+- **Family code format**: `TETHER-XXXXXX` (6 chars from unambiguous charset ABCDEFGHJKLMNPQRSTUVWXYZ23456789), generated with crypto.randomBytes
+- **DB column**: `family_code` on users table (partial unique index WHERE NOT NULL), auto-generated for parents on registration
+- **Endpoints**: `POST /auth/join-family` (new child + family code), `POST /auth/child-login` (accepts familyCode or parentEmail)
+- **Child enrollment 3 paths**: join family (new account via code), login with code + PIN, login with parent email + PIN
+- **PIN security**: All PINs hashed with SHA-256 (parent passwords + child PINs), validated as 4-6 digits on client and server
+- **Parent settings**: Family code displayed prominently for sharing with kids
 
 ### `scripts` (`@workspace/scripts`)
 

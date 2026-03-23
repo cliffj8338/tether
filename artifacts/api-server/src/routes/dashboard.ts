@@ -158,6 +158,7 @@ router.get("/users/me", async (req, res) => {
       faithModeEnabled: user.faithModeEnabled,
       isPaused: user.isPaused,
       phone: user.phone,
+      familyCode: user.familyCode,
     });
   } catch (error) {
     req.log.error(error, "Failed to get current user");

@@ -50,6 +50,7 @@ export interface User {
   faithModeEnabled: boolean;
   isPaused: boolean;
   phone: string | null;
+  familyCode: string | null;
 }
 
 export interface AuthResponse {
@@ -147,8 +148,11 @@ export const api = {
     login(data: { email: string; password: string }): Promise<AuthResponse> {
       return request("/auth/login", { method: "POST", body: JSON.stringify(data) });
     },
-    childLogin(data: { parentEmail: string; childName: string; pin: string }): Promise<AuthResponse> {
+    childLogin(data: { parentEmail?: string; familyCode?: string; childName: string; pin: string }): Promise<AuthResponse> {
       return request("/auth/child-login", { method: "POST", body: JSON.stringify(data) });
+    },
+    joinFamily(data: { familyCode: string; childName: string; pin: string; age?: number; grade?: string }): Promise<AuthResponse> {
+      return request("/auth/join-family", { method: "POST", body: JSON.stringify(data) });
     },
     me(): Promise<User> {
       return request("/users/me");

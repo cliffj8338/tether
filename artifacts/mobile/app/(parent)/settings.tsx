@@ -78,6 +78,24 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
 
+        {user?.familyCode ? (
+          <>
+            <Text style={styles.sectionLabel}>FAMILY CODE</Text>
+            <View style={styles.group}>
+              <View style={styles.row}>
+                <View style={[styles.rowIcon, { backgroundColor: `${Colors.accent}16` }]}>
+                  <Feather name="link" size={18} color={Colors.accent} />
+                </View>
+                <View style={styles.rowBody}>
+                  <Text style={styles.rowLabel}>Your Family Code</Text>
+                  <Text style={styles.familyCodeText}>{user.familyCode}</Text>
+                  <Text style={styles.rowSub}>Share this with your kids so they can join</Text>
+                </View>
+              </View>
+            </View>
+          </>
+        ) : null}
+
         <Text style={styles.sectionLabel}>ACCOUNT</Text>
         <View style={styles.group}>
           <View style={styles.row}>
@@ -322,6 +340,14 @@ const styles = StyleSheet.create({
     color: Colors.alert4,
     paddingHorizontal: 14,
     paddingBottom: 10,
+  },
+  familyCodeText: {
+    fontFamily: Fonts.heading,
+    fontSize: 20,
+    color: Colors.accent,
+    letterSpacing: 1.5,
+    marginTop: 4,
+    marginBottom: 2,
   },
   activeBadge: {
     backgroundColor: `${Colors.primary}16`,

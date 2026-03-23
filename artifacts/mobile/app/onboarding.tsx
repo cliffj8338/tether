@@ -43,7 +43,7 @@ const slides = [
   },
 ];
 
-type OnboardingStep = "slides" | "role" | "parent-signup" | "parent-login" | "child-setup";
+type OnboardingStep = "slides" | "role" | "parent-signup" | "parent-login" | "child-method" | "child-login-code" | "child-login-email" | "child-join";
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
@@ -57,6 +57,10 @@ export default function OnboardingScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [childParentEmail, setChildParentEmail] = useState("");
+  const [familyCode, setFamilyCode] = useState("");
+  const [childName, setChildName] = useState("");
+  const [childPin, setChildPin] = useState("");
+  const [childAge, setChildAge] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
@@ -104,17 +108,48 @@ export default function OnboardingScreen() {
     }
   };
 
-  const handleChildLogin = async () => {
-    if (!childParentEmail.trim() || !parentName.trim() || !password.trim()) {
+  const handleChildLoginWithCode = async () => {
+    if (!familyCode.trim() || !childName.trim() || !childPin.trim()) {
       Alert.alert("Missing Info", "Please fill in all fields.");
+      return;
+    }
+    if (!/^\d{4,6}$/.test(childPin.trim())) {
+      Alert.alert("Invalid PIN", "PIN must be 4-6 digits.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await api.auth.childLogin({
+        familyCode: familyCode.trim().toUpperCase(),
+        childName: childName.trim(),
+        pin: childPin.trim(),
+      });
+      await login(result.user, result.token);
+      await setOnboarded();
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      router.replace("/(child)/home");
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Invalid family code, name, or PIN.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChildLoginWithEmail = async () => {
+    if (!childParentEmail.trim() || !childName.trim() || !childPin.trim()) {
+      Alert.alert("Missing Info", "Please fill in all fields.");
+      return;
+    }
+    if (!/^\d{4,6}$/.test(childPin.trim())) {
+      Alert.alert("Invalid PIN", "PIN must be 4-6 digits.");
       return;
     }
     setLoading(true);
     try {
       const result = await api.auth.childLogin({
         parentEmail: childParentEmail.trim(),
-        childName: parentName.trim(),
-        pin: password.trim(),
+        childName: childName.trim(),
+        pin: childPin.trim(),
       });
       await login(result.user, result.token);
       await setOnboarded();
@@ -122,6 +157,38 @@ export default function OnboardingScreen() {
       router.replace("/(child)/home");
     } catch (err: any) {
       Alert.alert("Error", err.message || "Invalid PIN or account not found.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoinFamily = async () => {
+    if (!familyCode.trim() || !childName.trim() || !childPin.trim()) {
+      Alert.alert("Missing Info", "Please enter your family code, name, and create a PIN.");
+      return;
+    }
+    if (!/^\d{4,6}$/.test(childPin.trim())) {
+      Alert.alert("Invalid PIN", "PIN must be 4-6 digits.");
+      return;
+    }
+    if (childAge && (isNaN(parseInt(childAge)) || parseInt(childAge) < 3 || parseInt(childAge) > 17)) {
+      Alert.alert("Invalid Age", "Age must be between 3 and 17.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await api.auth.joinFamily({
+        familyCode: familyCode.trim().toUpperCase(),
+        childName: childName.trim(),
+        pin: childPin.trim(),
+        age: childAge ? parseInt(childAge) : undefined,
+      });
+      await login(result.user, result.token);
+      await setOnboarded();
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      router.replace("/(child)/home");
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Could not join family. Check your code and try again.");
     } finally {
       setLoading(false);
     }
@@ -191,7 +258,7 @@ export default function OnboardingScreen() {
             style={styles.roleCard}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setStep("child-setup");
+              setStep("child-method");
             }}
           >
             <View style={[styles.roleIconWrap, { backgroundColor: `${Colors.accent}16` }]}>
@@ -199,7 +266,7 @@ export default function OnboardingScreen() {
             </View>
             <View style={styles.roleCardBody}>
               <Text style={styles.roleCardTitle}>I'm a Kid</Text>
-              <Text style={styles.roleCardSub}>Log into your account with your PIN</Text>
+              <Text style={styles.roleCardSub}>Join your family or log in with your PIN</Text>
             </View>
             <Feather name="chevron-right" size={20} color={Colors.sand} />
           </Pressable>
@@ -297,14 +364,165 @@ export default function OnboardingScreen() {
     );
   }
 
+  if (step === "child-method") {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 20 }]}>
+        <View style={styles.roleContent}>
+          <Pressable onPress={() => setStep("role")} style={styles.backBtn}>
+            <Feather name="arrow-left" size={22} color={Colors.text} />
+          </Pressable>
+          <Text style={styles.roleTitle}>How do you want to connect?</Text>
+          <Text style={styles.roleSubtitle}>Ask your parent which option to use</Text>
+
+          <Pressable
+            style={styles.roleCard}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setStep("child-join");
+            }}
+          >
+            <View style={[styles.roleIconWrap, { backgroundColor: `${Colors.primary}16` }]}>
+              <Feather name="link" size={28} color={Colors.primary} />
+            </View>
+            <View style={styles.roleCardBody}>
+              <Text style={styles.roleCardTitle}>Join with Family Code</Text>
+              <Text style={styles.roleCardSub}>Your parent has a code like TETHER-ABC123</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color={Colors.sand} />
+          </Pressable>
+
+          <Pressable
+            style={styles.roleCard}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setStep("child-login-code");
+            }}
+          >
+            <View style={[styles.roleIconWrap, { backgroundColor: `${Colors.accent}16` }]}>
+              <Feather name="log-in" size={28} color={Colors.accent} />
+            </View>
+            <View style={styles.roleCardBody}>
+              <Text style={styles.roleCardTitle}>Log In with Family Code</Text>
+              <Text style={styles.roleCardSub}>Already have an account? Sign in with your code and PIN</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color={Colors.sand} />
+          </Pressable>
+
+          <Pressable
+            onPress={() => setStep("child-login-email")}
+            style={styles.loginLink}
+          >
+            <Text style={styles.loginLinkText}>Use <Text style={styles.loginLinkAccent}>parent's email</Text> instead</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
+  if (step === "child-join") {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
+        <View style={styles.formHeader}>
+          <Pressable onPress={() => setStep("child-method")} style={styles.backBtn}>
+            <Feather name="arrow-left" size={22} color={Colors.text} />
+          </Pressable>
+          <Text style={styles.formTitle}>Join Your Family</Text>
+          <Text style={styles.formSubtitle}>Ask your parent for the family code</Text>
+        </View>
+        <View style={styles.formBody}>
+          <TetherInput
+            label="Family Code"
+            placeholder="TETHER-ABC123"
+            value={familyCode}
+            onChangeText={(t) => setFamilyCode(t.toUpperCase())}
+            icon="link"
+            autoCapitalize="characters"
+          />
+          <TetherInput
+            label="Your Name"
+            placeholder="e.g. Olivia"
+            value={childName}
+            onChangeText={setChildName}
+            icon="smile"
+            autoCapitalize="words"
+          />
+          <TetherInput
+            label="Your Age"
+            placeholder="e.g. 10"
+            value={childAge}
+            onChangeText={setChildAge}
+            icon="calendar"
+            keyboardType="numeric"
+          />
+          <TetherInput
+            label="Create a PIN"
+            placeholder="Choose a 4-digit PIN"
+            value={childPin}
+            onChangeText={(t) => setChildPin(t.replace(/[^0-9]/g, "").slice(0, 6))}
+            secureTextEntry
+            keyboardType="numeric"
+            icon="lock"
+          />
+          <View style={{ marginTop: 8 }}>
+            <TetherButton title="Join Family" onPress={handleJoinFamily} loading={loading} />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  if (step === "child-login-code") {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
+        <View style={styles.formHeader}>
+          <Pressable onPress={() => setStep("child-method")} style={styles.backBtn}>
+            <Feather name="arrow-left" size={22} color={Colors.text} />
+          </Pressable>
+          <Text style={styles.formTitle}>Kid Login</Text>
+          <Text style={styles.formSubtitle}>Use your family code and PIN</Text>
+        </View>
+        <View style={styles.formBody}>
+          <TetherInput
+            label="Family Code"
+            placeholder="TETHER-ABC123"
+            value={familyCode}
+            onChangeText={(t) => setFamilyCode(t.toUpperCase())}
+            icon="link"
+            autoCapitalize="characters"
+          />
+          <TetherInput
+            label="Your Name"
+            placeholder="e.g. Olivia"
+            value={childName}
+            onChangeText={setChildName}
+            icon="smile"
+            autoCapitalize="words"
+          />
+          <TetherInput
+            label="PIN"
+            placeholder="Enter your 4-digit PIN"
+            value={childPin}
+            onChangeText={(t) => setChildPin(t.replace(/[^0-9]/g, "").slice(0, 6))}
+            secureTextEntry
+            keyboardType="numeric"
+            icon="lock"
+          />
+          <View style={{ marginTop: 8 }}>
+            <TetherButton title="Enter Tether" onPress={handleChildLoginWithCode} loading={loading} />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
       <View style={styles.formHeader}>
-        <Pressable onPress={() => setStep("role")} style={styles.backBtn}>
+        <Pressable onPress={() => setStep("child-method")} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color={Colors.text} />
         </Pressable>
         <Text style={styles.formTitle}>Kid Login</Text>
-        <Text style={styles.formSubtitle}>Enter your parent's email, your name, and PIN</Text>
+        <Text style={styles.formSubtitle}>Use your parent's email and PIN</Text>
       </View>
       <View style={styles.formBody}>
         <TetherInput
@@ -319,22 +537,22 @@ export default function OnboardingScreen() {
         <TetherInput
           label="Your Name"
           placeholder="e.g. Olivia"
-          value={parentName}
-          onChangeText={setParentName}
+          value={childName}
+          onChangeText={setChildName}
           icon="smile"
           autoCapitalize="words"
         />
         <TetherInput
           label="PIN"
           placeholder="Enter your 4-digit PIN"
-          value={password}
-          onChangeText={setPassword}
+          value={childPin}
+          onChangeText={(t) => setChildPin(t.replace(/[^0-9]/g, "").slice(0, 6))}
           secureTextEntry
           keyboardType="numeric"
           icon="lock"
         />
         <View style={{ marginTop: 8 }}>
-          <TetherButton title="Enter Tether" onPress={handleChildLogin} loading={loading} />
+          <TetherButton title="Enter Tether" onPress={handleChildLoginWithEmail} loading={loading} />
         </View>
       </View>
     </View>
