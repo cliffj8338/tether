@@ -24,11 +24,24 @@ export default function About() {
 
       <section className="py-24 px-4 bg-white">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
-          <div className="relative">
-            <div className="aspect-[4/3] rounded-3xl overflow-hidden bg-surface relative">
-               <img src={`${import.meta.env.BASE_URL}images/family-abstract.png`} alt="Abstract parent and child illustration" className="w-full h-full object-cover" />
+          <div className="relative flex flex-col items-center gap-6">
+            <div className="w-64 h-64 md:w-80 md:h-80 rounded-3xl overflow-hidden shadow-xl border-4 border-surface">
+              <img src={`${import.meta.env.BASE_URL}images/cliff-headshot.jpg`} alt="Cliff Jurkiewicz, Founder of Tether" className="w-full h-full object-cover" />
             </div>
-            <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-primary/10 rounded-full blur-3xl -z-10" />
+            <div className="text-center">
+              <h3 className="text-2xl font-display font-bold text-foreground">Cliff Jurkiewicz</h3>
+              <p className="text-primary font-semibold mb-2">Founder, Tether</p>
+              <p className="text-sm text-text-light mb-4">Top 1% LinkedIn &middot; AI Strategist &middot; Futurist &middot; Pilot &middot; Drummer</p>
+              <a
+                href="https://www.linkedin.com/in/cliffj/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#0A66C2] text-white px-5 py-2.5 rounded-full font-bold text-sm hover:bg-[#004182] transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                linkedin.com/in/cliffj
+              </a>
+            </div>
           </div>
           
           <div>
@@ -37,13 +50,13 @@ export default function About() {
               Cliff's path to building Tether was not a straight line. As a father navigating his own recovery journey, he found that the principles of accountability, transparency, and community that rebuilt his life were the same principles missing from every digital platform his children would eventually use.
             </p>
             <p className="text-lg text-text-mid mb-6 leading-relaxed">
-              Before Tether, Cliff was employee #21 at Phenom People, helping scale it from startup to unicorn as VP of Engineering. He led infrastructure supporting millions of users across enterprise HR platforms. He left that career to honor his son Kyle, founding Kyle's Wish Foundation.
+              Before Tether, Cliff was employee #21 at Phenom People, helping scale it from startup to unicorn as VP of Global Strategy. He helped take it from a startup to a $2 billion unicorn — one of the fastest trajectories in enterprise HR tech. He left that career to honor his son Kyle, founding Kyle's Wish Foundation.
             </p>
             <p className="text-lg text-text-mid mb-6 leading-relaxed">
               His faith is central to his family's life — and central to the product. Faith Mode exists because Cliff built the tool his own family needed: one where Christian values are not an afterthought, but a first-class feature woven into every layer of the platform.
             </p>
             <p className="text-lg text-text-mid leading-relaxed">
-              Tether brings together three threads: enterprise engineering experience at scale, the lived experience of a parent rebuilding trust within his own family, and a deep conviction that children deserve a place to learn communication with structure, safety, and grace.
+              Tether brings together three threads: enterprise experience at scale, the lived experience of a parent rebuilding trust within his own family, and a deep conviction that children deserve a place to learn communication with structure, safety, and grace.
             </p>
           </div>
         </div>
