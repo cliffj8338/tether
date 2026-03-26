@@ -49,7 +49,7 @@ export default function HowItWorks() {
               { title: "No Vanish Mode", desc: "Messages cannot disappear. There is no timer, no unsend, no edit. What is said is permanent and visible." },
               { title: "No Unknown Contacts", desc: "Every connection requires mutual parent approval. Strangers cannot message children. Period." },
               { title: "No Algorithmic Feed", desc: "No engagement optimization. No trending content. No suggested contacts. Communication only." },
-              { title: "No Data Monetization", desc: "Subscription-funded. No ads. No data brokering. No third-party tracking. COPPA compliant from the ground up." },
+              { title: "Parents Own the Data", desc: "Subscription-funded. No ads. No data brokering. No third-party tracking. Parents control, export, and delete their family's data at any time. COPPA compliant from the ground up." },
             ].map((item, i) => (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -72,7 +72,7 @@ export default function HowItWorks() {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-display font-bold mb-4">Graduated Trust System</h2>
             <p className="text-lg text-text-mid max-w-2xl mx-auto">
-              Five levels from full oversight to full independence. Privacy grows as children demonstrate responsible behavior. Safety never shrinks — the alert system remains active at every level.
+              Five levels from full oversight to full independence — all controlled by the parent. Privacy grows as children demonstrate responsible behavior. Parents decide when to advance. Safety never shrinks.
             </p>
           </div>
 

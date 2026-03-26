@@ -144,13 +144,13 @@ export default function About() {
             </div>
             <div className="bg-white p-6 rounded-2xl border border-border">
               <CheckCircle className="w-8 h-8 text-primary mb-4" />
-              <h4 className="font-bold text-lg mb-2">No data sold. Ever.</h4>
-              <p className="text-text-mid text-sm">Your subscription pays the bills. No advertising networks. No data brokers. No third-party tracking. COPPA compliant by architecture, not by policy patch.</p>
+              <h4 className="font-bold text-lg mb-2">Parents own the data. Period.</h4>
+              <p className="text-text-mid text-sm">Your child's data belongs to you — not Tether, not a third party, not an advertiser. No data brokers. No tracking. COPPA compliant by architecture, not by policy patch. Parents can export or delete their family's data at any time.</p>
             </div>
             <div className="bg-white p-6 rounded-2xl border border-border">
               <CheckCircle className="w-8 h-8 text-primary mb-4" />
               <h4 className="font-bold text-lg mb-2">Built to guide, not spy</h4>
-              <p className="text-text-mid text-sm">We give parents tools to teach. Trust levels grow. Privacy increases. The goal is not permanent surveillance — it is supervised independence.</p>
+              <p className="text-text-mid text-sm">Parents decide what they see, when they see it, and how much independence their child earns. Trust levels grow. Privacy increases. The goal is not permanent surveillance — it is supervised independence, guided by the parent.</p>
             </div>
           </div>
         </div>

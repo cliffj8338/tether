@@ -15,7 +15,7 @@ const FAQS = [
   },
   {
     q: "Do you sell my child's data?",
-    a: "Never. Our only business model is the family subscription. We do not run ads, and we do not sell behavioral data. Your privacy is structurally protected."
+    a: "Never. Our only business model is the family subscription. We do not run ads, and we do not sell data. Parents own and control all of their family's data — not Tether, not any third party."
   },
   {
     q: "Can my child bypass it by creating a new account?",
@@ -33,7 +33,7 @@ export default function Pricing() {
       {/* HEADER */}
       <section className="bg-surface py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-display font-bold mb-6">No Ads. No Data Sold. Ever.</h1>
+          <h1 className="text-5xl md:text-6xl font-display font-bold mb-6">No Ads. No Data Sold. Parents Own&nbsp;It&nbsp;All.</h1>
           <p className="text-xl text-text-mid max-w-2xl mx-auto">
             You are the customer. Your child is not the product. We are entirely funded by family subscriptions.
           </p>

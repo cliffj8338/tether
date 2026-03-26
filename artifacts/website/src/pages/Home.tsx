@@ -140,7 +140,7 @@ export default function Home() {
               {
                 icon: Activity,
                 title: "Graduated Trust",
-                desc: "Five trust levels from full oversight to full independence. Privacy grows as children demonstrate responsible behavior. But safety never shrinks — the alert system remains active at every level.",
+                desc: "Five trust levels from full oversight to full independence — all controlled by the parent. Privacy grows as children demonstrate responsible behavior. Safety never shrinks. Parents decide when to advance.",
                 color: "bg-accent/10 text-accent"
               },
               {
@@ -242,7 +242,7 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />
-                    <span className="text-text-mid font-medium">No ads. No data sold. Ever.</span>
+                    <span className="text-text-mid font-medium">No ads. No data sold. Parents control all data.</span>
                   </div>
                 </div>
               </div>
