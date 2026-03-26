@@ -47,7 +47,7 @@ export default function ForChurches() {
               {
                 icon: Shield,
                 title: "Community-Level Settings",
-                desc: "The community operator can set minimum trust levels, approve community-wide contacts, and define the moderation standards. Parents retain full ownership and control of their children's data and accounts — the community provides the floor, never the ceiling.",
+                desc: "The community operator can set minimum trust levels, approve community-wide contacts, and define the moderation standards. Parents are the only ones who can see their child's personal data — not the community, not Tether. The community provides the floor, never the ceiling.",
               },
               {
                 icon: Users,
@@ -94,7 +94,7 @@ export default function ForChurches() {
               {
                 icon: GraduationCap,
                 title: "Christian & Faith Schools",
-                desc: "Faith schools can combine the institutional safety features with Faith Mode defaults. The school receives event-only alerts. Parents own all data and retain full control. The platform reinforces the school's mission without the school becoming a data custodian.",
+                desc: "Faith schools can combine the institutional safety features with Faith Mode defaults. The school receives event-only alerts. Only parents can see their child's personal data — not the school, not even Tether's team. The platform reinforces the school's mission without the school becoming a data custodian.",
                 highlight: false,
               },
               {

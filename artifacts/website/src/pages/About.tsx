@@ -145,7 +145,7 @@ export default function About() {
             <div className="bg-white p-6 rounded-2xl border border-border">
               <CheckCircle className="w-8 h-8 text-primary mb-4" />
               <h4 className="font-bold text-lg mb-2">Parents own the data. Period.</h4>
-              <p className="text-text-mid text-sm">Your child's data belongs to you — not Tether, not a third party, not an advertiser. No data brokers. No tracking. COPPA compliant by architecture, not by policy patch. Parents can export or delete their family's data at any time.</p>
+              <p className="text-text-mid text-sm">Your child's personal data is visible only to you — not to Tether, not to admins, not to any third party. Not even the creators of Tether can see PII. Anonymized data may be used to improve safety, but it can never be traced to your child. Parents can export or delete at any time. COPPA compliant by architecture.</p>
             </div>
             <div className="bg-white p-6 rounded-2xl border border-border">
               <CheckCircle className="w-8 h-8 text-primary mb-4" />

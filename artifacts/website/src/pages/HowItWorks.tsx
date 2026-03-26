@@ -49,7 +49,7 @@ export default function HowItWorks() {
               { title: "No Vanish Mode", desc: "Messages cannot disappear. There is no timer, no unsend, no edit. What is said is permanent and visible." },
               { title: "No Unknown Contacts", desc: "Every connection requires mutual parent approval. Strangers cannot message children. Period." },
               { title: "No Algorithmic Feed", desc: "No engagement optimization. No trending content. No suggested contacts. Communication only." },
-              { title: "Parents Own the Data", desc: "Subscription-funded. No ads. No data brokering. No third-party tracking. Parents control, export, and delete their family's data at any time. COPPA compliant from the ground up." },
+              { title: "Parents Own the Data", desc: "Subscription-funded. No ads. Your child's personal data is visible only to you — not even the Tether team can see it. Anonymized data helps improve safety but can never be traced to your child. Parents export or delete their data at any time. COPPA compliant from the ground up." },
             ].map((item, i) => (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

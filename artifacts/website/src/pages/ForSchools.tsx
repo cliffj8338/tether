@@ -66,7 +66,7 @@ export default function ForSchools() {
               {
                 icon: ShieldCheck,
                 title: "Zero Data Custody",
-                desc: "Schools never access, store, or process student messages. Parents own and control all of their child's data — not the school, not Tether. The school's role is awareness, not surveillance. No FERPA complications. No data breach risk from student communications.",
+                desc: "Schools never access, store, or process student messages. Parents are the only ones who can see their child's personal data — not the school, not Tether, not even Tether's own team. The school's role is awareness, not surveillance. No FERPA complications. No data breach risk.",
               },
             ].map((feature, i) => (
               <motion.div

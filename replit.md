@@ -86,6 +86,37 @@ A research-grade analytics platform integrated into the API server and database.
 - **Message Intelligence**: Uses Claude to analyze messages for sentiment, emotional tone, topics, and more.
 - **Tracking**: Integrated analytics for both website (page views, sessions, waitlist conversions) and mobile app (screen views, message sends, feature usage).
 
+## Dual-Layer Data Architecture (PII Firewall)
+
+Tether uses a strict two-layer data architecture to ensure PII can never co-mingle with analytics data:
+
+**Layer 1 — PII Layer (Parent-Only Access)**
+- Contains identifiable data: names, messages, photos, account details
+- Only accessible by the parent of that specific child
+- Even Tether founders, engineers, and admins cannot access PII
+- Parent can export or delete at any time
+- Encrypted with parent-scoped keys
+
+**Layer 2 — Anonymized Intelligence Layer (Analytics Access)**
+- Stripped of all PII — no names, no message content, no identifiers
+- One-way pipeline: PII is stripped before writing to analytics tables
+- No foreign keys, no join paths, no reverse-lookup between layers
+- Used for: platform health, safety improvements, research, investor metrics
+- Accessible by admins, researchers, intelligence dashboard
+- Aggregation threshold: minimum 50 families per cohort
+- Differential privacy: calibrated statistical noise added
+
+**PII Firewall Audit System**
+- Continuous automated schema scan verifying no cross-layer links
+- Query audit: every analytics query scanned for PII patterns
+- Any violation blocks deployment and triggers immediate alert
+- Parents opt-in to contribute anonymized data; participation is never required
+
+**Messaging Policy**
+- Website and investor pages use "No PII sold" instead of "No data sold"
+- Always clarify: "Not even Tether's creators can see your child's data"
+- Anonymized aggregate data may be used for safety research — this is disclosed transparently
+
 ## Family Code Enrollment
 
 A system for child enrollment using unique family codes (`TETHER-XXXXXX`). Parents receive auto-generated family codes upon registration. Child enrollment supports joining via code, or logging in with code/parent email + PIN. All PINs are SHA-256 hashed.

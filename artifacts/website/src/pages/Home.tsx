@@ -242,7 +242,7 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />
-                    <span className="text-text-mid font-medium">No ads. No data sold. Parents control all data.</span>
+                    <span className="text-text-mid font-medium">No ads. No PII sold. Not even Tether can see your child's data.</span>
                   </div>
                 </div>
               </div>

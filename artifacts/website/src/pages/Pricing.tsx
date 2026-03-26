@@ -15,7 +15,7 @@ const FAQS = [
   },
   {
     q: "Do you sell my child's data?",
-    a: "Never. Our only business model is the family subscription. We do not run ads, and we do not sell data. Parents own and control all of their family's data — not Tether, not any third party."
+    a: "Never. No personally identifiable information is ever sold, shared, or visible to anyone — including the creators of Tether. Only parents can see their own children's data. Anonymized, non-identifiable data may be used to improve platform safety, but it can never be traced back to your child."
   },
   {
     q: "Can my child bypass it by creating a new account?",
@@ -26,14 +26,14 @@ const FAQS = [
 export default function Pricing() {
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  useSEO({ title: "Tether Pricing — $4.99/month Family Plan", description: "$4.99/month covers your entire family. No ads, no data sold. Compare Tether to device controls, monitoring apps, and in-app settings." });
+  useSEO({ title: "Tether Pricing — $4.99/month Family Plan", description: "$4.99/month covers your entire family. No ads. No PII ever sold or shared. Parents are the only ones who can see their children's data." });
 
   return (
     <div className="overflow-hidden">
       {/* HEADER */}
       <section className="bg-surface py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-display font-bold mb-6">No Ads. No Data Sold. Parents Own&nbsp;It&nbsp;All.</h1>
+          <h1 className="text-5xl md:text-6xl font-display font-bold mb-6">No Ads. No&nbsp;PII&nbsp;Sold. Parents Own&nbsp;Their&nbsp;Data.</h1>
           <p className="text-xl text-text-mid max-w-2xl mx-auto">
             You are the customer. Your child is not the product. We are entirely funded by family subscriptions.
           </p>
@@ -65,7 +65,7 @@ export default function Pricing() {
             <ul className="space-y-4">
               {[
                 "Unlimited children & parent accounts",
-                "All data owned & controlled by parents",
+                "PII visible only to parents — not even Tether can see it",
                 "All 5 Graduated Trust Levels",
                 "AI-powered content scanning",
                 "Push & SMS emergency alerts",
