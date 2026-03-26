@@ -275,16 +275,31 @@ export default function Home() {
               <p className="text-base md:text-lg text-white/70 leading-relaxed mb-6 max-w-3xl">
                 A California jury ruled that Meta and YouTube were negligent in designing platforms that addicted a young girl, contributing to depression, body dysmorphia, and suicidal thoughts. $6 million in damages. ~2,000 similar cases pending. This is the moment the industry changes — and the reason Tether exists.
               </p>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                 <a 
                   href="https://www.wsj.com/tech/meta-and-youtube-lose-landmark-social-media-trial-33e4c5cb" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-primary font-bold hover:text-primary-light transition-colors"
+                  className="inline-flex items-center gap-2 text-primary font-bold text-sm hover:text-primary-light transition-colors"
                 >
-                  Read the WSJ article <ExternalLink className="w-4 h-4" />
+                  Wall Street Journal <ExternalLink className="w-3.5 h-3.5" />
                 </a>
-                <span className="text-white/40 text-sm">Wall Street Journal</span>
+                <a 
+                  href="https://www.reuters.com/legal/litigation/jury-reaches-verdict-meta-google-trial-social-media-addiction-2026-03-25/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-primary font-bold text-sm hover:text-primary-light transition-colors"
+                >
+                  Reuters <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+                <a 
+                  href="https://www.linkedin.com/posts/cliffj_the-case-for-a-21-age-limit-on-social-media-activity-7400305258478084096-DA0y" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-white/60 font-bold text-sm hover:text-white transition-colors"
+                >
+                  Our founder's take <ExternalLink className="w-3.5 h-3.5" />
+                </a>
               </div>
             </div>
           </motion.div>
