@@ -69,6 +69,8 @@ export default function Pricing() {
                 "All 5 Graduated Trust Levels",
                 "AI-powered content scanning",
                 "Push & SMS emergency alerts",
+                "Anti-addiction controls — time limits & message caps",
+                "\"Go Live\" real-world activity suggestions",
                 "Faith Mode access",
                 "Permanent chat record (no vanish)"
               ].map((feature, i) => (

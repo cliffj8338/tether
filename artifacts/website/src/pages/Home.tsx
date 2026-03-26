@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ShieldCheck, Activity, Users, ArrowRight, EyeOff, MessageSquareX, Smartphone, CheckCircle2, GraduationCap, Heart, Shield, ExternalLink } from "lucide-react";
+import { ShieldCheck, Activity, Users, ArrowRight, EyeOff, MessageSquareX, Smartphone, CheckCircle2, GraduationCap, Heart, Shield, ExternalLink, Timer, BookOpen } from "lucide-react";
 import { useState } from "react";
 import { WaitlistModal } from "@/components/WaitlistModal";
 import { cn } from "@/lib/utils";
@@ -148,6 +148,12 @@ export default function Home() {
                 title: "The Trust Loop",
                 desc: "Before two children can message, both parents introduce themselves — name, phone, email exchanged. Kids connect within a network of adults who know each other, mirroring how friendships work in the physical world.",
                 color: "bg-primary/10 text-primary"
+              },
+              {
+                icon: Timer,
+                title: "Anti-Addiction Controls",
+                desc: "Parents set daily time limits and message caps. When a child hits the boundary, Tether pauses the conversation and suggests real-world activities — read a book, ride a bike, cook something, go outside. In Faith Mode: a Bible passage or devotional. Tether is a tool, not a destination.",
+                color: "bg-alert-3/10 text-alert-3"
               }
             ].map((feature, i) => (
               <motion.div 

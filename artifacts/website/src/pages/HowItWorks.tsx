@@ -289,6 +289,89 @@ export default function HowItWorks() {
 
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-alert-3/10 text-alert-3 font-bold text-sm mb-4">
+              <Timer className="w-4 h-4" /> Anti-Addiction
+            </div>
+            <h2 className="text-4xl font-display font-bold mb-4">A tool, not a destination.</h2>
+            <p className="text-lg text-text-mid max-w-3xl mx-auto">
+              Tether is a hammer — you use it to build something, then you put it down. We designed the opposite of engagement optimization. When your child has connected, Tether tells them to go live their life.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <div className="bg-surface border border-border rounded-3xl p-8">
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Timer className="w-5 h-5 text-primary" />
+                </div>
+                Parent Controls
+              </h3>
+              <ul className="space-y-4">
+                {[
+                  "Daily time limits — parents set how many minutes per day",
+                  "Message count caps — configurable per child",
+                  "Quiet hours — no messaging during dinner, homework, bedtime",
+                  "Weekend vs. weekday schedules",
+                  "Override available for parent-to-child communication"
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <ShieldCheck className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-text-mid text-sm leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-foreground rounded-3xl p-8 text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl" />
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-3 relative z-10">
+                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                  <BookOpen className="w-5 h-5 text-primary" />
+                </div>
+                "Go Live" Suggestions
+              </h3>
+              <p className="text-white/60 text-sm mb-6 relative z-10">
+                When limits are reached, Tether doesn't just lock children out — it redirects them to the real world:
+              </p>
+              <div className="space-y-3 relative z-10">
+                {[
+                  { label: "Standard Mode", items: ["Read a book", "Ride your bike", "Cook something new", "Draw or build something", "Go play outside", "Write in a journal"] },
+                  { label: "Faith Mode", items: ["Read today's Bible passage", "Write a prayer", "Practice a virtue challenge", "Devotional reflection"] }
+                ].map((group, i) => (
+                  <div key={i}>
+                    <div className="text-xs font-bold uppercase tracking-wider text-white/40 mb-2">{group.label}</div>
+                    <div className="flex flex-wrap gap-2">
+                      {group.items.map((item, j) => (
+                        <span key={j} className={cn(
+                          "px-3 py-1.5 rounded-full text-xs font-medium",
+                          i === 0 ? "bg-primary/20 text-primary" : "bg-faith-gold/20 text-faith-gold"
+                        )}>
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 pt-6 border-t border-white/10 relative z-10">
+                <p className="text-white/50 text-xs italic">
+                  "You've connected with your friends today. Now go live your life."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="max-w-5xl mx-auto mt-8 p-4 bg-surface border border-border rounded-xl text-center">
+            <p className="text-sm text-text-mid">
+              <span className="font-bold text-foreground">The anti-pattern:</span> Every major social platform optimizes for time-on-app. Tether optimizes for time-off-app. We succeed when your child puts the phone down and goes outside.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 bg-surface">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-16">
             <div className="lg:w-1/2">
               <div className="bg-faith-gold-bg border border-faith-gold-border p-8 md:p-12 rounded-3xl">
