@@ -7,7 +7,7 @@ import { useSEO } from "@/hooks/useSEO";
 const FAQS = [
   {
     q: "Do I have to pay per child?",
-    a: "No. The $9.99/month subscription covers your entire household. Add as many children and co-parents as you need."
+    a: "No. The $4.99/month subscription covers your entire household. Add as many children and co-parents as you need."
   },
   {
     q: "Is there an Android version?",
@@ -26,7 +26,7 @@ const FAQS = [
 export default function Pricing() {
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  useSEO({ title: "Tether Pricing — $9.99/month Family Plan", description: "$9.99/month covers your entire family. No ads, no data sold. Compare Tether to device controls, monitoring apps, and in-app settings." });
+  useSEO({ title: "Tether Pricing — $4.99/month Family Plan", description: "$4.99/month covers your entire family. No ads, no data sold. Compare Tether to device controls, monitoring apps, and in-app settings." });
 
   return (
     <div className="overflow-hidden">
@@ -51,7 +51,7 @@ export default function Pricing() {
             <h3 className="text-2xl font-bold mb-2">Family Plan</h3>
             <p className="text-text-mid mb-6">Everything you need to protect your household.</p>
             <div className="mb-8">
-              <span className="text-5xl font-display font-bold">$9.99</span>
+              <span className="text-5xl font-display font-bold">$4.99</span>
               <span className="text-text-mid">/month</span>
             </div>
             
@@ -65,6 +65,7 @@ export default function Pricing() {
             <ul className="space-y-4">
               {[
                 "Unlimited children & parent accounts",
+                "All data owned & controlled by parents",
                 "All 5 Graduated Trust Levels",
                 "AI-powered content scanning",
                 "Push & SMS emergency alerts",
