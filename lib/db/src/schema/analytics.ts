@@ -75,6 +75,11 @@ export const messageAnalyticsTable = pgTable("message_analytics", {
   topicKeywords: jsonb("topic_keywords"),
   hasEmoji: boolean("has_emoji").default(false),
   hasSlang: boolean("has_slang").default(false),
+  emojiToTextRatio: real("emoji_to_text_ratio"),
+  messageLength: integer("message_length"),
+  interestNouns: jsonb("interest_nouns"),
+  interestVerbs: jsonb("interest_verbs"),
+  interactionDepth: integer("interaction_depth"),
   responseTimeSeconds: integer("response_time_seconds"),
   isConversationStarter: boolean("is_conversation_starter").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -164,6 +169,105 @@ export const demographicSnapshotsTable = pgTable("demographic_snapshots", {
   index("idx_demo_snapshot_date").on(table.snapshotDate),
 ]);
 
+export const behavioralMetricsTable = pgTable("behavioral_metrics", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  periodDate: timestamp("period_date").notNull(),
+  sentimentVolatility: real("sentiment_volatility"),
+  sentimentMean: real("sentiment_mean"),
+  sentimentMin: real("sentiment_min"),
+  sentimentMax: real("sentiment_max"),
+  avgResponseLatencySeconds: real("avg_response_latency_seconds"),
+  responseLatencyStddev: real("response_latency_stddev"),
+  emojiToTextRatio: real("emoji_to_text_ratio"),
+  emojiToTextRatioTrend: real("emoji_to_text_ratio_trend"),
+  avgMessageLength: real("avg_message_length"),
+  messageLengthTrend: real("message_length_trend"),
+  cognitiveFatigueScore: real("cognitive_fatigue_score"),
+  messagesAnalyzed: integer("messages_analyzed").default(0),
+  anxietyIndicatorScore: real("anxiety_indicator_score"),
+  socialAvoidanceScore: real("social_avoidance_score"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_behavioral_user").on(table.userId),
+  index("idx_behavioral_date").on(table.periodDate),
+]);
+
+export const networkGraphTable = pgTable("network_graph", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  periodDate: timestamp("period_date").notNull(),
+  influenceScore: real("influence_score"),
+  replyTriggerRate: real("reply_trigger_rate"),
+  downstreamActions: integer("downstream_actions").default(0),
+  uniqueConnections: integer("unique_connections").default(0),
+  messagesSent: integer("messages_sent").default(0),
+  messagesReceived: integer("messages_received").default(0),
+  initiationRate: real("initiation_rate"),
+  reciprocityScore: real("reciprocity_score"),
+  networkRole: text("network_role"),
+  clusterMembership: text("cluster_membership"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_network_user").on(table.userId),
+  index("idx_network_date").on(table.periodDate),
+]);
+
+export const churnPredictionsTable = pgTable("churn_predictions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  computedAt: timestamp("computed_at").defaultNow().notNull(),
+  churnRiskScore: real("churn_risk_score"),
+  predictedChurnDate: timestamp("predicted_churn_date"),
+  confidenceLevel: real("confidence_level"),
+  silenceGradient: real("silence_gradient"),
+  messageLengthGradient: real("message_length_gradient"),
+  responseTimeGradient: real("response_time_gradient"),
+  sessionFrequencyGradient: real("session_frequency_gradient"),
+  daysInactive: integer("days_inactive").default(0),
+  lastActiveAt: timestamp("last_active_at"),
+  riskFactors: jsonb("risk_factors"),
+}, (table) => [
+  index("idx_churn_user").on(table.userId),
+  index("idx_churn_risk").on(table.churnRiskScore),
+  index("idx_churn_computed").on(table.computedAt),
+]);
+
+export const temporalAnomaliesTable = pgTable("temporal_anomalies", {
+  id: serial("id").primaryKey(),
+  detectedAt: timestamp("detected_at").defaultNow().notNull(),
+  anomalyType: text("anomaly_type").notNull(),
+  severity: real("severity"),
+  metricName: text("metric_name").notNull(),
+  baselineValue: real("baseline_value"),
+  observedValue: real("observed_value"),
+  percentChange: real("percent_change"),
+  timeWindowMinutes: integer("time_window_minutes"),
+  affectedUsers: integer("affected_users").default(0),
+  metadata: jsonb("metadata"),
+  resolved: boolean("resolved").default(false),
+}, (table) => [
+  index("idx_anomaly_detected").on(table.detectedAt),
+  index("idx_anomaly_type").on(table.anomalyType),
+  index("idx_anomaly_severity").on(table.severity),
+]);
+
+export const interestGraphTable = pgTable("interest_graph", {
+  id: serial("id").primaryKey(),
+  ageGroup: text("age_group").notNull(),
+  periodDate: timestamp("period_date").notNull(),
+  interestCluster: text("interest_cluster").notNull(),
+  nouns: jsonb("nouns"),
+  verbs: jsonb("verbs"),
+  occurrenceCount: integer("occurrence_count").default(1),
+  sentimentAffinity: real("sentiment_affinity"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_interest_age").on(table.ageGroup),
+  index("idx_interest_period").on(table.periodDate),
+  index("idx_interest_cluster").on(table.interestCluster),
+]);
+
 export const insertAnalyticsEventSchema = createInsertSchema(analyticsEventsTable).omit({ id: true, createdAt: true });
 export const insertSessionTrackingSchema = createInsertSchema(sessionTrackingTable).omit({ id: true });
 export const insertMessageAnalyticsSchema = createInsertSchema(messageAnalyticsTable).omit({ id: true, createdAt: true });
@@ -179,3 +283,8 @@ export type ConversationInsight = typeof conversationInsightsTable.$inferSelect;
 export type KeywordTrend = typeof keywordTrendsTable.$inferSelect;
 export type SafetyAnalytics = typeof safetyAnalyticsTable.$inferSelect;
 export type DemographicSnapshot = typeof demographicSnapshotsTable.$inferSelect;
+export type BehavioralMetric = typeof behavioralMetricsTable.$inferSelect;
+export type NetworkGraph = typeof networkGraphTable.$inferSelect;
+export type ChurnPrediction = typeof churnPredictionsTable.$inferSelect;
+export type TemporalAnomaly = typeof temporalAnomaliesTable.$inferSelect;
+export type InterestGraph = typeof interestGraphTable.$inferSelect;

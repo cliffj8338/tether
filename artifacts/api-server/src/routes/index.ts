@@ -11,6 +11,8 @@ import pushRouter from "./push";
 import waitlistRouter from "./waitlist";
 import analyticsRouter from "./analytics";
 import adminAnalyticsRouter from "./admin-analytics";
+import adminAdvancedRouter from "./admin-advanced";
+import adminAiQueryRouter from "./admin-ai-query";
 
 const router: IRouter = Router();
 
@@ -26,5 +28,7 @@ router.use(pushRouter);
 router.use(waitlistRouter);
 router.use(analyticsRouter);
 router.use(adminAnalyticsRouter);
+router.use(adminAdvancedRouter);
+router.use(adminAiQueryRouter);
 
 export default router;

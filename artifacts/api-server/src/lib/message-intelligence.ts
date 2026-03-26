@@ -14,6 +14,8 @@ interface MessageIntelligence {
   topicKeywords: string[];
   hasEmoji: boolean;
   hasSlang: boolean;
+  interestNouns: string[];
+  interestVerbs: string[];
 }
 
 const INTELLIGENCE_PROMPT = `You are a research analyst studying children's digital communication patterns. Analyze the following message from a child (ages 6-17) and extract structured metadata for research purposes. All data is anonymized and aggregated.
@@ -26,7 +28,9 @@ Respond ONLY with valid JSON matching this exact schema:
   "topicCategory": "<social|emotional|academic|faith|conflict|humor|family|friendship|identity|health|media|creative|sports|technology|other>",
   "topicKeywords": ["<keyword1>", "<keyword2>", "<keyword3>"],
   "vocabularyComplexity": <number 0.0-1.0 where 0=very simple, 1=advanced>,
-  "hasSlang": <boolean>
+  "hasSlang": <boolean>,
+  "interestNouns": ["<noun1>", "<noun2>"],
+  "interestVerbs": ["<verb1>", "<verb2>"]
 }
 
 Guidelines:
@@ -34,7 +38,9 @@ Guidelines:
 - vocabularyComplexity: Consider word sophistication relative to age group. Simple greetings = 0.1, age-appropriate = 0.4-0.6, advanced vocabulary = 0.8+
 - topicKeywords: 1-3 anonymized topic words capturing the subject matter (not the actual words used, but the themes)
 - hasSlang: true if message uses slang, abbreviations, or informal language typical of youth digital communication
-- emotionalTone: The primary emotional quality of the message`;
+- emotionalTone: The primary emotional quality of the message
+- interestNouns: 1-3 anonymized nouns representing interests/subjects discussed (e.g. "sport", "game", "music" — NOT specific names/brands)
+- interestVerbs: 1-3 anonymized action verbs representing activities discussed (e.g. "play", "study", "create")`;
 
 function computeBasicMetrics(content: string) {
   const words = content.trim().split(/\s+/).filter(w => w.length > 0);
@@ -71,6 +77,8 @@ export async function analyzeMessage(
       topicKeywords: [],
       vocabularyComplexity: 0.3,
       hasSlang: false,
+      interestNouns: [],
+      interestVerbs: [],
     };
 
     if (basicMetrics.wordCount >= 2) {
@@ -94,6 +102,8 @@ export async function analyzeMessage(
           topicKeywords: Array.isArray(parsed.topicKeywords) ? parsed.topicKeywords.slice(0, 5) : [],
           vocabularyComplexity: Math.max(0, Math.min(1, parsed.vocabularyComplexity ?? 0.3)),
           hasSlang: parsed.hasSlang ?? false,
+          interestNouns: Array.isArray(parsed.interestNouns) ? parsed.interestNouns.slice(0, 3) : [],
+          interestVerbs: Array.isArray(parsed.interestVerbs) ? parsed.interestVerbs.slice(0, 3) : [],
         };
       } catch {
         // AI analysis failed — use defaults
@@ -131,6 +141,11 @@ export async function analyzeMessage(
       }
     }
 
+    const emojiMatches = content.match(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu);
+    const emojiCount = emojiMatches?.length ?? 0;
+    const nonEmojiChars = content.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\s]/gu, "").length;
+    const emojiToTextRatio = nonEmojiChars > 0 ? emojiCount / (emojiCount + nonEmojiChars) : emojiCount > 0 ? 1.0 : 0;
+
     await db.insert(messageAnalyticsTable).values({
       messageId,
       conversationId,
@@ -147,6 +162,10 @@ export async function analyzeMessage(
       topicKeywords: aiAnalysis.topicKeywords ?? [],
       hasEmoji: basicMetrics.hasEmoji,
       hasSlang: aiAnalysis.hasSlang ?? false,
+      emojiToTextRatio,
+      messageLength: content.length,
+      interestNouns: aiAnalysis.interestNouns ?? [],
+      interestVerbs: aiAnalysis.interestVerbs ?? [],
       responseTimeSeconds,
       isConversationStarter,
     });

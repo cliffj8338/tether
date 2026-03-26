@@ -9,6 +9,16 @@ async function fetchJson<T>(path: string): Promise<T> {
   return res.json();
 }
 
+async function postJson<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Admin-Key": ADMIN_KEY },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
 export const api = {
   overview: () => fetchJson<OverviewData>("/admin/analytics/overview"),
   conversations: () => fetchJson<ConversationData>("/admin/analytics/conversations"),
@@ -17,6 +27,11 @@ export const api = {
   engagement: () => fetchJson<EngagementData>("/admin/analytics/engagement"),
   content: () => fetchJson<ContentData>("/admin/analytics/content"),
   website: () => fetchJson<WebsiteData>("/admin/analytics/website"),
+  behavioral: () => fetchJson<BehavioralData>("/admin/analytics/behavioral"),
+  network: () => fetchJson<NetworkData>("/admin/analytics/network"),
+  predictions: () => fetchJson<PredictionsData>("/admin/analytics/predictions"),
+  computeMetrics: () => postJson<{ ok: boolean }>("/admin/analytics/compute", {}),
+  aiQuery: (question: string) => postJson<AiQueryResponse>("/admin/analytics/query", { question }),
 };
 
 export interface OverviewData {
@@ -120,4 +135,60 @@ export interface WebsiteData {
   waitlistConversions: { day: string; count: number }[];
   referrers: { referrer: string; count: number }[];
   webSessions: { avgDuration: number; avgPages: number; totalSessions: number };
+}
+
+export interface BehavioralData {
+  kpis: {
+    avgVolatility: number;
+    avgAnxiety: number;
+    avgFatigue: number;
+    avgSocialAvoidance: number;
+    avgResponseLatency: number;
+    avgEmojiRatio: number;
+  };
+  volatilityTrend: { date: string; avgVolatility: number; avgAnxiety: number; avgFatigue: number; usersAnalyzed: number }[];
+  emojiTrend: { date: string; avgEmojiRatio: number; avgMsgLength: number }[];
+  latestMetrics: {
+    userId: number; date: string; volatility: number; anxiety: number;
+    fatigue: number; socialAvoidance: number; responseLatency: number; emojiRatio: number;
+  }[];
+  anxietyLeaderboard: { userId: number; avgLatency: number; avgAnxiety: number }[];
+}
+
+export interface NetworkData {
+  kpis: {
+    avgInfluence: number; avgReciprocity: number; avgConnections: number;
+    avgInitiation: number; avgReplyTrigger: number; graphDensity: number; totalNodes: number;
+  };
+  roleDistribution: { role: string; count: number }[];
+  topInfluencers: { userId: number; influenceScore: number; replyTriggerRate: number; role: string; connections: number }[];
+  networkTopology: string;
+}
+
+export interface PredictionsData {
+  churn: {
+    riskDistribution: { high: number; medium: number; low: number };
+    topRisks: {
+      userId: number; riskScore: number; predictedDate: string; confidence: number;
+      daysInactive: number; riskFactors: string[]; silenceGradient: number; msgLengthGradient: number;
+    }[];
+    riskFactorFrequency: { factor: string; count: number }[];
+  };
+  anomalies: {
+    type: string; severity: number; metric: string; baseline: number;
+    observed: number; percentChange: number; detectedAt: string;
+    affectedUsers: number; resolved: boolean;
+  }[];
+  interestClusters: { cluster: string; ageGroup: string; count: number; avgSentiment: number }[];
+}
+
+export interface AiQueryResponse {
+  thinking: string;
+  data: Record<string, unknown>[];
+  chartType: string;
+  chartConfig?: { xKey?: string; yKey?: string; label?: string };
+  summary: string;
+  sql?: string;
+  rowCount?: number;
+  error?: string;
 }

@@ -183,8 +183,8 @@ Marketing website for Tether (tetherapp.app). React + Vite, client-side SPA.
 Admin intelligence dashboard for Tether. React + Vite, Recharts visualizations.
 
 - **Framework**: React + Vite with Tailwind CSS v4
-- **Pages**: Overview, Conversation Intelligence, Safety Center, Demographics & Behavior, Engagement Analytics, Content Research, Website Analytics
-- **API Client**: `src/lib/api.ts` — typed fetch client with admin key auth, 7 query endpoints
+- **Pages**: Overview, Conversation Intelligence, Safety Center, Demographics & Behavior, Engagement Analytics, Content Research, Website Analytics, Behavioral Intelligence, Network Analysis, Predictive Analytics, AI Research Assistant (11 total)
+- **API Client**: `src/lib/api.ts` — typed fetch client with admin key auth, 10 query endpoints + compute + AI query
 - **Auth**: Uses `X-Admin-Key` header (dev default: `tether-admin-dev`; production: `ADMIN_API_KEY` env var)
 - **Preview path**: `/admin`
 - **Key dependencies**: recharts, lucide-react
@@ -193,10 +193,14 @@ Admin intelligence dashboard for Tether. React + Vite, Recharts visualizations.
 
 Research-grade analytics covering both mobile app and website:
 
-- **DB Schema**: `lib/db/src/schema/analytics.ts` — 7 tables (`analytics_events`, `session_tracking`, `message_analytics`, `conversation_insights`, `keyword_trends`, `safety_analytics`, `demographic_snapshots`) + 4 PG enum types
+- **DB Schema**: `lib/db/src/schema/analytics.ts` — 12 tables (7 original + 5 new: `behavioral_metrics`, `network_graph`, `churn_predictions`, `temporal_anomalies`, `interest_graph`) + 4 PG enum types
 - **Event Ingestion**: `POST /api/analytics/events` (unauthenticated, for app/web clients), `POST /api/analytics/sessions`
 - **Admin Endpoints**: `GET /api/admin/analytics/{overview,conversations,safety,demographics,engagement,content,website}` — all require admin auth (X-Admin-Key or parent user token)
-- **Message Intelligence**: `artifacts/api-server/src/lib/message-intelligence.ts` — Claude claude-haiku-4-5 analyzes every message for sentiment, emotional tone, topic category, keywords, vocabulary complexity, emoji/slang usage (fire-and-forget)
+- **Advanced Analytics Endpoints**: `GET /api/admin/analytics/{behavioral,network,predictions}` — behavioral intelligence, network graph analysis, churn predictions with risk factors
+- **Compute Engine**: `POST /api/admin/analytics/compute` — runs behavioral metrics, network analysis, and churn prediction for all child users. Uses upsert (ON CONFLICT) to prevent duplicate rows.
+- **AI Research Assistant**: `POST /api/admin/analytics/query` — natural language to SQL via Claude claude-haiku-4-5. Strips comments, blocks PII columns (email, password, content, ip_hash), forbids mutations, enforces LIMIT 100.
+- **Behavioral Engine**: `artifacts/api-server/src/lib/behavioral-engine.ts` — computes sentiment volatility, anxiety indicators, cognitive fatigue, social avoidance, response latency patterns, churn risk (Silence Gradient model), network influence/reciprocity/roles
+- **Message Intelligence**: `artifacts/api-server/src/lib/message-intelligence.ts` — Claude claude-haiku-4-5 analyzes every message for sentiment, emotional tone, topic category, keywords, vocabulary complexity, emoji/slang usage, interest nouns/verbs, interaction depth (fire-and-forget)
 - **Website Tracking**: `artifacts/website/src/lib/analytics.ts` — page views, session tracking, waitlist conversions; integrated into App.tsx via AnalyticsTracker component
 - **Mobile Tracking**: `artifacts/mobile/services/analytics.ts` — screen views, message sends, feature usage, session management
 
