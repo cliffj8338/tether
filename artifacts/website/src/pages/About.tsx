@@ -16,7 +16,7 @@ export default function About() {
         </div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h1 className="text-5xl md:text-6xl font-display font-bold mb-6">Our Story</h1>
-          <p className="text-xl text-text-light leading-relaxed">
+          <p className="text-xl text-white/80 leading-relaxed">
             Tether was not conceived in a boardroom. It was born from a father's frustration — and a family's faith.
           </p>
         </div>
