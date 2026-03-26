@@ -152,7 +152,7 @@ export default function Home() {
               {
                 icon: Timer,
                 title: "Anti-Addiction Controls",
-                desc: "Parents set daily time limits and message caps. When a child hits the boundary, Tether pauses the conversation and suggests real-world activities — read a book, ride a bike, cook something, go outside. In Faith Mode: a Bible passage or devotional. Tether is a tool, not a destination.",
+                desc: "Parents set daily time limits and message caps. When a child hits the boundary, Tether pauses the conversation and suggests real-world activities — read a book, ride a bike, cook something, go outside. Faith Mode adds Bible passages and devotionals alongside the standard suggestions. Tether is a tool, not a destination.",
                 color: "bg-alert-3/10 text-alert-3"
               }
             ].map((feature, i) => (

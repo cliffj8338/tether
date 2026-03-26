@@ -332,12 +332,12 @@ export default function HowItWorks() {
                 "Go Live" Suggestions
               </h3>
               <p className="text-white/60 text-sm mb-6 relative z-10">
-                When limits are reached, Tether doesn't just lock children out — it redirects them to the real world:
+                When limits are reached, Tether doesn't just lock children out — it redirects them to the real world. Faith Mode includes all standard suggestions plus faith-specific activities:
               </p>
               <div className="space-y-3 relative z-10">
                 {[
                   { label: "Standard Mode", items: ["Read a book", "Ride your bike", "Cook something new", "Draw or build something", "Go play outside", "Write in a journal"] },
-                  { label: "Faith Mode", items: ["Read today's Bible passage", "Write a prayer", "Practice a virtue challenge", "Devotional reflection"] }
+                  { label: "Faith Mode adds", items: ["Read today's Bible passage", "Write a prayer", "Practice a virtue challenge", "Devotional reflection"] }
                 ].map((group, i) => (
                   <div key={i}>
                     <div className="text-xs font-bold uppercase tracking-wider text-white/40 mb-2">{group.label}</div>
