@@ -37,7 +37,7 @@ const queryClient = new QueryClient();
 function PushNotificationManager() {
   const { user } = useAuth();
   const router = useRouter();
-  const responseListener = useRef<ReturnType<typeof addNotificationResponseListener>>();
+  const responseListener = useRef<ReturnType<typeof addNotificationResponseListener>>(undefined);
 
   useEffect(() => {
     if (!user) {

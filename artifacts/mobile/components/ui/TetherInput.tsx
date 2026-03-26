@@ -11,7 +11,7 @@ interface TetherInputProps {
   onChangeText: (text: string) => void;
   secureTextEntry?: boolean;
   keyboardType?: "default" | "email-address" | "numeric";
-  autoCapitalize?: "none" | "sentences" | "words";
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
   error?: string;
   icon?: keyof typeof Feather.glyphMap;
   multiline?: boolean;
