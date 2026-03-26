@@ -7,7 +7,7 @@ import { getUserFromToken } from "./auth";
 
 export async function requireAdmin(req: Request, res: Response, next: NextFunction) {
   const adminKey = req.headers["x-admin-key"];
-  if (adminKey === (process.env.ADMIN_API_KEY || "tether-admin-dev")) {
+  if (process.env.ADMIN_API_KEY && adminKey === process.env.ADMIN_API_KEY) {
     next();
     return;
   }

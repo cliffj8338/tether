@@ -8,7 +8,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
     const idToken = await user.getIdToken();
     return { "Authorization": `Bearer ${idToken}` };
   }
-  return { "X-Admin-Key": "tether-admin-dev" };
+  return {};
 }
 
 async function fetchJson<T>(path: string): Promise<T> {
