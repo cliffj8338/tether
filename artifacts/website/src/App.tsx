@@ -2,20 +2,20 @@ import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, lazy, Suspense } from "react";
 import { analytics } from "./lib/analytics";
 
 import Home from "./pages/Home";
-import HowItWorks from "./pages/HowItWorks";
-import ForSchools from "./pages/ForSchools";
-import ForChurches from "./pages/ForChurches";
-import FaithMode from "./pages/FaithMode";
-import Pricing from "./pages/Pricing";
-import About from "./pages/About";
-import Waitlist from "./pages/Waitlist";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import NotFound from "./pages/not-found";
+const HowItWorks = lazy(() => import("./pages/HowItWorks"));
+const ForSchools = lazy(() => import("./pages/ForSchools"));
+const ForChurches = lazy(() => import("./pages/ForChurches"));
+const FaithMode = lazy(() => import("./pages/FaithMode"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const About = lazy(() => import("./pages/About"));
+const Waitlist = lazy(() => import("./pages/Waitlist"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const NotFound = lazy(() => import("./pages/not-found"));
 
 import { PageLayout } from "./components/layout/PageLayout";
 import { WelcomeModal } from "./components/WelcomeModal";
@@ -41,21 +41,31 @@ const queryClient = new QueryClient({
   },
 });
 
+function PageFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
+
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/how-it-works" component={HowItWorks} />
-      <Route path="/for-schools" component={ForSchools} />
-      <Route path="/for-churches" component={ForChurches} />
-      <Route path="/faith-mode" component={FaithMode} />
-      <Route path="/pricing" component={Pricing} />
-      <Route path="/about" component={About} />
-      <Route path="/waitlist" component={Waitlist} />
-      <Route path="/blog" component={Blog} />
-      <Route path="/blog/:slug" component={BlogPost} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<PageFallback />}>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/how-it-works" component={HowItWorks} />
+        <Route path="/for-schools" component={ForSchools} />
+        <Route path="/for-churches" component={ForChurches} />
+        <Route path="/faith-mode" component={FaithMode} />
+        <Route path="/pricing" component={Pricing} />
+        <Route path="/about" component={About} />
+        <Route path="/waitlist" component={Waitlist} />
+        <Route path="/blog" component={Blog} />
+        <Route path="/blog/:slug" component={BlogPost} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 

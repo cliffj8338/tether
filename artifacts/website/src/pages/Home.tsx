@@ -25,8 +25,10 @@ export default function Home() {
       <section className="relative pt-16 pb-24 lg:pt-32 lg:pb-40 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
         <div className="absolute inset-0 -z-10 w-full h-full opacity-60">
           <img 
-            src={`${import.meta.env.BASE_URL}images/hero-bg.png`} 
+            src={`${import.meta.env.BASE_URL}images/hero-bg.jpg`} 
             alt="" 
+            loading="eager"
+            decoding="async"
             className="w-full h-full object-cover object-top"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
@@ -177,7 +179,7 @@ export default function Home() {
 
       <section className="py-20 bg-primary text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <img src={`${import.meta.env.BASE_URL}images/organic-shapes.png`} alt="" className="w-full h-full object-cover filter brightness-0 invert" />
+          <img src={`${import.meta.env.BASE_URL}images/organic-shapes.jpg`} alt="" className="w-full h-full object-cover filter brightness-0 invert" />
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 divide-y md:divide-y-0 md:divide-x divide-white/20">

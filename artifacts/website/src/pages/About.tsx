@@ -12,7 +12,7 @@ export default function About() {
     <div className="overflow-hidden">
       <section className="bg-foreground text-white py-24 px-4 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
-           <img src={`${import.meta.env.BASE_URL}images/organic-shapes.png`} alt="" className="w-full h-full object-cover filter blur-3xl saturate-200" />
+           <img src={`${import.meta.env.BASE_URL}images/organic-shapes.jpg`} alt="" className="w-full h-full object-cover filter blur-3xl saturate-200" />
         </div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h1 className="text-5xl md:text-6xl font-display font-bold mb-6">Our Story</h1>
