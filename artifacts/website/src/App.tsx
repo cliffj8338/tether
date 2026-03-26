@@ -1,7 +1,9 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useEffect, useRef } from "react";
+import { analytics } from "./lib/analytics";
 
 import Home from "./pages/Home";
 import HowItWorks from "./pages/HowItWorks";
@@ -16,6 +18,18 @@ import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/not-found";
 
 import { PageLayout } from "./components/layout/PageLayout";
+
+function AnalyticsTracker() {
+  const [location] = useLocation();
+  const prev = useRef("");
+  useEffect(() => {
+    if (location !== prev.current) {
+      prev.current = location;
+      analytics.pageView(location);
+    }
+  }, [location]);
+  return null;
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +63,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <AnalyticsTracker />
           <PageLayout>
             <Router />
           </PageLayout>

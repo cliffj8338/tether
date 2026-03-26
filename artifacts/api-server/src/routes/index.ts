@@ -9,6 +9,8 @@ import alertsRouter from "./alerts";
 import dashboardRouter from "./dashboard";
 import pushRouter from "./push";
 import waitlistRouter from "./waitlist";
+import analyticsRouter from "./analytics";
+import adminAnalyticsRouter from "./admin-analytics";
 
 const router: IRouter = Router();
 
@@ -22,5 +24,7 @@ router.use(alertsRouter);
 router.use(dashboardRouter);
 router.use(pushRouter);
 router.use(waitlistRouter);
+router.use(analyticsRouter);
+router.use(adminAnalyticsRouter);
 
 export default router;

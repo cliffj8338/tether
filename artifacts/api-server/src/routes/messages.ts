@@ -8,6 +8,7 @@ import { scanContent } from "../lib/content-filter";
 import { aiScanContent } from "../lib/ai-content-filter";
 import { sendPushNotification, buildAlertPushMessage } from "../lib/push-notifications";
 import { sendAlertSMS } from "../lib/sms";
+import { analyzeMessage } from "../lib/message-intelligence";
 
 const router: IRouter = Router();
 
@@ -151,6 +152,8 @@ router.post("/conversations/:conversationId/messages", async (req, res) => {
         }
       }
     }
+
+    analyzeMessage(content, message.id, conversationId, senderId, user.age).catch(() => {});
 
     res.status(201).json({
       id: message.id,

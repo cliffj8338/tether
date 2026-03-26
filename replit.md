@@ -178,6 +178,28 @@ Marketing website for Tether (tetherapp.app). React + Vite, client-side SPA.
 - **Preview path**: `/` (root)
 - **Key dependencies**: framer-motion, clsx, tailwind-merge, lucide-react
 
+### `artifacts/admin` (`@workspace/admin`)
+
+Admin intelligence dashboard for Tether. React + Vite, Recharts visualizations.
+
+- **Framework**: React + Vite with Tailwind CSS v4
+- **Pages**: Overview, Conversation Intelligence, Safety Center, Demographics & Behavior, Engagement Analytics, Content Research, Website Analytics
+- **API Client**: `src/lib/api.ts` — typed fetch client with admin key auth, 7 query endpoints
+- **Auth**: Uses `X-Admin-Key` header (dev default: `tether-admin-dev`; production: `ADMIN_API_KEY` env var)
+- **Preview path**: `/admin`
+- **Key dependencies**: recharts, lucide-react
+
+### Analytics Platform
+
+Research-grade analytics covering both mobile app and website:
+
+- **DB Schema**: `lib/db/src/schema/analytics.ts` — 7 tables (`analytics_events`, `session_tracking`, `message_analytics`, `conversation_insights`, `keyword_trends`, `safety_analytics`, `demographic_snapshots`) + 4 PG enum types
+- **Event Ingestion**: `POST /api/analytics/events` (unauthenticated, for app/web clients), `POST /api/analytics/sessions`
+- **Admin Endpoints**: `GET /api/admin/analytics/{overview,conversations,safety,demographics,engagement,content,website}` — all require admin auth (X-Admin-Key or parent user token)
+- **Message Intelligence**: `artifacts/api-server/src/lib/message-intelligence.ts` — Claude claude-haiku-4-5 analyzes every message for sentiment, emotional tone, topic category, keywords, vocabulary complexity, emoji/slang usage (fire-and-forget)
+- **Website Tracking**: `artifacts/website/src/lib/analytics.ts` — page views, session tracking, waitlist conversions; integrated into App.tsx via AnalyticsTracker component
+- **Mobile Tracking**: `artifacts/mobile/services/analytics.ts` — screen views, message sends, feature usage, session management
+
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts exec tsx src/<script>.ts`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.

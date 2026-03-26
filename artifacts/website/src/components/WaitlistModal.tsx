@@ -92,6 +92,7 @@ export function WaitlistModal({ isOpen, onClose, defaultRole = "parent" }: Waitl
       }
 
       setIsSuccess(true);
+      import("../lib/analytics").then(m => m.analytics.waitlistSignup(role)).catch(() => {});
       toast({
         title: "You're on the list!",
         description: "Keep an eye on your inbox for updates on Tether's launch.",
