@@ -51,9 +51,43 @@ A marketing website for Tether, built with React, Vite, Tailwind CSS v4, and wou
 
 ### `admin` (`@workspace/admin`)
 
-An admin intelligence dashboard built with React, Vite, and Tailwind CSS v4, using Recharts for visualizations. It provides comprehensive analytics and insights across 11 distinct pages, including:
+An admin intelligence dashboard built with React, Vite, and Tailwind CSS v4, using Recharts for visualizations. It provides comprehensive analytics and insights across 12 distinct pages, including:
 - Overview, Conversation Intelligence, Safety Center, Demographics & Behavior, Engagement Analytics, Content Research, Website Analytics, Behavioral Intelligence, Network Analysis, Predictive Analytics, AI Research Assistant, and Data Catalog (18 tables, 172+ fields, 56 correlation links across 3 research lenses).
-- **Authentication**: Uses an `X-Admin-Key` header for API access.
+- **Authentication**: Firebase Auth with Google sign-in. Falls back to `X-Admin-Key` header for dev/API access. Login page at `/admin` shows Google sign-in button. Users verified against backend via Firebase ID tokens.
+
+## Authentication Architecture (Firebase)
+
+### Overview
+All auth is handled through Firebase Authentication. The system supports Google sign-in (and can be extended to Apple, email/password, phone, etc.).
+
+### Components
+1. **Firebase Client SDK** (`firebase` package) — installed in `admin` dashboard for Google sign-in UI
+2. **Firebase Admin SDK** (`firebase-admin` package) — installed in `api-server` for server-side ID token verification
+3. **Auth Flow**: Client signs in via Firebase → gets ID token → sends to API server → server verifies with Firebase Admin → looks up/creates user in DB → returns admin user profile
+
+### Database Schema
+- `users.firebase_uid` (TEXT, UNIQUE) — links Firebase account to internal user
+- `users.is_admin` (BOOLEAN) — controls admin dashboard access
+- `ADMIN_EMAILS` env var — comma-separated list of emails auto-granted admin on first login
+
+### Environment Variables Required
+**Admin Dashboard (Vite env vars):**
+- `VITE_FIREBASE_API_KEY` — Firebase Web API key
+- `VITE_FIREBASE_AUTH_DOMAIN` — e.g., `tether-app.firebaseapp.com`
+- `VITE_FIREBASE_PROJECT_ID` — e.g., `tether-app`
+- `VITE_FIREBASE_STORAGE_BUCKET` (optional)
+- `VITE_FIREBASE_MESSAGING_SENDER_ID` (optional)
+- `VITE_FIREBASE_APP_ID` (optional)
+
+**API Server:**
+- `FIREBASE_SERVICE_ACCOUNT_KEY` — Full service account JSON (stringified)
+- `FIREBASE_PROJECT_ID` — Alternative to full service account
+- `ADMIN_EMAILS` — Comma-separated admin emails for auto-provisioning
+
+### Auth Middleware
+- Shared `requireAdmin` middleware in `api-server/src/lib/require-admin.ts`
+- Checks (in order): X-Admin-Key header → Firebase ID token → legacy token
+- All three admin route files use the shared middleware
 
 ## Shared Libraries
 

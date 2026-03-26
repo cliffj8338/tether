@@ -1,6 +1,8 @@
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
+import { AuthProvider, useAuth } from "@/lib/auth-context";
+import Login from "@/pages/Login";
 import Overview from "@/pages/Overview";
 import ConversationIntelligence from "@/pages/ConversationIntelligence";
 import SafetyCenter from "@/pages/SafetyCenter";
@@ -41,6 +43,45 @@ function NavIcon({ d }: { d: string }) {
   );
 }
 
+function UserMenu() {
+  const { adminUser, firebaseUser, logout } = useAuth();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-sidebar-accent/50 transition-colors w-full"
+      >
+        {firebaseUser?.photoURL ? (
+          <img src={firebaseUser.photoURL} alt="" className="w-7 h-7 rounded-full" />
+        ) : (
+          <div className="w-7 h-7 rounded-full bg-sidebar-primary flex items-center justify-center text-xs font-bold text-white">
+            {(adminUser?.displayName || "A")[0].toUpperCase()}
+          </div>
+        )}
+        <div className="flex-1 text-left min-w-0">
+          <div className="text-xs font-medium text-sidebar-foreground truncate">{adminUser?.displayName || "Admin"}</div>
+          <div className="text-[10px] text-sidebar-foreground/50 truncate">{adminUser?.email}</div>
+        </div>
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute bottom-full left-0 mb-1 w-full bg-popover border border-border rounded-lg shadow-lg z-50 py-1">
+            <button
+              onClick={() => { logout(); setOpen(false); }}
+              className="w-full px-3 py-2 text-left text-sm text-destructive hover:bg-accent transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const [location] = useLocation();
 
@@ -77,6 +118,12 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
           );
         })}
       </nav>
+
+      {!collapsed && (
+        <div className="p-2 border-t border-sidebar-border">
+          <UserMenu />
+        </div>
+      )}
 
       <div className="p-3 border-t border-sidebar-border">
         <button onClick={onToggle} className="flex items-center justify-center w-full p-2 rounded-lg text-sidebar-foreground/50 hover:bg-sidebar-accent/50 transition-colors">
@@ -116,21 +163,45 @@ function AppRouter() {
   );
 }
 
-function App() {
+function AuthenticatedApp() {
+  const { adminUser, loading, error } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!adminUser) {
+    return <Login />;
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
+      <main className={`transition-all duration-200 ${collapsed ? "ml-16" : "ml-56"}`}>
+        <div className="p-6 max-w-[1400px] mx-auto">
+          <AppRouter />
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <div className="min-h-screen bg-background">
-          <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
-          <main className={`transition-all duration-200 ${collapsed ? "ml-16" : "ml-56"}`}>
-            <div className="p-6 max-w-[1400px] mx-auto">
-              <AppRouter />
-            </div>
-          </main>
-        </div>
-      </WouterRouter>
+      <AuthProvider>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <AuthenticatedApp />
+        </WouterRouter>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

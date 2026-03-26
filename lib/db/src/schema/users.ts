@@ -6,6 +6,7 @@ export const userRoleEnum = pgEnum("user_role", ["parent", "child"]);
 
 export const usersTable = pgTable("users", {
   id: serial("id").primaryKey(),
+  firebaseUid: text("firebase_uid").unique(),
   email: text("email"),
   displayName: text("display_name").notNull(),
   role: userRoleEnum("role").notNull(),
@@ -21,6 +22,7 @@ export const usersTable = pgTable("users", {
   phone: text("phone"),
   passwordHash: text("password_hash"),
   familyCode: text("family_code").unique(),
+  isAdmin: boolean("is_admin").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

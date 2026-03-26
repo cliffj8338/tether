@@ -6,24 +6,10 @@ import {
   usersTable, messagesTable,
 } from "@workspace/db";
 import { eq, desc, sql, gte, and, count } from "drizzle-orm";
-import { getUserFromToken } from "../lib/auth";
+import { requireAdmin } from "../lib/require-admin";
 import { runAllComputations } from "../lib/behavioral-engine";
 
 const router: IRouter = Router();
-
-async function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  const adminKey = req.headers["x-admin-key"];
-  if (adminKey === (process.env.ADMIN_API_KEY || "tether-admin-dev")) {
-    next();
-    return;
-  }
-  const user = await getUserFromToken(req);
-  if (!user || user.role !== "parent") {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
-  next();
-}
 
 router.use("/admin/analytics", requireAdmin);
 

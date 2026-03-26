@@ -1,18 +1,28 @@
+import { auth } from "./firebase";
+
 const API_BASE = "/api";
-const ADMIN_KEY = "tether-admin-dev";
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const user = auth.currentUser;
+  if (user) {
+    const idToken = await user.getIdToken();
+    return { "Authorization": `Bearer ${idToken}` };
+  }
+  return { "X-Admin-Key": "tether-admin-dev" };
+}
 
 async function fetchJson<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "X-Admin-Key": ADMIN_KEY },
-  });
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_BASE}${path}`, { headers });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 }
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
+  const headers = await getAuthHeaders();
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "X-Admin-Key": ADMIN_KEY },
+    headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);

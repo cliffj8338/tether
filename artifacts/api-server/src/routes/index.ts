@@ -13,11 +13,13 @@ import analyticsRouter from "./analytics";
 import adminAnalyticsRouter from "./admin-analytics";
 import adminAdvancedRouter from "./admin-advanced";
 import adminAiQueryRouter from "./admin-ai-query";
+import adminAuthRouter from "./admin-auth";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(authRouter);
+router.use(adminAuthRouter);
 router.use(childrenRouter);
 router.use(conversationsRouter);
 router.use(messagesRouter);
