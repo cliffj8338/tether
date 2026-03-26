@@ -14,7 +14,7 @@ function staticHtmlPages(): Plugin {
     configureServer(server) {
       server.middlewares.use((req, _res, next) => {
         if (req.url === "/investors" || req.url === "/investors/") {
-          req.url = "/investors.html";
+          req.url = "/investors/index.html";
         }
         next();
       });
