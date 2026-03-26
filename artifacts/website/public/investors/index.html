@@ -1305,7 +1305,6 @@
     <a class="nav-link" href="/" style="color:#6B9E8A;font-weight:700;margin-left:8px">&#8592; Back to Site</a>
   </div>
   <div class="nav-actions">
-    <button id="modeToggle" onclick="toggleInvestorMode()" style="display:flex;align-items:center;gap:7px;background:var(--primary);border:1px solid var(--primary-d);color:white;border-radius:8px;padding:5px 12px 5px 6px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;letter-spacing:.03em;transition:all .2s;white-space:nowrap;"><span style="width:22px;height:22px;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-family:'Fraunces',serif;font-size:14px;font-weight:600;font-style:italic;color:var(--primary);line-height:1">$</span></span>Investor View</button>
     <span class="nav-version">v4.6.7</span>
     <button class="nav-btn" onclick="window.print()">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -1383,7 +1382,7 @@ function closeMobileNav() {
 // Investor nav links — enable investor mode if needed, then scroll
 function mobNavInvestor(e, hash) {
   e.preventDefault(); closeMobileNav();
-  if (!document.body.classList.contains('investor-mode')) toggleInvestorMode();
+  document.body.classList.add('investor-mode');
   setTimeout(function() { var t=document.querySelector(hash); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); }, 80);
 }
 var _st=null;
@@ -5636,39 +5635,8 @@ Cliff has been in recovery from alcohol for more than 12 years. He found his Chr
 
 
 <script>
-/* ── INVESTOR / PARENT MODE TOGGLE ── */
-function toggleInvestorMode() {
-  const body = document.body;
-  const btn = document.getElementById('modeToggle');
-  const isInvestor = body.classList.toggle('investor-mode');
-
-  const dollar = String.fromCharCode(36);
-  const dollarCircle = '<span style="width:22px;height:22px;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:2px"><span style="font-family:Fraunces,serif;font-size:14px;font-weight:600;font-style:italic;color:#6B9E8A;line-height:1">' + dollar + '</span></span>';
-  const personCircle = '<span style="width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:2px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>';
-
-  if (isInvestor) {
-    btn.innerHTML = personCircle + 'Parent View';
-    btn.style.background = '#4E7D6A';
-    btn.style.borderColor = '#3D6254';
-  } else {
-    btn.innerHTML = dollarCircle + 'Investor View';
-    btn.style.background = '#6B9E8A';
-    btn.style.borderColor = '#4E7D6A';
-  }
-
-  document.querySelectorAll('.investor-only').forEach(function(el) {
-    el.style.display = isInvestor ? '' : 'none';
-  });
-}
 document.addEventListener('DOMContentLoaded', function() {
-  var params = new URLSearchParams(window.location.search);
-  if (params.get('investor') === 'true') {
-    toggleInvestorMode();
-  } else {
-    document.querySelectorAll('.investor-only').forEach(function(el) {
-      el.style.display = 'none';
-    });
-  }
+  document.body.classList.add('investor-mode');
 });
 </script>
 
