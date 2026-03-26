@@ -129,7 +129,7 @@ export default function Home() {
             <p className="text-text-mid text-lg">We didn't build a safer version of social media. We built a different category entirely.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
                 icon: ShieldCheck,

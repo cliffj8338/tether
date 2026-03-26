@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ShieldAlert, Eye, Lock, HeartHandshake, ShieldCheck, UserCheck, Users, ArrowRight, Bell, MessageCircle, Phone } from "lucide-react";
+import { ShieldAlert, Eye, Lock, HeartHandshake, ShieldCheck, UserCheck, Users, ArrowRight, Bell, MessageCircle, Phone, Timer, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSEO } from "@/hooks/useSEO";
 
