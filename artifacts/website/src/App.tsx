@@ -18,6 +18,7 @@ import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/not-found";
 
 import { PageLayout } from "./components/layout/PageLayout";
+import { WelcomeModal } from "./components/WelcomeModal";
 
 function AnalyticsTracker() {
   const [location] = useLocation();
@@ -68,6 +69,7 @@ function App() {
             <Router />
           </PageLayout>
         </WouterRouter>
+        <WelcomeModal />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
