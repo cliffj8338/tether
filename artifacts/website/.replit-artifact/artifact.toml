@@ -23,6 +23,10 @@ publicDir = "artifacts/website/dist/public"
 serve = "static"
 
 [[services.production.rewrites]]
+from = "/investors/"
+to = "/investors/index.html"
+
+[[services.production.rewrites]]
 from = "/investors"
 to = "/investors/index.html"
 
