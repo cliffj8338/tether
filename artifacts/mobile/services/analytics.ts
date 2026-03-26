@@ -76,7 +76,7 @@ export const appAnalytics = {
     send("contact_added", userId);
   },
 
-  trustLevelChanged(userId?: number | null, newLevel: number) {
+  trustLevelChanged(userId: number | null | undefined, newLevel: number) {
     send("trust_level_changed", userId, { newLevel });
   },
 };
