@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ShieldCheck, Activity, Users, ArrowRight, EyeOff, MessageSquareX, Smartphone, CheckCircle2, GraduationCap, Heart, Shield } from "lucide-react";
+import { ShieldCheck, Activity, Users, ArrowRight, EyeOff, MessageSquareX, Smartphone, CheckCircle2, GraduationCap, Heart, Shield, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { WaitlistModal } from "@/components/WaitlistModal";
 import { cn } from "@/lib/utils";
@@ -248,6 +248,46 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="relative bg-foreground rounded-3xl p-8 md:p-12 overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-destructive/10 rounded-full blur-3xl -z-0" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl -z-0" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-destructive/20 text-destructive text-xs font-bold uppercase tracking-wider">
+                  <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+                  March 25, 2026
+                </span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-display font-bold text-white mb-4 leading-tight">
+                A jury just found Meta and YouTube liable for intentionally addicting a child.
+              </h2>
+              <p className="text-base md:text-lg text-white/70 leading-relaxed mb-6 max-w-3xl">
+                A California jury ruled that Meta and YouTube were negligent in designing platforms that addicted a young girl, contributing to depression, body dysmorphia, and suicidal thoughts. $6 million in damages. ~2,000 similar cases pending. This is the moment the industry changes — and the reason Tether exists.
+              </p>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <a 
+                  href="https://www.wsj.com/tech/meta-and-youtube-lose-landmark-social-media-trial-33e4c5cb" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-primary font-bold hover:text-primary-light transition-colors"
+                >
+                  Read the WSJ article <ExternalLink className="w-4 h-4" />
+                </a>
+                <span className="text-white/40 text-sm">Wall Street Journal</span>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
