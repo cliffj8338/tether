@@ -59,7 +59,7 @@ export async function sendEmail({
   const { client, fromEmail } = await getResendClient();
 
   const result = await client.emails.send({
-    from: fromEmail || 'Tether <noreply@tetherapp.app>',
+    from: fromEmail || 'Tether <hello@tetherapp.app>',
     to: Array.isArray(to) ? to : [to],
     subject,
     html,
