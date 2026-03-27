@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { waitlistTable, insertWaitlistSchema } from "@workspace/db/schema";
 import { count } from "drizzle-orm";
+import { sendWaitlistConfirmation } from "../lib/email";
 
 interface PgError {
   code?: string;
@@ -23,6 +24,11 @@ router.post("/waitlist", async (req, res) => {
     }
 
     const [entry] = await db.insert(waitlistTable).values(parsed.data).returning();
+
+    sendWaitlistConfirmation(parsed.data.email, parsed.data.name ?? undefined).catch((err) => {
+      console.error("Failed to send waitlist confirmation email:", err);
+    });
+
     res.status(201).json({ success: true, id: entry.id });
   } catch (err: unknown) {
     if (isPgError(err) && err.code === "23505") {
