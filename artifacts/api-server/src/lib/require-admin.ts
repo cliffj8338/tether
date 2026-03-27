@@ -24,17 +24,12 @@ export async function requireAdmin(req: Request, res: Response, next: NextFuncti
         next();
         return;
       }
-      if (user && user.role === "parent") {
-        (req as any).user = user;
-        next();
-        return;
-      }
       res.status(403).json({ error: "Access denied. Admin privileges required." });
       return;
     }
 
     const legacyUser = await getUserFromToken(req);
-    if (legacyUser && (legacyUser.isAdmin || legacyUser.role === "parent")) {
+    if (legacyUser && legacyUser.isAdmin) {
       (req as any).user = legacyUser;
       next();
       return;

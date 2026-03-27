@@ -1,0 +1,221 @@
+import { Router, type IRouter } from "express";
+import { db } from "@workspace/db";
+import { usersTable, waitlistTable } from "@workspace/db";
+import { desc, count, eq, sql, ilike, or, and, type SQL } from "drizzle-orm";
+import { requireAdmin } from "../lib/require-admin";
+
+const router: IRouter = Router();
+
+router.use("/admin/ops", requireAdmin);
+
+router.get("/admin/ops/waitlist", async (req, res) => {
+  try {
+    const search = (req.query.search as string) || "";
+    const role = req.query.role as string;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
+    const offset = (page - 1) * limit;
+
+    const conditions: SQL[] = [];
+    if (search) {
+      const searchCond = or(
+        ilike(waitlistTable.email, `%${search}%`),
+        ilike(waitlistTable.name, `%${search}%`)
+      );
+      if (searchCond) conditions.push(searchCond);
+    }
+    if (role && role !== "all") {
+      conditions.push(eq(waitlistTable.role, role as any));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const entries = await db
+      .select()
+      .from(waitlistTable)
+      .where(whereClause)
+      .orderBy(desc(waitlistTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const [filteredCount] = await db
+      .select({ count: count() })
+      .from(waitlistTable)
+      .where(whereClause);
+
+    const roleCounts = await db
+      .select({ role: waitlistTable.role, count: count() })
+      .from(waitlistTable)
+      .groupBy(waitlistTable.role);
+
+    res.json({
+      entries,
+      total: filteredCount.count,
+      page,
+      limit,
+      roleCounts: Object.fromEntries(roleCounts.map(r => [r.role, r.count])),
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get("/admin/ops/users", async (req, res) => {
+  try {
+    const search = (req.query.search as string) || "";
+    const role = req.query.role as string;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
+    const offset = (page - 1) * limit;
+
+    const conditions: SQL[] = [];
+    if (search) {
+      const searchCond = or(
+        ilike(usersTable.email, `%${search}%`),
+        ilike(usersTable.displayName, `%${search}%`)
+      );
+      if (searchCond) conditions.push(searchCond);
+    }
+    if (role && role !== "all") {
+      conditions.push(eq(usersTable.role, role as any));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const users = await db
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        displayName: usersTable.displayName,
+        role: usersTable.role,
+        parentId: usersTable.parentId,
+        grade: usersTable.grade,
+        age: usersTable.age,
+        trustLevel: usersTable.trustLevel,
+        faithModeEnabled: usersTable.faithModeEnabled,
+        isPaused: usersTable.isPaused,
+        isAdmin: usersTable.isAdmin,
+        avatarColor: usersTable.avatarColor,
+        createdAt: usersTable.createdAt,
+      })
+      .from(usersTable)
+      .where(whereClause)
+      .orderBy(desc(usersTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const [filteredCount] = await db
+      .select({ count: count() })
+      .from(usersTable)
+      .where(whereClause);
+
+    const [parentCount] = await db.select({ count: count() }).from(usersTable).where(eq(usersTable.role, "parent"));
+    const [childCount] = await db.select({ count: count() }).from(usersTable).where(eq(usersTable.role, "child"));
+    const [adminCount] = await db.select({ count: count() }).from(usersTable).where(eq(usersTable.isAdmin, true));
+
+    res.json({
+      users,
+      total: filteredCount.count,
+      page,
+      limit,
+      roleCounts: { parent: parentCount.count, child: childCount.count, admin: adminCount.count },
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/admin/ops/users/:id/toggle-admin", async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    if (isNaN(userId) || userId <= 0) return res.status(400).json({ error: "Invalid user ID" });
+
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    await db.update(usersTable).set({ isAdmin: !user.isAdmin }).where(eq(usersTable.id, userId));
+    res.json({ ok: true, isAdmin: !user.isAdmin });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/admin/ops/users/:id/toggle-pause", async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    if (isNaN(userId) || userId <= 0) return res.status(400).json({ error: "Invalid user ID" });
+
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    await db.update(usersTable).set({ isPaused: !user.isPaused }).where(eq(usersTable.id, userId));
+    res.json({ ok: true, isPaused: !user.isPaused });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get("/admin/ops/system-status", async (_req, res) => {
+  try {
+    const dbStart = Date.now();
+    await db.execute(sql`SELECT 1`);
+    const dbLatency = Date.now() - dbStart;
+
+    const [userCount] = await db.select({ count: count() }).from(usersTable);
+    const [waitlistCount] = await db.select({ count: count() }).from(waitlistTable);
+
+    const services = [
+      {
+        name: "PostgreSQL Database",
+        status: "operational" as const,
+        latency: dbLatency,
+        details: `${userCount.count} users, ${waitlistCount.count} waitlist entries`,
+      },
+      {
+        name: "API Server",
+        status: "operational" as const,
+        latency: 0,
+        details: `Node.js ${process.version}`,
+      },
+      {
+        name: "Firebase Auth",
+        status: process.env.FIREBASE_SERVICE_ACCOUNT_KEY ? "operational" as const : "degraded" as const,
+        latency: null,
+        details: process.env.FIREBASE_SERVICE_ACCOUNT_KEY ? "Service account configured" : "Missing service account key",
+      },
+      {
+        name: "Twilio SMS",
+        status: process.env.TWILIO_ACCOUNT_SID ? "operational" as const : "not_configured" as const,
+        latency: null,
+        details: process.env.TWILIO_ACCOUNT_SID ? "Configured" : "Not configured",
+      },
+      {
+        name: "RevenueCat Payments",
+        status: process.env.REVENUECAT_API_KEY ? "operational" as const : "not_configured" as const,
+        latency: null,
+        details: process.env.REVENUECAT_API_KEY ? "Configured" : "Not configured",
+      },
+      {
+        name: "Anthropic AI (Claude)",
+        status: process.env.ANTHROPIC_API_KEY ? "operational" as const : "not_configured" as const,
+        latency: null,
+        details: process.env.ANTHROPIC_API_KEY ? "claude-haiku-4-5" : "Not configured",
+      },
+    ];
+
+    const uptime = process.uptime();
+
+    res.json({
+      services,
+      uptime,
+      environment: process.env.NODE_ENV || "development",
+      version: "0.1.0-alpha",
+      nodeVersion: process.version,
+      memoryUsage: process.memoryUsage(),
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+export default router;

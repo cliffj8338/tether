@@ -51,9 +51,10 @@ A marketing website for Tether, built with React, Vite, Tailwind CSS v4, and wou
 
 ### `admin` (`@workspace/admin`)
 
-An admin intelligence dashboard built with React, Vite, and Tailwind CSS v4, using Recharts for visualizations. It provides comprehensive analytics and insights across 12 distinct pages, including:
-- Overview, Conversation Intelligence, Safety Center, Demographics & Behavior, Engagement Analytics, Content Research, Website Analytics, Behavioral Intelligence, Network Analysis, Predictive Analytics, AI Research Assistant, and Data Catalog (18 tables, 172+ fields, 56 correlation links across 3 research lenses).
-- **Authentication**: Firebase Auth with Google sign-in. Falls back to `X-Admin-Key` header for dev/API access. Login page at `/admin` shows Google sign-in button. Users verified against backend via Firebase ID tokens.
+An admin intelligence dashboard built with React, Vite, and Tailwind CSS v4, using Recharts for visualizations. It provides comprehensive analytics and operations across 18 distinct pages organized into two sections:
+- **Intelligence** (12 pages): Overview, Conversation Intelligence, Safety Center, Demographics & Behavior, Engagement Analytics, Content Research, Website Analytics, Behavioral Intelligence, Network Analysis, Predictive Analytics, AI Research Assistant, and Data Catalog (18 tables, 172+ fields, 56 correlation links across 3 research lenses).
+- **Operations** (6 pages): Waitlist Management (search/filter/export), User Management (role toggling, pause/unpause), Product Roadmap (4-phase timeline), System Architecture (5-layer component diagram), Version & Config (feature flags, tech stack, DB schema), and System Status (real-time health monitoring, memory usage, service checks).
+- **Authentication**: Firebase Auth with Google sign-in (admin-only). Login page at `/admin` shows Google sign-in button. Users verified against backend via Firebase ID tokens. `requireAdmin` middleware enforces admin-only access on all dashboard API routes.
 
 ## Authentication Architecture (Firebase)
 

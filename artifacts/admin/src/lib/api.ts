@@ -42,6 +42,13 @@ export const api = {
   predictions: () => fetchJson<PredictionsData>("/admin/analytics/predictions"),
   computeMetrics: () => postJson<{ ok: boolean }>("/admin/analytics/compute", {}),
   aiQuery: (question: string) => postJson<AiQueryResponse>("/admin/analytics/query", { question }),
+  waitlist: (params: { search?: string; role?: string; page?: number }) =>
+    fetchJson<WaitlistData>(`/admin/ops/waitlist?search=${encodeURIComponent(params.search || "")}&role=${params.role || "all"}&page=${params.page || 1}`),
+  users: (params: { search?: string; role?: string; page?: number }) =>
+    fetchJson<UsersData>(`/admin/ops/users?search=${encodeURIComponent(params.search || "")}&role=${params.role || "all"}&page=${params.page || 1}`),
+  toggleAdmin: (userId: number) => postJson<{ ok: boolean; isAdmin: boolean }>(`/admin/ops/users/${userId}/toggle-admin`, {}),
+  togglePause: (userId: number) => postJson<{ ok: boolean; isPaused: boolean }>(`/admin/ops/users/${userId}/toggle-pause`, {}),
+  systemStatus: () => fetchJson<SystemStatusData>("/admin/ops/system-status"),
 };
 
 export interface OverviewData {
@@ -201,4 +208,35 @@ export interface AiQueryResponse {
   sql?: string;
   rowCount?: number;
   error?: string;
+}
+
+export interface WaitlistData {
+  entries: { id: number; email: string; name: string | null; role: string; createdAt: string }[];
+  total: number;
+  page: number;
+  limit: number;
+  roleCounts: Record<string, number>;
+}
+
+export interface UsersData {
+  users: {
+    id: number; email: string | null; displayName: string; role: string;
+    parentId: number | null; grade: string | null; age: number | null;
+    trustLevel: number | null; faithModeEnabled: boolean | null;
+    isPaused: boolean | null; isAdmin: boolean | null;
+    avatarColor: string | null; createdAt: string;
+  }[];
+  total: number;
+  page: number;
+  limit: number;
+  roleCounts: { parent: number; child: number; admin: number };
+}
+
+export interface SystemStatusData {
+  services: { name: string; status: string; latency: number | null; details: string }[];
+  uptime: number;
+  environment: string;
+  version: string;
+  nodeVersion: string;
+  memoryUsage: { heapUsed: number; heapTotal: number; rss: number; external: number };
 }
