@@ -56,8 +56,23 @@ async function getCredentials(): Promise<TwilioCredentials> {
 }
 
 async function getTwilioClient() {
-  const { accountSid, apiKey, apiKeySecret } = await getCredentials();
-  return twilio(apiKey, apiKeySecret, { accountSid });
+  const creds = await getCredentials();
+  const { accountSid, apiKey, apiKeySecret } = creds;
+
+  const acSid = [accountSid, apiKey, apiKeySecret].find(v => v.startsWith("AC"));
+  const skSid = [accountSid, apiKey, apiKeySecret].find(v => v.startsWith("SK"));
+
+  if (acSid && skSid) {
+    const secret = [accountSid, apiKey, apiKeySecret].find(v => v !== acSid && v !== skSid);
+    return twilio(skSid, secret!, { accountSid: acSid });
+  }
+
+  if (skSid) {
+    const others = [accountSid, apiKey, apiKeySecret].filter(v => v !== skSid);
+    return twilio(skSid, others[1] || others[0], { accountSid: others[0] });
+  }
+
+  return twilio(accountSid, apiKeySecret);
 }
 
 async function getFromPhoneNumber(): Promise<string> {
