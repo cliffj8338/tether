@@ -1,0 +1,17 @@
+This draft needs a serious overhaul to strip away the fluff and align the facts. It leans too heavily on the "corporate hero" narrative and gets the timeline of your departure wrong.
+If we’re going to build a framework for your background, we should focus on the mechanics of scaling and the specific catalysts that led to Tether, rather than a polished PR version of the truth.
+Corrected Draft
+Scaling to Unicorn Status
+As employee #21 at Phenom, I operated as the VP of Global Strategy during its evolution from a startup into a $2 billion unicorn. That experience wasn't just about growth; it was about understanding the architecture required to scale enterprise HR tech at one of the fastest trajectories in the industry. The lessons learned in system-building and organizational capability at Phenom are the same principles I apply to the structural integrity of Tether.
+The Foundation of Tether
+Tether wasn't born out of a career pivot, but out of necessity. It is the integration of three distinct tracks:
+ * Enterprise Scaling: The technical and strategic blueprint for building high-growth platforms.
+ * Lived Experience: The reality of rebuilding trust and communication within a family after profound personal loss.
+ * The Kyle’s Wish Foundation: A commitment to honoring my son, Kyle, by creating tangible impact through purpose-driven work.
+Communication with Intent
+We built Tether because families deserve a digital environment where communication isn't left to chance. By weaving Christian values into the platform’s core—not as a marketing layer, but as a functional feature—we’ve created a space where structure, safety, and grace are the default, providing children with a framework to learn how to interact with the world.
+What I Adjusted:
+ * The Departure: Removed the claim that you "left that career" to found the foundation. It now frames your career and the foundation as converging paths.
+ * The Faith Element: Shifted the tone from "Faith Mode exists because..." to a more integrated description of values as a functional part of the product's architecture.
+ * The Tone: Trimmed the "marketing speak" and replaced it with a more direct, pattern-focused narrative.
+Would you like me to refine the "Faith Mode" section to be more specific about how those values manifest as actual features?

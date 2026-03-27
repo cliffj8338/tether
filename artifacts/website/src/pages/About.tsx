@@ -50,13 +50,20 @@ export default function About() {
               Cliff's path to building Tether was not a straight line. As a father navigating his own recovery journey, he found that the principles of accountability, transparency, and community that rebuilt his life were the same principles missing from every digital platform his children would eventually use.
             </p>
             <p className="text-lg text-text-mid mb-6 leading-relaxed">
-              Before Tether, Cliff was employee #21 at Phenom People, helping scale it from startup to unicorn as VP of Global Strategy. He helped take it from a startup to a $2 billion unicorn — one of the fastest trajectories in enterprise HR tech. He left that career to honor his son Kyle, founding Kyle's Wish Foundation.
+              As employee #21 at Phenom, I operated as the VP of Global Strategy during its evolution from a startup into a $2 billion unicorn. That experience wasn't just about growth; it was about understanding the architecture required to scale enterprise HR tech at one of the fastest trajectories in the industry. The lessons learned in system-building and organizational capability at Phenom are the same principles I apply to the structural integrity of Tether.
             </p>
-            <p className="text-lg text-text-mid mb-6 leading-relaxed">
-              His faith is central to his family's life — and central to the product. Faith Mode exists because Cliff built the tool his own family needed: one where Christian values are not an afterthought, but a first-class feature woven into every layer of the platform.
+            <h3 className="text-xl font-heading font-bold text-text-dark mb-3">The Foundation of Tether</h3>
+            <p className="text-lg text-text-mid mb-4 leading-relaxed">
+              Tether wasn't born out of a career pivot, but out of necessity. It is the integration of three distinct tracks:
             </p>
+            <ul className="text-lg text-text-mid mb-6 leading-relaxed space-y-2 pl-6 list-disc">
+              <li><strong>Enterprise Scaling:</strong> The technical and strategic blueprint for building high-growth platforms.</li>
+              <li><strong>Lived Experience:</strong> The reality of rebuilding trust and communication within a family after profound personal loss.</li>
+              <li><strong>The Kyle's Wish Foundation:</strong> A commitment to honoring my son, Kyle, by creating tangible impact through purpose-driven work.</li>
+            </ul>
+            <h3 className="text-xl font-heading font-bold text-text-dark mb-3">Communication with Intent</h3>
             <p className="text-lg text-text-mid leading-relaxed">
-              Tether brings together three threads: enterprise experience at scale, the lived experience of a parent rebuilding trust within his own family, and a deep conviction that children deserve a place to learn communication with structure, safety, and grace.
+              We built Tether because families deserve a digital environment where communication isn't left to chance. By weaving Christian values into the platform's core—not as a marketing layer, but as a functional feature—we've created a space where structure, safety, and grace are the default, providing children with a framework to learn how to interact with the world.
             </p>
           </div>
         </div>
