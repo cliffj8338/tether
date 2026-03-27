@@ -49,6 +49,8 @@ export const api = {
   toggleAdmin: (userId: number) => postJson<{ ok: boolean; isAdmin: boolean }>(`/admin/ops/users/${userId}/toggle-admin`, {}),
   togglePause: (userId: number) => postJson<{ ok: boolean; isPaused: boolean }>(`/admin/ops/users/${userId}/toggle-pause`, {}),
   systemStatus: () => fetchJson<SystemStatusData>("/admin/ops/system-status"),
+  testSms: (phoneNumber: string) =>
+    postJson<{ success: boolean; message: string }>("/admin/ops/test-sms", { phoneNumber }),
 };
 
 export interface OverviewData {

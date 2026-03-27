@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { api } from "@/lib/api";
 
 function formatUptime(seconds: number) {
@@ -33,6 +34,20 @@ export default function SystemStatus() {
     queryFn: () => api.systemStatus(),
     refetchInterval: 30000,
   });
+
+  const [testPhone, setTestPhone] = useState("");
+  const [smsStatus, setSmsStatus] = useState<{ type: "idle" | "sending" | "success" | "error"; message?: string }>({ type: "idle" });
+
+  const handleTestSms = async () => {
+    if (!testPhone.trim()) return;
+    setSmsStatus({ type: "sending" });
+    try {
+      const result = await api.testSms(testPhone.trim());
+      setSmsStatus({ type: "success", message: result.message });
+    } catch (err: any) {
+      setSmsStatus({ type: "error", message: err.message || "Failed to send test SMS" });
+    }
+  };
 
   const allOperational = data?.services?.every((s: any) => s.status === "operational" || s.status === "not_configured");
 
@@ -156,6 +171,45 @@ export default function SystemStatus() {
               </div>
             </div>
           )}
+
+          <div className="bg-card border rounded-xl">
+            <div className="p-4 border-b">
+              <h3 className="font-semibold">Integration Tests</h3>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="text-sm font-medium block mb-2">Send Test SMS (Twilio)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="tel"
+                    value={testPhone}
+                    onChange={(e) => {
+                      setTestPhone(e.target.value);
+                      if (smsStatus.type !== "idle" && smsStatus.type !== "sending") setSmsStatus({ type: "idle" });
+                    }}
+                    placeholder="+1XXXXXXXXXX"
+                    className="flex-1 px-3 py-2 text-sm border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                  <button
+                    onClick={handleTestSms}
+                    disabled={!testPhone.trim() || smsStatus.type === "sending"}
+                    className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  >
+                    {smsStatus.type === "sending" ? "Sending..." : "Send Test"}
+                  </button>
+                </div>
+                {smsStatus.type === "success" && (
+                  <div className="mt-2 text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">{smsStatus.message}</div>
+                )}
+                {smsStatus.type === "error" && (
+                  <div className="mt-2 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{smsStatus.message}</div>
+                )}
+                <p className="text-xs text-muted-foreground mt-2">
+                  Sends a test alert SMS via Twilio to verify the integration is working. Use international format with country code.
+                </p>
+              </div>
+            </div>
+          </div>
         </>
       )}
     </div>

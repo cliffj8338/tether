@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { usersTable, waitlistTable } from "@workspace/db";
 import { desc, count, eq, sql, ilike, or, and, type SQL } from "drizzle-orm";
 import { requireAdmin } from "../lib/require-admin";
+import { sendAlertSMS } from "../lib/sms";
 
 const router: IRouter = Router();
 
@@ -164,6 +165,33 @@ router.get("/admin/ops/system-status", async (_req, res) => {
     const [userCount] = await db.select({ count: count() }).from(usersTable);
     const [waitlistCount] = await db.select({ count: count() }).from(waitlistTable);
 
+    async function checkConnector(connectorName: string): Promise<{ connected: boolean; details: string }> {
+      try {
+        const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+        const xReplitToken = process.env.REPL_IDENTITY
+          ? "repl " + process.env.REPL_IDENTITY
+          : process.env.WEB_REPL_RENEWAL
+          ? "depl " + process.env.WEB_REPL_RENEWAL
+          : null;
+        if (!xReplitToken || !hostname) return { connected: false, details: "Connector host unavailable" };
+        const resp = await fetch(
+          `https://${hostname}/api/v2/connection?include_secrets=false&connector_names=${connectorName}`,
+          { headers: { Accept: "application/json", "X-Replit-Token": xReplitToken } }
+        );
+        const data = await resp.json() as { items?: Array<{ settings: Record<string, string> }> };
+        if (data.items && data.items.length > 0) return { connected: true, details: "Connected via Replit integration" };
+        return { connected: false, details: "Not configured" };
+      } catch {
+        return { connected: false, details: "Check failed" };
+      }
+    }
+
+    const [twilioCheck, resendCheck, revenuecatCheck] = await Promise.all([
+      checkConnector("twilio"),
+      checkConnector("resend"),
+      checkConnector("revenuecat"),
+    ]);
+
     const services = [
       {
         name: "PostgreSQL Database",
@@ -185,15 +213,21 @@ router.get("/admin/ops/system-status", async (_req, res) => {
       },
       {
         name: "Twilio SMS",
-        status: process.env.TWILIO_ACCOUNT_SID ? "operational" as const : "not_configured" as const,
+        status: twilioCheck.connected ? "operational" as const : "not_configured" as const,
         latency: null,
-        details: process.env.TWILIO_ACCOUNT_SID ? "Configured" : "Not configured",
+        details: twilioCheck.details,
+      },
+      {
+        name: "Resend Email",
+        status: resendCheck.connected ? "operational" as const : "not_configured" as const,
+        latency: null,
+        details: resendCheck.details,
       },
       {
         name: "RevenueCat Payments",
-        status: process.env.REVENUECAT_API_KEY ? "operational" as const : "not_configured" as const,
+        status: revenuecatCheck.connected ? "operational" as const : "not_configured" as const,
         latency: null,
-        details: process.env.REVENUECAT_API_KEY ? "Configured" : "Not configured",
+        details: revenuecatCheck.details,
       },
       {
         name: "Anthropic AI (Claude)",
@@ -215,6 +249,37 @@ router.get("/admin/ops/system-status", async (_req, res) => {
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/admin/ops/test-sms", async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    if (!phoneNumber || typeof phoneNumber !== "string") {
+      res.status(400).json({ error: "Phone number is required (e.g. +1XXXXXXXXXX)" });
+      return;
+    }
+
+    const cleaned = phoneNumber.replace(/[^\d+]/g, "");
+    if (!/^\+\d{10,15}$/.test(cleaned)) {
+      res.status(400).json({ error: "Invalid phone number format. Use international format: +1XXXXXXXXXX" });
+      return;
+    }
+
+    const success = await sendAlertSMS(
+      cleaned,
+      "level4",
+      "Test Child",
+      "This is a test alert from Tether Admin Dashboard."
+    );
+
+    if (success) {
+      res.json({ success: true, message: `Test SMS sent to ${cleaned}` });
+    } else {
+      res.status(500).json({ error: "Failed to send SMS. Check Twilio configuration." });
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to send test SMS" });
   }
 });
 
