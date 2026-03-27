@@ -25,7 +25,10 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
     headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error || `API error: ${res.status}`);
+  }
   return res.json();
 }
 

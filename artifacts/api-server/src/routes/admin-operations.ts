@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { usersTable, waitlistTable } from "@workspace/db";
 import { desc, count, eq, sql, ilike, or, and, type SQL } from "drizzle-orm";
 import { requireAdmin } from "../lib/require-admin";
-import { sendAlertSMS } from "../lib/sms";
+import { sendTestSMS } from "../lib/sms";
 
 const router: IRouter = Router();
 
@@ -266,17 +266,12 @@ router.post("/admin/ops/test-sms", async (req, res) => {
       return;
     }
 
-    const success = await sendAlertSMS(
-      cleaned,
-      "level4",
-      "Test Child",
-      "This is a test alert from Tether Admin Dashboard."
-    );
+    const result = await sendTestSMS(cleaned);
 
-    if (success) {
+    if (result.success) {
       res.json({ success: true, message: `Test SMS sent to ${cleaned}` });
     } else {
-      res.status(500).json({ error: "Failed to send SMS. Check Twilio configuration." });
+      res.status(400).json({ error: result.error || "Failed to send SMS. Check Twilio configuration." });
     }
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to send test SMS" });
