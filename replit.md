@@ -39,7 +39,9 @@ An Expo React Native application for parents and children. It features:
 - **Authentication**: `AuthContext` with AsyncStorage for token persistence.
 - **API Service**: Typed fetch wrapper for all API endpoints.
 - **Key Features**: Trust levels (1-5), two-pass content filtering (pattern-based + Claude AI), Faith Mode toggle (per-child), contact approval, and COPPA compliance.
-- **Navigation**: Structured using `expo-router` with separate flows for onboarding, parent, and child roles, including specific screens for conversations, child details, and alerts.
+- **Navigation**: Structured using `expo-router` with separate flows for onboarding, parent, and child roles, including specific screens for conversations, child details, alerts, and add-child (modal).
+- **Onboarding**: Full parent/child onboarding flow — discovery slides, role selection, parent signup/login, child join-family/login (via family code or parent email + PIN). After parent signup, dashboard shows family code and "Add Your First Child" empty state.
+- **Add Child**: Modal screen (`/add-child`) lets parents add children with name, age, grade, and PIN. Shows family code for sharing. Success screen shows login instructions for the child. Role-guarded (parent-only).
 
 ### `website` (`@workspace/website`)
 

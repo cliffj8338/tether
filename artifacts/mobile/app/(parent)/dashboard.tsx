@@ -7,7 +7,7 @@ import {
   Pressable,
   RefreshControl,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -25,6 +25,12 @@ export default function DashboardScreen() {
   const { user } = useAuth();
   const { children, feedItems, stats, isRefreshing, refresh } = useDashboard();
   const [activeChild, setActiveChild] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
@@ -99,42 +105,76 @@ export default function DashboardScreen() {
 
         <View style={styles.secHead}>
           <Text style={styles.secTitle}>Your Children</Text>
-          <Pressable onPress={() => {}}>
+          <Pressable onPress={() => router.push("/add-child" as any)}>
             <Text style={styles.secLink}>Add Child</Text>
           </Pressable>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.childrenRow}>
-          {children.map((child, i) => (
+
+        {children.length === 0 ? (
+          <View style={styles.emptyFamily}>
+            {user?.familyCode ? (
+              <View style={styles.emptyFamilyCode}>
+                <View style={[styles.emptyCodeIcon, { backgroundColor: `${Colors.accent}16` }]}>
+                  <Feather name="link" size={22} color={Colors.accent} />
+                </View>
+                <Text style={styles.emptyTitle}>Your Family Code</Text>
+                <Text style={styles.emptyCodeValue}>{user.familyCode}</Text>
+                <Text style={styles.emptySub}>
+                  Share this code with your kids so they can join, or add them yourself below.
+                </Text>
+              </View>
+            ) : null}
             <Pressable
-              key={child.id}
-              style={[styles.childCard, activeChild === i && styles.childCardActive]}
+              style={styles.emptyAddBtn}
               onPress={() => {
-                setActiveChild(i);
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push(`/child-detail/${child.id}`);
+                router.push("/add-child" as any);
               }}
             >
-              {child.flagCount > 0 && (
-                <View style={styles.childFlagBadge}>
-                  <Text style={styles.childFlagText}>{child.flagCount}</Text>
-                </View>
-              )}
-              <Avatar name={child.displayName} color={child.avatarColor} size={42} />
-              <Text style={styles.childName}>{child.displayName}</Text>
-              <Text style={styles.childGrade}>{child.grade}</Text>
-              <View style={styles.childStat}>
-                <Feather name="message-circle" size={12} color={Colors.textMid} />
-                <Text style={styles.childStatText}>{child.messageCount} msgs</Text>
+              <View style={[styles.emptyAddIcon, { backgroundColor: `${Colors.primary}16` }]}>
+                <Feather name="user-plus" size={20} color={Colors.primary} />
               </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.emptyAddTitle}>Add Your First Child</Text>
+                <Text style={styles.emptyAddSub}>Set up their account with a name and PIN</Text>
+              </View>
+              <Feather name="chevron-right" size={18} color={Colors.sand} />
             </Pressable>
-          ))}
-          <Pressable style={styles.addChildCard} onPress={() => {}}>
-            <View style={styles.addChildIcon}>
-              <Feather name="plus" size={20} color={Colors.textMid} />
-            </View>
-            <Text style={styles.addChildLabel}>Add Child</Text>
-          </Pressable>
-        </ScrollView>
+          </View>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.childrenRow}>
+            {children.map((child, i) => (
+              <Pressable
+                key={child.id}
+                style={[styles.childCard, activeChild === i && styles.childCardActive]}
+                onPress={() => {
+                  setActiveChild(i);
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push(`/child-detail/${child.id}`);
+                }}
+              >
+                {child.flagCount > 0 && (
+                  <View style={styles.childFlagBadge}>
+                    <Text style={styles.childFlagText}>{child.flagCount}</Text>
+                  </View>
+                )}
+                <Avatar name={child.displayName} color={child.avatarColor} size={42} />
+                <Text style={styles.childName}>{child.displayName}</Text>
+                <Text style={styles.childGrade}>{child.grade}</Text>
+                <View style={styles.childStat}>
+                  <Feather name="message-circle" size={12} color={Colors.textMid} />
+                  <Text style={styles.childStatText}>{child.messageCount} msgs</Text>
+                </View>
+              </Pressable>
+            ))}
+            <Pressable style={styles.addChildCard} onPress={() => router.push("/add-child" as any)}>
+              <View style={styles.addChildIcon}>
+                <Feather name="plus" size={20} color={Colors.textMid} />
+              </View>
+              <Text style={styles.addChildLabel}>Add Child</Text>
+            </Pressable>
+          </ScrollView>
+        )}
 
         <View style={styles.secHead}>
           <Text style={styles.secTitle}>Recent Activity</Text>
@@ -432,4 +472,73 @@ const styles = StyleSheet.create({
   },
   actionLabel: { fontFamily: Fonts.bodyBold, fontSize: 13, color: Colors.text },
   actionSub: { fontFamily: Fonts.body, fontSize: 11, color: Colors.textMid, lineHeight: 14 },
+  emptyFamily: {
+    marginBottom: 22,
+    gap: 12,
+  },
+  emptyFamilyCode: {
+    backgroundColor: Colors.white,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    borderRadius: 18,
+    padding: 20,
+    alignItems: "center",
+    gap: 8,
+  },
+  emptyCodeIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  emptyTitle: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: 13,
+    color: Colors.textMid,
+    letterSpacing: 0.3,
+  },
+  emptyCodeValue: {
+    fontFamily: Fonts.heading,
+    fontSize: 24,
+    color: Colors.accent,
+    letterSpacing: 2,
+  },
+  emptySub: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    color: Colors.textMid,
+    textAlign: "center",
+    lineHeight: 19,
+    paddingHorizontal: 12,
+  },
+  emptyAddBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.white,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    borderRadius: 18,
+    padding: 16,
+    gap: 14,
+  },
+  emptyAddIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyAddTitle: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 15,
+    color: Colors.text,
+  },
+  emptyAddSub: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
+    color: Colors.textMid,
+    marginTop: 2,
+  },
 });
