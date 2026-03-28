@@ -20,6 +20,8 @@ import { useAuth } from "@/context/AuthContext";
 import { Avatar } from "@/components/ui/Avatar";
 import { useMessages, useConversations } from "@/hooks/useApiData";
 import { EmojiPicker } from "@/components/EmojiPicker";
+import { api } from "@/services/api";
+import type { UsageStats } from "@/services/api";
 
 function formatTime(iso: string): string {
   try {
@@ -55,18 +57,40 @@ export default function ConversationScreen() {
 
   const [inputText, setInputText] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
+  const [usage, setUsage] = useState<UsageStats | null>(null);
+  const [sendError, setSendError] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+      if (isChild && user?.id) {
+        api.children.usage(user.id).then(setUsage).catch(() => {});
+      }
+    }, [isChild, user?.id])
+  );
 
   const handleSend = useCallback(async () => {
     if (!inputText.trim()) return;
+    setSendError("");
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       await send(inputText.trim());
-    } catch (err) {
-      console.warn("Send failed:", err);
+      setInputText("");
+      setShowEmoji(false);
+      if (isChild && user?.id) {
+        api.children.usage(user.id).then(setUsage).catch(() => {});
+      }
+    } catch (err: any) {
+      const msg = err?.message || "";
+      if (msg.includes("limit")) {
+        setSendError("You've reached your daily message limit!");
+      } else if (msg.includes("wait") || msg.includes("cooldown")) {
+        setSendError("Slow down! Wait a moment before sending again.");
+      } else {
+        setSendError("Couldn't send message. Try again.");
+        console.warn("Send failed:", err);
+      }
     }
-    setInputText("");
-    setShowEmoji(false);
-  }, [inputText, send]);
+  }, [inputText, send, isChild, user?.id]);
 
   const handleEmojiSelect = (emoji: string) => {
     setInputText((prev) => prev + emoji);
@@ -136,6 +160,22 @@ export default function ConversationScreen() {
 
         {isChild && showEmoji && (
           <EmojiPicker onSelect={handleEmojiSelect} onClose={() => setShowEmoji(false)} />
+        )}
+
+        {sendError ? (
+          <View style={styles.errorBanner}>
+            <Feather name="alert-circle" size={14} color={Colors.alert4} />
+            <Text style={styles.errorText}>{sendError}</Text>
+          </View>
+        ) : null}
+
+        {isChild && usage && usage.dailyMessageLimit > 0 && (
+          <View style={styles.usageBanner}>
+            <Feather name="message-square" size={12} color={Colors.textMid} />
+            <Text style={styles.usageBannerText}>
+              {Math.max(0, usage.dailyMessageLimit - usage.messagesToday)} messages remaining today
+            </Text>
+          </View>
         )}
 
         <View style={[styles.inputBar, { paddingBottom: insets.bottom + 8 }]}>
@@ -291,5 +331,35 @@ const styles = StyleSheet.create({
   },
   sendBtnActive: {
     backgroundColor: Colors.primary,
+  },
+  errorBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: `${Colors.alert4}12`,
+    borderTopWidth: 1,
+    borderTopColor: `${Colors.alert4}30`,
+  },
+  errorText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: 12,
+    color: Colors.alert4,
+  },
+  usageBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 6,
+    backgroundColor: Colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  usageBannerText: {
+    fontFamily: Fonts.body,
+    fontSize: 11,
+    color: Colors.textMid,
   },
 });

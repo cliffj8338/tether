@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { messagesTable, conversationsTable, usersTable, alertsTable } from "@workspace/db";
-import { eq, desc, asc, lt, and } from "drizzle-orm";
+import { eq, desc, asc, lt, and, gte, sql } from "drizzle-orm";
 import { SendMessageBody } from "@workspace/api-zod";
 import { getUserFromToken } from "../lib/auth";
 import { scanContent } from "../lib/content-filter";
@@ -70,6 +70,50 @@ router.post("/conversations/:conversationId/messages", async (req, res) => {
     }
 
     const senderId = user.id;
+
+    if (user.role === "child") {
+      if (user.dailyMessageLimit && user.dailyMessageLimit > 0) {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const [countResult] = await db.select({
+          count: sql<number>`count(*)::int`,
+        }).from(messagesTable).where(
+          and(
+            eq(messagesTable.senderId, user.id),
+            gte(messagesTable.createdAt, todayStart)
+          )
+        );
+        if ((countResult?.count ?? 0) >= user.dailyMessageLimit) {
+          res.status(429).json({
+            error: "Daily message limit reached",
+            limitReached: true,
+            limit: user.dailyMessageLimit,
+          });
+          return;
+        }
+      }
+
+      if (user.cooldownSeconds && user.cooldownSeconds > 0) {
+        const cooldownStart = new Date(Date.now() - user.cooldownSeconds * 1000);
+        const [recentMsg] = await db.select({
+          count: sql<number>`count(*)::int`,
+        }).from(messagesTable).where(
+          and(
+            eq(messagesTable.senderId, user.id),
+            gte(messagesTable.createdAt, cooldownStart)
+          )
+        );
+        if ((recentMsg?.count ?? 0) > 0) {
+          res.status(429).json({
+            error: "Please wait before sending another message",
+            cooldown: true,
+            cooldownSeconds: user.cooldownSeconds,
+          });
+          return;
+        }
+      }
+    }
+
     const patternResult = scanContent(content);
 
     const levelOrder: Record<string, number> = {

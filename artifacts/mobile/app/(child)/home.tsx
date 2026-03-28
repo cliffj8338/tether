@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,14 +10,22 @@ import { Fonts } from "@/constants/typography";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar } from "@/components/ui/Avatar";
 import { useConversations } from "@/hooks/useApiData";
+import { api } from "@/services/api";
+import type { UsageStats } from "@/services/api";
 
 export default function ChildHomeScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { conversations, refresh } = useConversations();
+  const [usage, setUsage] = useState<UsageStats | null>(null);
 
   useFocusEffect(
-    React.useCallback(() => { refresh(); }, [refresh])
+    React.useCallback(() => {
+      refresh();
+      if (user?.id) {
+        api.children.usage(user.id).then(setUsage).catch(() => {});
+      }
+    }, [refresh, user?.id])
   );
 
   const myConvos = conversations;
@@ -31,6 +39,56 @@ export default function ChildHomeScreen() {
         </View>
         <Avatar name={user?.displayName ?? "K"} color={user?.avatarColor ?? Colors.accent} size={40} />
       </View>
+
+      {usage && (usage.dailyMessageLimit > 0 || usage.screenTimeLimitMinutes > 0) && (
+        <View style={styles.usageCard}>
+          <Text style={styles.usageTitle}>Today's Activity</Text>
+          <View style={styles.usageRow}>
+            <View style={styles.usageItem}>
+              <Feather name="message-square" size={16} color={Colors.accent} />
+              <Text style={styles.usageNum}>{usage.messagesToday}</Text>
+              <Text style={styles.usageLabel}>
+                {usage.dailyMessageLimit > 0
+                  ? `of ${usage.dailyMessageLimit} msgs`
+                  : "messages"}
+              </Text>
+            </View>
+            {usage.dailyMessageLimit > 0 && (
+              <View style={styles.usageItem}>
+                <Feather
+                  name={usage.messagesToday >= usage.dailyMessageLimit ? "alert-circle" : "check-circle"}
+                  size={16}
+                  color={usage.messagesToday >= usage.dailyMessageLimit ? Colors.alert4 : Colors.primary}
+                />
+                <Text style={[styles.usageNum, usage.messagesToday >= usage.dailyMessageLimit ? { color: Colors.alert4 } : {}]}>
+                  {Math.max(0, usage.dailyMessageLimit - usage.messagesToday)}
+                </Text>
+                <Text style={styles.usageLabel}>remaining</Text>
+              </View>
+            )}
+            {usage.screenTimeLimitMinutes > 0 && (
+              <View style={styles.usageItem}>
+                <Feather name="clock" size={16} color={Colors.primary} />
+                <Text style={styles.usageNum}>{usage.screenTimeLimitMinutes}</Text>
+                <Text style={styles.usageLabel}>min limit</Text>
+              </View>
+            )}
+          </View>
+          {usage.dailyMessageLimit > 0 && (
+            <View style={styles.progressBarBg}>
+              <View
+                style={[
+                  styles.progressBarFill,
+                  {
+                    width: `${Math.min(100, (usage.messagesToday / usage.dailyMessageLimit) * 100)}%`,
+                    backgroundColor: usage.messagesToday >= usage.dailyMessageLimit ? Colors.alert4 : Colors.primary,
+                  },
+                ]}
+              />
+            </View>
+          )}
+        </View>
+      )}
 
       <FlatList
         data={myConvos}
@@ -136,4 +194,50 @@ const styles = StyleSheet.create({
   },
   emptyTitle: { fontFamily: Fonts.bodySemiBold, fontSize: 18, color: Colors.text },
   emptyText: { fontFamily: Fonts.body, fontSize: 14, color: Colors.textMid, textAlign: "center", paddingHorizontal: 40, lineHeight: 20 },
+  usageCard: {
+    backgroundColor: Colors.white,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    padding: 16,
+    marginBottom: 16,
+  },
+  usageTitle: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: 13,
+    color: Colors.textMid,
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
+    marginBottom: 12,
+  },
+  usageRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 12,
+  },
+  usageItem: {
+    alignItems: "center",
+    gap: 4,
+  },
+  usageNum: {
+    fontFamily: Fonts.heading,
+    fontSize: 22,
+    color: Colors.text,
+  },
+  usageLabel: {
+    fontFamily: Fonts.body,
+    fontSize: 11,
+    color: Colors.textMid,
+  },
+  progressBarBg: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.surface,
+    overflow: "hidden",
+  },
+  progressBarFill: {
+    height: 6,
+    borderRadius: 3,
+  },
 });

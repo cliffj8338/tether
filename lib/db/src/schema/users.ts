@@ -23,6 +23,9 @@ export const usersTable = pgTable("users", {
   passwordHash: text("password_hash"),
   familyCode: text("family_code").unique(),
   isAdmin: boolean("is_admin").default(false),
+  screenTimeLimitMinutes: integer("screen_time_limit_minutes").default(0),
+  dailyMessageLimit: integer("daily_message_limit").default(0),
+  cooldownSeconds: integer("cooldown_seconds").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

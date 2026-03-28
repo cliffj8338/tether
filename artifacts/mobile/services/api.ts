@@ -67,8 +67,19 @@ export interface Child {
   trustLevel: number;
   faithModeEnabled: boolean;
   isPaused: boolean;
+  screenTimeLimitMinutes: number;
+  dailyMessageLimit: number;
+  cooldownSeconds: number;
   flagCount: number;
   messageCount: number;
+}
+
+export interface UsageStats {
+  messagesToday: number;
+  dailyMessageLimit: number;
+  cooldownSeconds: number;
+  screenTimeLimitMinutes: number;
+  lastMessageAt: string | null;
 }
 
 export interface Conversation {
@@ -169,8 +180,11 @@ export const api = {
     add(data: { displayName: string; pin: string; age?: number; grade?: string }): Promise<Child> {
       return request("/children", { method: "POST", body: JSON.stringify(data) });
     },
-    update(childId: number, data: Partial<{ trustLevel: number; faithModeEnabled: boolean; isPaused: boolean }>): Promise<Child> {
+    update(childId: number, data: Partial<{ trustLevel: number; faithModeEnabled: boolean; isPaused: boolean; screenTimeLimitMinutes: number; dailyMessageLimit: number; cooldownSeconds: number }>): Promise<Child> {
       return request(`/children/${childId}`, { method: "PATCH", body: JSON.stringify(data) });
+    },
+    usage(childId: number): Promise<UsageStats> {
+      return request(`/children/${childId}/usage`);
     },
     updateTrustLevel(childId: number, trustLevel: number): Promise<Child> {
       return request(`/children/${childId}/trust-level`, { method: "PATCH", body: JSON.stringify({ trustLevel }) });

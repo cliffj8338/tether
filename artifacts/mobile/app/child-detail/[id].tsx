@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,12 +9,15 @@ import {
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/typography";
 import { Avatar } from "@/components/ui/Avatar";
 import { useChildDetail } from "@/hooks/useApiData";
+import { api } from "@/services/api";
+import type { UsageStats } from "@/services/api";
 
 const trustLevelDescriptions = [
   "",
@@ -43,6 +46,27 @@ export default function ChildDetailScreen() {
   const [trustLevel, setTrustLevel] = useState(child?.trustLevel ?? 1);
   const [faithMode, setFaithMode] = useState(child?.faithModeEnabled ?? false);
   const [isPaused, setIsPaused] = useState(child?.isPaused ?? false);
+  const [screenTimeLimit, setScreenTimeLimit] = useState(child?.screenTimeLimitMinutes ?? 0);
+  const [dailyMsgLimit, setDailyMsgLimit] = useState(child?.dailyMessageLimit ?? 0);
+  const [cooldown, setCooldown] = useState(child?.cooldownSeconds ?? 0);
+  const [usage, setUsage] = useState<UsageStats | null>(null);
+
+  useEffect(() => {
+    if (child) {
+      setTrustLevel(child.trustLevel ?? 1);
+      setFaithMode(child.faithModeEnabled ?? false);
+      setIsPaused(child.isPaused ?? false);
+      setScreenTimeLimit(child.screenTimeLimitMinutes ?? 0);
+      setDailyMsgLimit(child.dailyMessageLimit ?? 0);
+      setCooldown(child.cooldownSeconds ?? 0);
+    }
+  }, [child]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      api.children.usage(childId).then(setUsage).catch(() => {});
+    }, [childId])
+  );
 
   if (!child) {
     return (
@@ -171,6 +195,113 @@ export default function ChildDetailScreen() {
               trackColor={{ false: Colors.border, true: Colors.faithGold }}
               thumbColor={Colors.white}
             />
+          </View>
+        </View>
+
+        <Text style={styles.sectionLabel}>ANTI-ADDICTION CONTROLS</Text>
+        <View style={styles.settingsGroup}>
+          {usage && (
+            <View style={styles.usageBar}>
+              <View style={styles.usageStat}>
+                <Text style={styles.usageValue}>{usage.messagesToday}</Text>
+                <Text style={styles.usageLabel}>Messages today</Text>
+              </View>
+              {dailyMsgLimit > 0 && (
+                <View style={styles.usageStat}>
+                  <Text style={[styles.usageValue, usage.messagesToday >= dailyMsgLimit ? { color: Colors.alert4 } : {}]}>
+                    {Math.max(0, dailyMsgLimit - usage.messagesToday)}
+                  </Text>
+                  <Text style={styles.usageLabel}>Remaining</Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          <View style={styles.settingsRow}>
+            <View style={[styles.settingIcon, { backgroundColor: `${Colors.accent}12` }]}>
+              <Feather name="message-square" size={18} color={Colors.accent} />
+            </View>
+            <View style={styles.settingBody}>
+              <Text style={styles.settingLabel}>Daily Message Limit</Text>
+              <Text style={styles.settingSub}>
+                {dailyMsgLimit === 0 ? "Unlimited" : `${dailyMsgLimit} messages per day`}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.limitRow}>
+            {[0, 25, 50, 100, 200].map((val) => (
+              <Pressable
+                key={val}
+                style={[styles.limitChip, dailyMsgLimit === val && styles.limitChipActive]}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setDailyMsgLimit(val);
+                  updateSettings({ dailyMessageLimit: val });
+                }}
+              >
+                <Text style={[styles.limitChipText, dailyMsgLimit === val && styles.limitChipTextActive]}>
+                  {val === 0 ? "∞" : val}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <View style={styles.settingsRow}>
+            <View style={[styles.settingIcon, { backgroundColor: `${Colors.primary}12` }]}>
+              <Feather name="clock" size={18} color={Colors.primary} />
+            </View>
+            <View style={styles.settingBody}>
+              <Text style={styles.settingLabel}>Cooldown Between Messages</Text>
+              <Text style={styles.settingSub}>
+                {cooldown === 0 ? "No cooldown" : `${cooldown} second wait`}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.limitRow}>
+            {[0, 10, 30, 60, 120].map((val) => (
+              <Pressable
+                key={val}
+                style={[styles.limitChip, cooldown === val && styles.limitChipActive]}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setCooldown(val);
+                  updateSettings({ cooldownSeconds: val });
+                }}
+              >
+                <Text style={[styles.limitChipText, cooldown === val && styles.limitChipTextActive]}>
+                  {val === 0 ? "Off" : val < 60 ? `${val}s` : `${val / 60}m`}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <View style={styles.settingsRow}>
+            <View style={[styles.settingIcon, { backgroundColor: `${Colors.alert3}12` }]}>
+              <Feather name="watch" size={18} color={Colors.alert3} />
+            </View>
+            <View style={styles.settingBody}>
+              <Text style={styles.settingLabel}>Screen Time Limit</Text>
+              <Text style={styles.settingSub}>
+                {screenTimeLimit === 0 ? "Unlimited" : `${screenTimeLimit} min per day`}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.limitRow}>
+            {[0, 30, 60, 120, 240].map((val) => (
+              <Pressable
+                key={val}
+                style={[styles.limitChip, screenTimeLimit === val && styles.limitChipActive]}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setScreenTimeLimit(val);
+                  updateSettings({ screenTimeLimitMinutes: val });
+                }}
+              >
+                <Text style={[styles.limitChipText, screenTimeLimit === val && styles.limitChipTextActive]}>
+                  {val === 0 ? "∞" : val < 60 ? `${val}m` : `${val / 60}h`}
+                </Text>
+              </Pressable>
+            ))}
           </View>
         </View>
 
@@ -352,6 +483,44 @@ const styles = StyleSheet.create({
     gap: 10,
     borderBottomWidth: 1,
     borderBottomColor: Colors.surface,
+  },
+  usageBar: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.surface,
+  },
+  usageStat: { alignItems: "center", gap: 2 },
+  usageValue: { fontFamily: Fonts.heading, fontSize: 24, color: Colors.text },
+  usageLabel: { fontFamily: Fonts.body, fontSize: 11, color: Colors.textMid },
+  limitRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.surface,
+  },
+  limitChip: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: Colors.surface,
+    alignItems: "center",
+  },
+  limitChipActive: {
+    backgroundColor: Colors.primary,
+  },
+  limitChipText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: 13,
+    color: Colors.textMid,
+  },
+  limitChipTextActive: {
+    color: Colors.white,
   },
   contactBody: { flex: 1 },
   contactName: { fontFamily: Fonts.bodySemiBold, fontSize: 14, color: Colors.text },

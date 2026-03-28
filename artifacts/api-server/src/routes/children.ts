@@ -41,6 +41,9 @@ router.get("/children", async (req, res) => {
         trustLevel: child.trustLevel ?? 1,
         faithModeEnabled: child.faithModeEnabled ?? false,
         isPaused: child.isPaused ?? false,
+        screenTimeLimitMinutes: child.screenTimeLimitMinutes ?? 0,
+        dailyMessageLimit: child.dailyMessageLimit ?? 0,
+        cooldownSeconds: child.cooldownSeconds ?? 0,
         flagCount: flagResult?.count ?? 0,
         messageCount: msgResult?.count ?? 0,
       };
@@ -80,6 +83,9 @@ router.post("/children", async (req, res) => {
       trustLevel: child.trustLevel ?? 1,
       faithModeEnabled: child.faithModeEnabled ?? false,
       isPaused: child.isPaused ?? false,
+      screenTimeLimitMinutes: child.screenTimeLimitMinutes ?? 0,
+      dailyMessageLimit: child.dailyMessageLimit ?? 0,
+      cooldownSeconds: child.cooldownSeconds ?? 0,
       flagCount: 0,
       messageCount: 0,
     });
@@ -106,6 +112,9 @@ router.patch("/children/:childId", async (req, res) => {
     if (body.faithModeEnabled !== undefined) updateData.faithModeEnabled = body.faithModeEnabled;
     if (body.isPaused !== undefined) updateData.isPaused = body.isPaused;
     if (body.avatarColor !== undefined) updateData.avatarColor = body.avatarColor;
+    if (body.screenTimeLimitMinutes !== undefined) updateData.screenTimeLimitMinutes = body.screenTimeLimitMinutes;
+    if (body.dailyMessageLimit !== undefined) updateData.dailyMessageLimit = body.dailyMessageLimit;
+    if (body.cooldownSeconds !== undefined) updateData.cooldownSeconds = body.cooldownSeconds;
 
     const [child] = await db.update(usersTable).set(updateData).where(
       and(eq(usersTable.id, childId), eq(usersTable.parentId, user.id))
@@ -132,6 +141,9 @@ router.patch("/children/:childId", async (req, res) => {
       trustLevel: child.trustLevel ?? 1,
       faithModeEnabled: child.faithModeEnabled ?? false,
       isPaused: child.isPaused ?? false,
+      screenTimeLimitMinutes: child.screenTimeLimitMinutes ?? 0,
+      dailyMessageLimit: child.dailyMessageLimit ?? 0,
+      cooldownSeconds: child.cooldownSeconds ?? 0,
       flagCount: flagResult?.count ?? 0,
       messageCount: msgResult?.count ?? 0,
     });
@@ -178,12 +190,67 @@ router.patch("/children/:childId/trust-level", async (req, res) => {
       trustLevel: child.trustLevel ?? 1,
       faithModeEnabled: child.faithModeEnabled ?? false,
       isPaused: child.isPaused ?? false,
+      screenTimeLimitMinutes: child.screenTimeLimitMinutes ?? 0,
+      dailyMessageLimit: child.dailyMessageLimit ?? 0,
+      cooldownSeconds: child.cooldownSeconds ?? 0,
       flagCount: flagResult2?.count ?? 0,
       messageCount: msgResult2?.count ?? 0,
     });
   } catch (error) {
     req.log.error(error, "Failed to update trust level");
     res.status(500).json({ error: "Failed to update trust level" });
+  }
+});
+
+router.get("/children/:childId/usage", async (req, res) => {
+  try {
+    const user = await getUserFromToken(req);
+    if (!user) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    const childId = parseInt(req.params.childId);
+    const isSelf = user.id === childId;
+    if (user.role === "parent") {
+      const [childRow] = await db.select({ id: usersTable.id }).from(usersTable)
+        .where(and(eq(usersTable.id, childId), eq(usersTable.parentId, user.id)));
+      if (!childRow) {
+        res.status(404).json({ error: "Child not found" });
+        return;
+      }
+    } else if (!isSelf) {
+      res.status(403).json({ error: "Forbidden" });
+      return;
+    }
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const [todayMsgResult] = await db.select({
+      count: sql<number>`count(*)::int`,
+    }).from(messagesTable).where(
+      and(eq(messagesTable.senderId, childId), sql`${messagesTable.createdAt} >= ${todayStart}`)
+    );
+
+    const [lastMsg] = await db.select({
+      createdAt: messagesTable.createdAt,
+    }).from(messagesTable)
+      .where(eq(messagesTable.senderId, childId))
+      .orderBy(sql`${messagesTable.createdAt} desc`)
+      .limit(1);
+
+    const [childUser] = await db.select().from(usersTable).where(eq(usersTable.id, childId));
+
+    res.json({
+      messagesToday: todayMsgResult?.count ?? 0,
+      dailyMessageLimit: childUser?.dailyMessageLimit ?? 0,
+      cooldownSeconds: childUser?.cooldownSeconds ?? 0,
+      screenTimeLimitMinutes: childUser?.screenTimeLimitMinutes ?? 0,
+      lastMessageAt: lastMsg?.createdAt?.toISOString() ?? null,
+    });
+  } catch (error) {
+    req.log.error(error, "Failed to get usage stats");
+    res.status(500).json({ error: "Failed to get usage stats" });
   }
 });
 

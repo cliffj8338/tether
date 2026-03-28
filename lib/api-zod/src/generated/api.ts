@@ -128,6 +128,9 @@ export const UpdateChildBody = zod.object({
   faithModeEnabled: zod.boolean().optional(),
   isPaused: zod.boolean().optional(),
   avatarColor: zod.string().optional(),
+  screenTimeLimitMinutes: zod.number().min(0).max(480).optional(),
+  dailyMessageLimit: zod.number().min(0).max(500).optional(),
+  cooldownSeconds: zod.number().min(0).max(300).optional(),
 });
 
 export const UpdateChildResponse = zod.object({
