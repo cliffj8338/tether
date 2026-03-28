@@ -32,6 +32,33 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   return res.json();
 }
 
+async function patchJson<T>(path: string, body: unknown): Promise<T> {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error || `API error: ${res.status}`);
+  }
+  return res.json();
+}
+
+async function deleteJson<T>(path: string): Promise<T> {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "DELETE",
+    headers,
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error || `API error: ${res.status}`);
+  }
+  return res.json();
+}
+
 export const api = {
   overview: () => fetchJson<OverviewData>("/admin/analytics/overview"),
   conversations: () => fetchJson<ConversationData>("/admin/analytics/conversations"),
@@ -54,6 +81,13 @@ export const api = {
   systemStatus: () => fetchJson<SystemStatusData>("/admin/ops/system-status"),
   testSms: (phoneNumber: string) =>
     postJson<{ success: boolean; message: string }>("/admin/ops/test-sms", { phoneNumber }),
+  costs: () => fetchJson<PlatformCostsData>("/platform-costs"),
+  addCost: (data: { month: string; category: string; amount: number; notes: string }) =>
+    postJson<PlatformCostEntry>("/admin/ops/costs", data),
+  updateCost: (id: number, data: { month?: string; category?: string; amount?: number; notes?: string }) =>
+    patchJson<PlatformCostEntry>(`/admin/ops/costs/${id}`, data),
+  deleteCost: (id: number) =>
+    deleteJson<{ ok: boolean }>(`/admin/ops/costs/${id}`),
 };
 
 export interface OverviewData {
@@ -244,4 +278,25 @@ export interface SystemStatusData {
   version: string;
   nodeVersion: string;
   memoryUsage: { heapUsed: number; heapTotal: number; rss: number; external: number };
+}
+
+export interface PlatformCostEntry {
+  id: number;
+  month: string;
+  category: string;
+  amount: string;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlatformCostsData {
+  months: {
+    month: string;
+    total: number;
+    categories: Record<string, number>;
+    entries: PlatformCostEntry[];
+  }[];
+  grandTotal: number;
+  lastUpdated: string | null;
 }
