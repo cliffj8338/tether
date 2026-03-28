@@ -98,8 +98,10 @@ export async function sendTestSMS(toPhone: string): Promise<{ success: boolean; 
     return { success: true };
   } catch (err: any) {
     const message = err?.message || err?.toString() || "Unknown Twilio error";
-    console.error("Test SMS error:", message);
-    return { success: false, error: message };
+    const code = err?.code;
+    const status = err?.status;
+    console.error("Test SMS error:", { message, code, status, moreInfo: err?.moreInfo });
+    return { success: false, error: `${message}${code ? ` (code: ${code})` : ''}` };
   }
 }
 
