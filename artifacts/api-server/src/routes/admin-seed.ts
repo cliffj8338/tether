@@ -649,27 +649,36 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
 
 router.delete("/admin/ops/seed-demo", async (_req, res) => {
   try {
-    await db.execute(sql`DELETE FROM churn_predictions WHERE user_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app' OR parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app'))`);
-    await db.execute(sql`DELETE FROM network_graph WHERE user_id IN (SELECT id FROM users WHERE parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app'))`);
-    await db.execute(sql`DELETE FROM behavioral_metrics WHERE user_id IN (SELECT id FROM users WHERE parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app'))`);
+    const demoChildIds = sql`(SELECT id FROM users WHERE parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app'))`;
+    const demoParentIds = sql`(SELECT id FROM users WHERE email LIKE '%@demo.tether.app')`;
+    const demoAllIds = sql`(SELECT id FROM users WHERE email LIKE '%@demo.tether.app' OR parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app'))`;
+
+    await db.execute(sql`DELETE FROM churn_predictions WHERE user_id IN ${demoAllIds}`);
+    await db.execute(sql`DELETE FROM network_graph WHERE user_id IN ${demoAllIds}`);
+    await db.execute(sql`DELETE FROM behavioral_metrics WHERE user_id IN ${demoAllIds}`);
     await db.execute(sql`DELETE FROM interest_graph`);
     await db.execute(sql`DELETE FROM temporal_anomalies`);
     await db.execute(sql`DELETE FROM keyword_trends`);
     await db.execute(sql`DELETE FROM conversation_insights`);
     await db.execute(sql`DELETE FROM safety_analytics`);
     await db.execute(sql`DELETE FROM demographic_snapshots`);
-    await db.execute(sql`DELETE FROM message_analytics WHERE sender_id IN (SELECT id FROM users WHERE parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app'))`);
+
+    await db.execute(sql`DELETE FROM message_analytics WHERE conversation_id IN (SELECT id FROM conversations WHERE child_id IN ${demoChildIds})`);
     await db.execute(sql`DELETE FROM analytics_events`);
     await db.execute(sql`DELETE FROM session_tracking`);
-    await db.execute(sql`DELETE FROM alerts WHERE parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app')`);
-    await db.execute(sql`DELETE FROM messages WHERE sender_id IN (SELECT id FROM users WHERE parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app'))`);
-    await db.execute(sql`DELETE FROM conversations WHERE child_id IN (SELECT id FROM users WHERE parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app'))`);
-    await db.execute(sql`DELETE FROM contacts WHERE child_id IN (SELECT id FROM users WHERE parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app'))`);
+
+    await db.execute(sql`DELETE FROM alerts WHERE parent_id IN ${demoParentIds}`);
+    await db.execute(sql`DELETE FROM messages WHERE conversation_id IN (SELECT id FROM conversations WHERE child_id IN ${demoChildIds})`);
+    await db.execute(sql`DELETE FROM conversations WHERE child_id IN ${demoChildIds}`);
+    await db.execute(sql`DELETE FROM contacts WHERE child_id IN ${demoChildIds}`);
+
     await db.execute(sql`DELETE FROM waitlist WHERE email LIKE '%@example.com'`);
-    await db.execute(sql`DELETE FROM users WHERE parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app')`);
+    await db.execute(sql`DELETE FROM users WHERE parent_id IN ${demoParentIds}`);
     await db.execute(sql`DELETE FROM users WHERE email LIKE '%@demo.tether.app'`);
+
     res.json({ ok: true, message: "Demo data cleared successfully" });
   } catch (err: any) {
+    console.error("Clear demo data error:", err);
     res.status(500).json({ error: err.message });
   }
 });
