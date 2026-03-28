@@ -18,15 +18,16 @@ const FIRESTORE_BASE       =
 const TETHER_API = 'https://tether-connect-cliffj8338.replit.app';
 
 const STATIC = {
-  lineCount:    30800,
-  fileCount:    184,
+  lineCount:    37994,
+  fileCount:    308,
   version:      '—',
-  featureCount: 40,
+  featureCount: 42,
   subApps: [
-    { name: 'Admin Intelligence Dashboard', loc: 9879,  files: 86 },
-    { name: 'Mobile App (Expo)',             loc: 6214,  files: 38 },
-    { name: 'Marketing Website',             loc: 4172,  files: 30 },
-    { name: 'API Server',                    loc: 3916,  files: 30 },
+    { name: 'Admin Intelligence Dashboard', loc: 10487, files: 86 },
+    { name: 'Mobile App (Expo)',             loc: 8501,  files: 70 },
+    { name: 'Marketing Website',             loc: 4253,  files: 35 },
+    { name: 'API Server',                    loc: 4430,  files: 35 },
+    { name: 'Shared Libraries',              loc: 3809,  files: 80 },
   ],
 };
 
