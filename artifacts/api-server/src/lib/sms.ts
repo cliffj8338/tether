@@ -2,7 +2,9 @@ import twilio from "twilio";
 
 interface TwilioCredentials {
   accountSid: string;
-  authToken: string;
+  apiKeySid?: string;
+  apiKeySecret?: string;
+  authToken?: string;
   phoneNumber: string;
 }
 
@@ -40,25 +42,24 @@ async function getCredentials(): Promise<TwilioCredentials> {
   }
 
   const s = connection.settings;
-  const allValues = [s.account_sid, s.api_key, s.api_key_secret].filter(Boolean);
-  const acSid = allValues.find(v => v.startsWith("AC"));
 
-  if (!acSid) {
+  const accountSid = s.account_sid;
+  if (!accountSid || !accountSid.startsWith("AC")) {
     throw new Error(
       "Twilio Account SID (starts with AC) not found in connector. " +
       "Please update your Twilio integration: put your Account SID (AC...) in the Account SID field."
     );
   }
 
-  const authOrSecret = allValues.find(v => v !== acSid && !v.startsWith("SK")) || allValues.find(v => v !== acSid);
-
-  if (!authOrSecret) {
-    throw new Error("Twilio Auth Token not found in connector settings.");
-  }
+  const apiKey = s.api_key;
+  const apiKeySecret = s.api_key_secret;
+  const useApiKey = apiKey && apiKey.startsWith("SK") && apiKeySecret;
 
   cachedCredentials = {
-    accountSid: acSid,
-    authToken: authOrSecret,
+    accountSid,
+    ...(useApiKey
+      ? { apiKeySid: apiKey, apiKeySecret }
+      : { authToken: apiKey || apiKeySecret }),
     phoneNumber: s.phone_number,
   };
 
@@ -66,8 +67,11 @@ async function getCredentials(): Promise<TwilioCredentials> {
 }
 
 async function getTwilioClient() {
-  const { accountSid, authToken } = await getCredentials();
-  return twilio(accountSid, authToken);
+  const creds = await getCredentials();
+  if (creds.apiKeySid && creds.apiKeySecret) {
+    return twilio(creds.apiKeySid, creds.apiKeySecret, { accountSid: creds.accountSid });
+  }
+  return twilio(creds.accountSid, creds.authToken!);
 }
 
 async function getFromPhoneNumber(): Promise<string> {
