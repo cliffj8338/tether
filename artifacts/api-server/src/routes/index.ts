@@ -16,6 +16,7 @@ import adminAiQueryRouter from "./admin-ai-query";
 import adminAuthRouter from "./admin-auth";
 import adminOpsRouter from "./admin-operations";
 import adminCostsRouter from "./admin-costs";
+import adminSeedRouter from "./admin-seed";
 
 const router: IRouter = Router();
 
@@ -36,5 +37,6 @@ router.use(adminAdvancedRouter);
 router.use(adminAiQueryRouter);
 router.use(adminOpsRouter);
 router.use(adminCostsRouter);
+router.use(adminSeedRouter);
 
 export default router;

@@ -278,4 +278,47 @@ router.post("/admin/ops/test-sms", async (req, res) => {
   }
 });
 
+router.get("/admin/ops/stats", async (_req, res) => {
+  try {
+    const result = await db.execute(sql`
+      SELECT
+        (SELECT count(*)::int FROM users) AS users,
+        (SELECT count(*)::int FROM messages) AS messages,
+        (SELECT count(*)::int FROM alerts) AS alerts,
+        (SELECT count(*)::int FROM conversations) AS conversations,
+        (SELECT count(*)::int FROM contacts) AS contacts,
+        (SELECT count(*)::int FROM waitlist) AS waitlist,
+        (SELECT count(*)::int FROM message_analytics) AS message_analytics,
+        (SELECT count(*)::int FROM behavioral_metrics) AS behavioral_metrics,
+        (SELECT count(*)::int FROM network_graph) AS network_graph,
+        (SELECT count(*)::int FROM churn_predictions) AS churn_predictions,
+        (SELECT count(*)::int FROM temporal_anomalies) AS anomalies,
+        (SELECT count(*)::int FROM interest_graph) AS interest_graph,
+        (SELECT count(*)::int FROM keyword_trends) AS keyword_trends,
+        (SELECT count(*)::int FROM session_tracking) AS sessions,
+        (SELECT count(*)::int FROM analytics_events) AS events
+    `);
+    const r = result.rows[0] as any;
+    res.json({
+      users: r.users,
+      messages: r.messages,
+      alerts: r.alerts,
+      conversations: r.conversations,
+      contacts: r.contacts,
+      waitlist: r.waitlist,
+      messageAnalytics: r.message_analytics,
+      behavioralMetrics: r.behavioral_metrics,
+      networkGraph: r.network_graph,
+      churnPredictions: r.churn_predictions,
+      anomalies: r.anomalies,
+      interestGraph: r.interest_graph,
+      keywordTrends: r.keyword_trends,
+      sessions: r.sessions,
+      events: r.events,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
