@@ -26,18 +26,18 @@ export default function BehavioralIntelligence() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <KpiCard title="Sentiment Volatility" value={kpis.avgVolatility != null ? Number(kpis.avgVolatility).toFixed(3) : "—"} icon={<span className="text-lg">~</span>} />
-        <KpiCard title="Anxiety Score" value={kpis.avgAnxiety != null ? Number(kpis.avgAnxiety).toFixed(3) : "—"} icon={<span className="text-lg">!</span>} color="text-chart-5" />
-        <KpiCard title="Cognitive Fatigue" value={kpis.avgFatigue != null ? Number(kpis.avgFatigue).toFixed(3) : "—"} icon={<span className="text-lg">Z</span>} color="text-chart-4" />
-        <KpiCard title="Social Avoidance" value={kpis.avgSocialAvoidance != null ? Number(kpis.avgSocialAvoidance).toFixed(3) : "—"} icon={<span className="text-lg">x</span>} color="text-chart-3" />
-        <KpiCard title="Avg Response Time" value={kpis.avgResponseLatency != null ? `${Math.round(Number(kpis.avgResponseLatency))}s` : "—"} icon={<span className="text-lg">T</span>} color="text-chart-2" />
-        <KpiCard title="Emoji:Text Ratio" value={kpis.avgEmojiRatio != null ? Number(kpis.avgEmojiRatio).toFixed(3) : "—"} icon={<span className="text-lg">:)</span>} color="text-chart-1" />
+        <KpiCard title="Sentiment Volatility" value={kpis.avgVolatility != null ? Number(kpis.avgVolatility).toFixed(3) : "—"} icon={<span className="text-lg">~</span>} info="Measures how rapidly a child's emotional tone swings between messages. Higher values suggest emotional instability or stressors." />
+        <KpiCard title="Anxiety Score" value={kpis.avgAnxiety != null ? Number(kpis.avgAnxiety).toFixed(3) : "—"} icon={<span className="text-lg">!</span>} color="text-chart-5" info="Composite score (0-1) derived from message patterns: short replies, hedging language, question frequency. Above 0.5 warrants attention." />
+        <KpiCard title="Cognitive Fatigue" value={kpis.avgFatigue != null ? Number(kpis.avgFatigue).toFixed(3) : "—"} icon={<span className="text-lg">Z</span>} color="text-chart-4" info="Detects declining message quality over a session — shorter messages, more typos, rising emoji-to-text ratio signal mental exhaustion." />
+        <KpiCard title="Social Avoidance" value={kpis.avgSocialAvoidance != null ? Number(kpis.avgSocialAvoidance).toFixed(3) : "—"} icon={<span className="text-lg">x</span>} color="text-chart-3" info="Measures tendency to withdraw from conversations. Calculated from declining reply rates and increasing response delays." />
+        <KpiCard title="Avg Response Time" value={kpis.avgResponseLatency != null ? `${Math.round(Number(kpis.avgResponseLatency))}s` : "—"} icon={<span className="text-lg">T</span>} color="text-chart-2" info="Average time between receiving a message and sending a reply. Sustained increases may signal disengagement or avoidance." />
+        <KpiCard title="Emoji:Text Ratio" value={kpis.avgEmojiRatio != null ? Number(kpis.avgEmojiRatio).toFixed(3) : "—"} icon={<span className="text-lg">:)</span>} color="text-chart-1" info="Ratio of emoji characters to text characters. A rising ratio with falling message length often indicates cognitive fatigue." />
       </div>
 
       {hasData ? (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <ChartCard title="Sentiment Volatility Trend" subtitle="Higher = more emotional swings (potential stressor indicator)">
+            <ChartCard title="Sentiment Volatility Trend" subtitle="Higher = more emotional swings (potential stressor indicator)" info="Tracks volatility, anxiety, and fatigue scores over time. Correlated spikes across all three may indicate a systemic issue affecting children.">
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={data.volatilityTrend}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -52,7 +52,7 @@ export default function BehavioralIntelligence() {
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title="Emoji-to-Text Ratio vs Message Length" subtitle="Rising emoji ratio with falling length suggests cognitive fatigue">
+            <ChartCard title="Emoji-to-Text Ratio vs Message Length" subtitle="Rising emoji ratio with falling length suggests cognitive fatigue" info="When children start using more emojis but writing shorter messages, it often signals mental exhaustion or declining engagement.">
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={data.emojiTrend}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -69,7 +69,7 @@ export default function BehavioralIntelligence() {
           </div>
 
           {data.latestMetrics.length > 0 && (
-            <ChartCard title="Per-User Behavioral Snapshot" subtitle="Most recent behavioral metrics by anonymized user">
+            <ChartCard title="Per-User Behavioral Snapshot" subtitle="Most recent behavioral metrics by anonymized user" info="Latest behavioral scores for individual users. Red highlights indicate values above concern thresholds. Users shown by ID only — no PII.">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>

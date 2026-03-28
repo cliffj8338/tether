@@ -29,15 +29,15 @@ export default function Demographics() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <KpiCard title="Total Children" value={totalChildren.toLocaleString()} icon={<span className="text-lg">C</span>} color="text-chart-2" />
-        <KpiCard title="Male / Female" value={`${totalChildren > 0 ? ((maleCount / totalChildren) * 100).toFixed(0) : 0}% / ${totalChildren > 0 ? ((femaleCount / totalChildren) * 100).toFixed(0) : 0}%`} subtitle={`${maleCount.toLocaleString()} / ${femaleCount.toLocaleString()}`} icon={<span className="text-lg">G</span>} color="text-chart-1" />
-        <KpiCard title="Faith Mode" value={`${faithMode.adoptionRate}%`} subtitle={`${faithMode.enabled} of ${faithMode.total} children`} icon={<span className="text-lg">+</span>} color="text-chart-3" />
-        <KpiCard title="Avg Family Size" value={avgChildrenPerFamily} subtitle="children per family" icon={<span className="text-lg">F</span>} />
-        <KpiCard title="Paused Accounts" value={pausedAccounts} icon={<span className="text-lg">P</span>} color="text-chart-3" />
+        <KpiCard title="Total Children" value={totalChildren.toLocaleString()} icon={<span className="text-lg">C</span>} color="text-chart-2" info="Total number of child accounts registered on the platform." />
+        <KpiCard title="Male / Female" value={`${totalChildren > 0 ? ((maleCount / totalChildren) * 100).toFixed(0) : 0}% / ${totalChildren > 0 ? ((femaleCount / totalChildren) * 100).toFixed(0) : 0}%`} subtitle={`${maleCount.toLocaleString()} / ${femaleCount.toLocaleString()}`} icon={<span className="text-lg">G</span>} color="text-chart-1" info="Estimated gender split based on first-name analysis. Aggregate only — no individual identification." />
+        <KpiCard title="Faith Mode" value={`${faithMode.adoptionRate}%`} subtitle={`${faithMode.enabled} of ${faithMode.total} children`} icon={<span className="text-lg">+</span>} color="text-chart-3" info="Percentage of children with Faith Mode enabled by their parents. Adds scripture-based content and faith-aligned filters." />
+        <KpiCard title="Avg Family Size" value={avgChildrenPerFamily} subtitle="children per family" icon={<span className="text-lg">F</span>} info="Average number of children per parent account. Helps understand household engagement patterns." />
+        <KpiCard title="Paused Accounts" value={pausedAccounts} icon={<span className="text-lg">P</span>} color="text-chart-3" info="Child accounts temporarily paused by parents. These children cannot send or receive messages until unpaused." />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Age Distribution" subtitle="Children by age">
+        <ChartCard title="Age Distribution" subtitle="Children by age" info="Breakdown of children by their current age (6-16). Helps identify which age groups are most represented on the platform.">
           {ageDistribution.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={ageDistribution.filter(a => a.age !== null)}>
@@ -51,7 +51,7 @@ export default function Demographics() {
           ) : <EmptyState message="No age data" />}
         </ChartCard>
 
-        <ChartCard title="Trust Level Distribution" subtitle="Children across graduated trust levels">
+        <ChartCard title="Trust Level Distribution" subtitle="Children across graduated trust levels" info="Tether's 5-level graduated trust system: L1 (Restricted) to L5 (Independent). Children advance as they demonstrate responsible communication.">
           {trustLevelDistribution.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={trustLevelDistribution.map(t => ({ ...t, label: TRUST_LABELS[t.level] ?? `Level ${t.level}` }))}>
@@ -69,7 +69,7 @@ export default function Demographics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <ChartCard title="Grade Distribution" subtitle="Children by school grade">
+        <ChartCard title="Grade Distribution" subtitle="Children by school grade" info="School grade distribution (K through 8th). Useful for age-appropriate content analysis and research segmentation.">
           {gradeDistribution.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={gradeDistribution.filter((g: any) => g.grade !== null)}>
@@ -83,7 +83,7 @@ export default function Demographics() {
           ) : <EmptyState message="No grade data" />}
         </ChartCard>
 
-        <ChartCard title="Gender Distribution" subtitle="Estimated from name analysis">
+        <ChartCard title="Gender Distribution" subtitle="Estimated from name analysis" info="Gender estimation based on aggregate first-name patterns. No individual child is identified — only platform-wide counts are shown.">
           {genderDistribution && genderDistribution.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
@@ -97,7 +97,7 @@ export default function Demographics() {
           ) : <EmptyState message="No gender data" />}
         </ChartCard>
 
-        <ChartCard title="Family Size" subtitle="Distribution of children per family">
+        <ChartCard title="Family Size" subtitle="Distribution of children per family" info="How many children each parent account has registered. Larger families may show different engagement and communication patterns.">
           {familySizeData.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>

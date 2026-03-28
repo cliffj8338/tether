@@ -30,14 +30,14 @@ export default function SafetyCenter() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard title="Block Rate" value={`${blockRate}%`} subtitle={`${blockedMessages} of ${totalMessages} messages`} icon={<span className="text-lg font-bold">!</span>} color="text-chart-5" />
-        <KpiCard title="Review Rate" value={`${alertReviewRate}%`} subtitle="Alerts read by parents" icon={<span className="text-lg">R</span>} color="text-chart-1" />
-        <KpiCard title="Total Blocked" value={blockedMessages} icon={<span className="text-lg">X</span>} color="text-chart-5" />
-        <KpiCard title="Total Alerts (30d)" value={alertsByLevel.reduce((s, a) => s + a.count, 0)} icon={<span className="text-lg">A</span>} color="text-chart-3" />
+        <KpiCard title="Block Rate" value={`${blockRate}%`} subtitle={`${blockedMessages} of ${totalMessages} messages`} icon={<span className="text-lg font-bold">!</span>} color="text-chart-5" info="Percentage of messages blocked from delivery. These messages were flagged as harmful and never reached the recipient." />
+        <KpiCard title="Review Rate" value={`${alertReviewRate}%`} subtitle="Alerts read by parents" icon={<span className="text-lg">R</span>} color="text-chart-1" info="How many safety alerts have been read by parents. Low review rates may indicate parents aren't checking alerts." />
+        <KpiCard title="Total Blocked" value={blockedMessages} icon={<span className="text-lg">X</span>} color="text-chart-5" info="Absolute count of messages blocked from delivery across the entire platform." />
+        <KpiCard title="Total Alerts (30d)" value={alertsByLevel.reduce((s, a) => s + a.count, 0)} icon={<span className="text-lg">A</span>} color="text-chart-3" info="Total safety alerts generated in the last 30 days across all severity levels (L1-L5)." />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Alerts by Severity" subtitle="Distribution across alert levels (30 days)">
+        <ChartCard title="Alerts by Severity" subtitle="Distribution across alert levels (30 days)" info="L1 (Tone) = mild language issues. L2 (Mild) = unkind words. L3 (Unkind) = bullying language. L4 (High) = serious concern. L5 (Critical) = immediate danger requiring intervention.">
           {alertsByLevel.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={alertsByLevel.map(a => ({ ...a, label: LEVEL_LABELS[a.level] ?? a.level }))}>
@@ -53,7 +53,7 @@ export default function SafetyCenter() {
           ) : <EmptyState message="No alerts" />}
         </ChartCard>
 
-        <ChartCard title="Alert Trend" subtitle="Daily alerts over 30 days">
+        <ChartCard title="Alert Trend" subtitle="Daily alerts over 30 days" info="Day-by-day alert count. Sudden spikes may indicate bullying events, new user cohorts, or social conflicts.">
           {alertsTrend.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={alertsTrend}>
@@ -69,7 +69,7 @@ export default function SafetyCenter() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Hourly Alert Distribution" subtitle="When do flags happen?">
+        <ChartCard title="Hourly Alert Distribution" subtitle="When do flags happen?" info="Shows which hours of day produce the most alerts. After-school hours (3-6 PM) and late evening often show spikes.">
           {hourlyDistribution.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={hourlyDistribution}>
@@ -83,7 +83,7 @@ export default function SafetyCenter() {
           ) : <EmptyState message="No hourly data" />}
         </ChartCard>
 
-        <ChartCard title="Most Flagged Profiles" subtitle="Anonymized — by age group (30 days)">
+        <ChartCard title="Most Flagged Profiles" subtitle="Anonymized — by age group (30 days)" info="Children who triggered the most content flags. Shown by age group and grade only — no names or IDs are displayed.">
           {topFlaggedChildren.length > 0 ? (
             <div className="space-y-2 max-h-[200px] overflow-y-auto">
               {topFlaggedChildren.map((c, i) => (

@@ -1,17 +1,22 @@
 import { ReactNode } from "react";
+import { InfoTooltip } from "./InfoTooltip";
 
 interface ChartCardProps {
   title: string;
   subtitle?: string;
   children: ReactNode;
   className?: string;
+  info?: string;
 }
 
-export function ChartCard({ title, subtitle, children, className = "" }: ChartCardProps) {
+export function ChartCard({ title, subtitle, children, className = "", info }: ChartCardProps) {
   return (
     <div className={`bg-card rounded-xl border border-card-border p-5 shadow-sm ${className}`}>
       <div className="mb-4">
-        <h3 className="text-sm font-semibold text-card-foreground">{title}</h3>
+        <div className="flex items-center gap-1.5">
+          <h3 className="text-sm font-semibold text-card-foreground">{title}</h3>
+          {info && <InfoTooltip text={info} />}
+        </div>
         {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
       </div>
       {children}
