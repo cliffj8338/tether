@@ -183,8 +183,8 @@ A system for child enrollment using unique family codes (`TETHER-XXXXXX`). Paren
 ## Security Hardening
 
 - **Password Hashing**: bcrypt (10 rounds) replaces SHA-256. Legacy SHA-256 hashes auto-upgrade on login.
-- **Auth Tokens**: Opaque tokens via `crypto.randomBytes(48).toString("base64url")` stored in `passwordHash` column. Dual-mode token lookup for backwards compat.
-- **Rate Limiting**: In-memory rate limiting on auth routes (login, register, child-login, forgot-password).
+- **Auth Tokens**: Opaque tokens via `crypto.randomBytes(48).toString("base64url")` stored in `passwordHash` column. Single-mode lookup only (legacy hex.userId bypass removed).
+- **Rate Limiting**: In-memory rate limiting on auth routes (login, register, child-login, forgot-password, reset-password).
 - **Account Lifecycle**: Forgot password (email reset code via Resend), reset password, delete account (cascades to children).
 
 ## Subscription Feature Gating
@@ -193,6 +193,14 @@ A system for child enrollment using unique family codes (`TETHER-XXXXXX`). Paren
 - **Free Tier**: 1 child, basic messaging
 - **Premium Tier**: Unlimited children, anti-addiction controls, Faith Mode, advanced alerts
 - **Paywall**: Premium badge on gated features, redirects to `/paywall` (RevenueCat integration)
+
+## EAS Build Configuration
+
+- **eas.json**: Development (simulator), Preview (internal), Production (auto-increment) profiles
+- **Bundle ID**: `app.tetherapp.mobile` (iOS + Android)
+- **App Slug**: `tether` (changed from `mobile`)
+- **Submit**: iOS (Apple ID configured, ASC App ID + Team ID need user input), Android (service account key path needed)
+- **Permissions**: Camera, Photo Library, Non-exempt encryption declaration
 
 ## Contact System
 

@@ -253,6 +253,8 @@ export default function DashboardScreen() {
             onPress={() => {
               if (children.length > 0) {
                 router.push(`/child-detail/${children[0].id}` as any);
+              } else {
+                Alert.alert("No Children", "Add a child first to manage content settings.");
               }
             }}
           />
