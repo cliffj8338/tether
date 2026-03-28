@@ -344,8 +344,11 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
         }
         console.log(`[Seed] Created ${analyticsRows.length} message analytics`);
 
-        const behavioralRows = [];
         const sampledChildren = pickN(childIds, Math.min(2000, childIds.length));
+        const ageGroups = ["6-8","9-11","12-14","15+"];
+
+        try {
+        const behavioralRows = [];
         for (const childId of sampledChildren) {
           for (let d = 0; d < 28; d += 7) {
             const periodDate = daysAgo(d);
@@ -371,10 +374,12 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
           }
         }
         for (let b = 0; b < behavioralRows.length; b += 500) {
-          await db.insert(behavioralMetricsTable).values(behavioralRows.slice(b, b + 500));
+          await db.insert(behavioralMetricsTable).values(behavioralRows.slice(b, b + 500)).onConflictDoNothing();
         }
         console.log(`[Seed] Created ${behavioralRows.length} behavioral metrics`);
+        } catch (e) { console.error("[Seed] behavioral_metrics error:", e); }
 
+        try {
         const networkRows = [];
         const roles = ["hub","bridge","peripheral","isolate","amplifier","leader","initiator","influencer","connector","observer"];
         const clusters = ["social-butterflies","academic-focused","sports-enthusiasts","faith-community","creative-minds","gaming-group","music-lovers","outdoor-explorers"];
@@ -395,10 +400,12 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
           });
         }
         for (let b = 0; b < networkRows.length; b += 500) {
-          await db.insert(networkGraphTable).values(networkRows.slice(b, b + 500));
+          await db.insert(networkGraphTable).values(networkRows.slice(b, b + 500)).onConflictDoNothing();
         }
         console.log(`[Seed] Created ${networkRows.length} network graph entries`);
+        } catch (e) { console.error("[Seed] network_graph error:", e); }
 
+        try {
         const churnRows = [];
         for (const childId of pickN(childIds, Math.min(1500, childIds.length))) {
           const risk = Math.random();
@@ -420,7 +427,9 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
           await db.insert(churnPredictionsTable).values(churnRows.slice(b, b + 500));
         }
         console.log(`[Seed] Created ${churnRows.length} churn predictions`);
+        } catch (e) { console.error("[Seed] churn_predictions error:", e); }
 
+        try {
         const anomalyRows = [];
         for (let i = 0; i < 30; i++) {
           anomalyRows.push({
@@ -438,9 +447,10 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
         }
         await db.insert(temporalAnomaliesTable).values(anomalyRows);
         console.log(`[Seed] Created ${anomalyRows.length} anomalies`);
+        } catch (e) { console.error("[Seed] anomalies error:", e); }
 
+        try {
         const interestRows = [];
-        const ageGroups = ["6-8","9-11","12-14","15+"];
         const interestClusters = ["gaming","music","sports","faith","academics","social-media","art","animals","cooking","nature","science","reading"];
         for (const ag of ageGroups) {
           for (const cluster of pickN(interestClusters, 8)) {
@@ -461,7 +471,9 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
           await db.insert(interestGraphTable).values(interestRows.slice(b, b + 500));
         }
         console.log(`[Seed] Created ${interestRows.length} interest graph entries`);
+        } catch (e) { console.error("[Seed] interest_graph error:", e); }
 
+        try {
         const kwRows = [];
         const keywords = ["friend","school","game","church","pray","love","help","fun","happy","sad","scared","bored","excited","test","homework","movie","music","sport","art","family","God","Jesus","Bible","worship","kindness","bullying","angry","sorry","thanks","please","team","practice","birthday","summer","camping","beach"];
         for (const kw of keywords) {
@@ -478,7 +490,9 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
         }
         await db.insert(keywordTrendsTable).values(kwRows);
         console.log(`[Seed] Created ${kwRows.length} keyword trends`);
+        } catch (e) { console.error("[Seed] keyword_trends error:", e); }
 
+        try {
         const convoInsightRows = [];
         for (const convoId of convoIds.slice(0, 3000)) {
           convoInsightRows.push({
@@ -502,7 +516,9 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
           await db.insert(conversationInsightsTable).values(convoInsightRows.slice(b, b + 500));
         }
         console.log(`[Seed] Created ${convoInsightRows.length} conversation insights`);
+        } catch (e) { console.error("[Seed] conversation_insights error:", e); }
 
+        try {
         const safetyRows = [];
         for (let w = 0; w < 12; w++) {
           const pStart = daysAgo((w + 1) * 7);
@@ -528,7 +544,9 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
         }
         await db.insert(safetyAnalyticsTable).values(safetyRows);
         console.log(`[Seed] Created ${safetyRows.length} safety analytics periods`);
+        } catch (e) { console.error("[Seed] safety_analytics error:", e); }
 
+        try {
         const demoSnapshots = [];
         for (let w = 0; w < 12; w++) {
           const totalC = childIds.length - w * rand(50, 200);
@@ -552,7 +570,9 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
         }
         await db.insert(demographicSnapshotsTable).values(demoSnapshots);
         console.log(`[Seed] Created ${demoSnapshots.length} demographic snapshots`);
+        } catch (e) { console.error("[Seed] demographic_snapshots error:", e); }
 
+        try {
         const eventRows = [];
         const webPages = ["/","/how-it-works","/pricing","/about","/faith-mode","/for-schools","/for-churches","/waitlist","/blog","/terms","/privacy"];
         const referrers = ["google.com","facebook.com","instagram.com","twitter.com","direct","tiktok.com","youtube.com","reddit.com"];
@@ -571,7 +591,9 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
           await db.insert(analyticsEventsTable).values(eventRows.slice(b, b + 500));
         }
         console.log(`[Seed] Created ${eventRows.length} analytics events`);
+        } catch (e) { console.error("[Seed] analytics_events error:", e); }
 
+        try {
         const sessionRows = [];
         for (let i = 0; i < 3000; i++) {
           const isWeb = Math.random() < 0.5;
@@ -593,7 +615,9 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
           await db.insert(sessionTrackingTable).values(sessionRows.slice(b, b + 500));
         }
         console.log(`[Seed] Created ${sessionRows.length} sessions`);
+        } catch (e) { console.error("[Seed] sessions error:", e); }
 
+        try {
         const waitlistRows = [];
         for (let i = 0; i < NUM_WAITLIST; i++) {
           const fn = pick([...FIRST_NAMES_M, ...FIRST_NAMES_F]);
@@ -610,6 +634,7 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
           await db.insert(waitlistTable).values(waitlistRows.slice(b, b + 200));
         }
         console.log(`[Seed] Created ${waitlistRows.length} waitlist entries`);
+        } catch (e) { console.error("[Seed] waitlist error:", e); }
 
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
         console.log(`[Seed] DONE — demo data fully loaded in ${elapsed}s!`);
