@@ -6,6 +6,7 @@ import {
   ScrollView,
   Pressable,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,6 +20,7 @@ import { StatCard } from "@/components/ui/StatCard";
 import { AlertLevelTag } from "@/components/ui/AlertLevelTag";
 import { useDashboard } from "@/hooks/useApiData";
 import { TetherMark } from "@/components/icons/TetherMark";
+import { api } from "@/services/api";
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -47,11 +49,12 @@ export default function DashboardScreen() {
             style={styles.iconBtn}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push("/(parent)/messages" as any);
             }}
           >
             <Feather name="search" size={18} color={Colors.textMid} />
           </Pressable>
-          <Pressable style={styles.iconBtn}>
+          <Pressable style={styles.iconBtn} onPress={() => router.push("/(parent)/alerts" as any)}>
             <Feather name="bell" size={18} color={Colors.textMid} />
             {stats.unreadAlerts > 0 && (
               <View style={styles.notifBadge}>
@@ -178,7 +181,7 @@ export default function DashboardScreen() {
 
         <View style={styles.secHead}>
           <Text style={styles.secTitle}>Recent Activity</Text>
-          <Pressable>
+          <Pressable onPress={() => router.push("/(parent)/alerts" as any)}>
             <Text style={styles.secLink}>View All</Text>
           </Pressable>
         </View>
@@ -229,24 +232,46 @@ export default function DashboardScreen() {
             iconColor={Colors.primary}
             label="Pause All"
             sub="Temporarily pause chats"
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              Alert.alert("Pause All Chats", "This will temporarily pause all children's conversations. Continue?", [
+                { text: "Cancel", style: "cancel" },
+                { text: "Pause All", style: "destructive", onPress: async () => {
+                  for (const child of children) {
+                    await api.children.update(child.id, { isPaused: true });
+                  }
+                  Alert.alert("Done", "All conversations paused.");
+                }},
+              ]);
+            }}
           />
           <ActionButton
             icon="sliders"
             iconColor={Colors.accent}
             label="Content Settings"
             sub="Manage filters & rules"
+            onPress={() => {
+              if (children.length > 0) {
+                router.push(`/child-detail/${children[0].id}` as any);
+              }
+            }}
           />
           <ActionButton
             icon="users"
             iconColor={Colors.textMid}
             label="Manage Contacts"
             sub="Approve or remove"
+            onPress={() => router.push("/(parent)/community" as any)}
           />
           <ActionButton
             icon="download"
             iconColor={Colors.alert3}
             label="Export History"
             sub="Download logs"
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              Alert.alert("Export", "Message history export will be available in a future update.");
+            }}
           />
         </View>
       </ScrollView>
@@ -254,14 +279,15 @@ export default function DashboardScreen() {
   );
 }
 
-function ActionButton({ icon, iconColor, label, sub }: {
+function ActionButton({ icon, iconColor, label, sub, onPress }: {
   icon: keyof typeof Feather.glyphMap;
   iconColor: string;
   label: string;
   sub: string;
+  onPress?: () => void;
 }) {
   return (
-    <Pressable style={styles.actionBtn}>
+    <Pressable style={styles.actionBtn} onPress={onPress}>
       <View style={[styles.actionIconWrap, { backgroundColor: `${iconColor}16` }]}>
         <Feather name={icon} size={18} color={iconColor} />
       </View>

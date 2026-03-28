@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert, TextInput, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert, TextInput, ActivityIndicator, Linking } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -130,8 +130,8 @@ export default function SettingsScreen() {
             </Pressable>
           </View>
           {phoneError ? <Text style={styles.phoneError}>{phoneError}</Text> : null}
-          <SettingsRow icon="bell" label="Notifications" />
-          <SettingsRow icon="lock" label="Privacy & Security" />
+          <SettingsRow icon="bell" label="Notifications" onPress={() => router.push("/(parent)/alerts" as any)} />
+          <SettingsRow icon="lock" label="Privacy & Security" onPress={() => Alert.alert("Privacy & Security", "Two-factor authentication and advanced security settings coming soon.")} />
         </View>
 
         <Text style={styles.sectionLabel}>SUBSCRIPTION</Text>
@@ -183,8 +183,8 @@ export default function SettingsScreen() {
 
         <Text style={styles.sectionLabel}>CONTENT FILTERS</Text>
         <View style={styles.group}>
-          <SettingsRow icon="shield" label="Filter Settings" />
-          <SettingsRow icon="alert-triangle" label="Alert Preferences" />
+          <SettingsRow icon="shield" label="Filter Settings" onPress={() => router.push("/(parent)/dashboard" as any)} />
+          <SettingsRow icon="alert-triangle" label="Alert Preferences" onPress={() => router.push("/(parent)/alerts" as any)} />
           <View style={styles.row}>
             <View style={[styles.rowIcon, { backgroundColor: `${Colors.faithGold}16` }]}>
               <Feather name="book-open" size={18} color={Colors.faithGold} />
@@ -204,9 +204,9 @@ export default function SettingsScreen() {
 
         <Text style={styles.sectionLabel}>SUPPORT</Text>
         <View style={styles.group}>
-          <SettingsRow icon="help-circle" label="Help & FAQ" />
-          <SettingsRow icon="file-text" label="Terms of Service" />
-          <SettingsRow icon="shield" label="Privacy Policy" />
+          <SettingsRow icon="help-circle" label="Help & FAQ" onPress={() => Linking.openURL("https://tetherapp.app")} />
+          <SettingsRow icon="file-text" label="Terms of Service" onPress={() => Linking.openURL("https://tetherapp.app/terms")} />
+          <SettingsRow icon="shield" label="Privacy Policy" onPress={() => Linking.openURL("https://tetherapp.app/privacy")} />
         </View>
 
         <Pressable style={styles.logoutBtn} onPress={handleLogout}>
@@ -249,9 +249,9 @@ export default function SettingsScreen() {
   );
 }
 
-function SettingsRow({ icon, label }: { icon: keyof typeof Feather.glyphMap; label: string }) {
+function SettingsRow({ icon, label, onPress }: { icon: keyof typeof Feather.glyphMap; label: string; onPress?: () => void }) {
   return (
-    <Pressable style={styles.row}>
+    <Pressable style={styles.row} onPress={onPress}>
       <View style={[styles.rowIcon, { backgroundColor: Colors.surface }]}>
         <Feather name={icon} size={18} color={Colors.textMid} />
       </View>

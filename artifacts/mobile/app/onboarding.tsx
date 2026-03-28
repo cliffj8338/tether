@@ -462,7 +462,7 @@ export default function OnboardingScreen() {
                 setLoading(true);
                 try {
                   const result = await api.auth.resetPassword(email.trim(), resetCode.trim(), newPassword);
-                  await login(result.token, result.user);
+                  await login(result.user, result.token);
                   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                   router.replace("/(parent)/dashboard" as any);
                 } catch (err: any) {

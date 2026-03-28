@@ -189,7 +189,7 @@ export function useChildDetail(childId: number) {
     }
   }, [childId]);
 
-  const updateSettings = useCallback(async (data: Partial<{ faithModeEnabled: boolean; isPaused: boolean }>) => {
+  const updateSettings = useCallback(async (data: Partial<{ faithModeEnabled: boolean; isPaused: boolean; screenTimeLimitMinutes: number | null; dailyMessageLimit: number | null; cooldownSeconds: number | null }>) => {
     try {
       const updated = await api.children.update(childId, data);
       setChild(updated);

@@ -171,6 +171,21 @@ export const api = {
     updateProfile(data: { phone?: string; displayName?: string }): Promise<User> {
       return request("/users/me", { method: "PATCH", body: JSON.stringify(data) });
     },
+    forgotPassword(email: string): Promise<{ message: string }> {
+      return request("/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+    },
+    resetPassword(email: string, code: string, newPassword: string): Promise<{ message: string; token: string; user: any }> {
+      return request("/auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify({ email, code, newPassword }),
+      });
+    },
+    deleteAccount(): Promise<{ message: string }> {
+      return request("/users/me", { method: "DELETE" });
+    },
   },
 
   children: {
@@ -180,7 +195,7 @@ export const api = {
     add(data: { displayName: string; pin: string; age?: number; grade?: string }): Promise<Child> {
       return request("/children", { method: "POST", body: JSON.stringify(data) });
     },
-    update(childId: number, data: Partial<{ trustLevel: number; faithModeEnabled: boolean; isPaused: boolean; screenTimeLimitMinutes: number; dailyMessageLimit: number; cooldownSeconds: number }>): Promise<Child> {
+    update(childId: number, data: Partial<{ trustLevel: number; faithModeEnabled: boolean; isPaused: boolean; screenTimeLimitMinutes: number | null; dailyMessageLimit: number | null; cooldownSeconds: number | null }>): Promise<Child> {
       return request(`/children/${childId}`, { method: "PATCH", body: JSON.stringify(data) });
     },
     usage(childId: number): Promise<UsageStats> {
@@ -253,21 +268,4 @@ export const api = {
     },
   },
 
-  auth: {
-    forgotPassword(email: string): Promise<{ message: string }> {
-      return request("/auth/forgot-password", {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      });
-    },
-    resetPassword(email: string, code: string, newPassword: string): Promise<{ message: string; token: string; user: any }> {
-      return request("/auth/reset-password", {
-        method: "POST",
-        body: JSON.stringify({ email, code, newPassword }),
-      });
-    },
-    deleteAccount(): Promise<{ message: string }> {
-      return request("/users/me", { method: "DELETE" });
-    },
-  },
 };
