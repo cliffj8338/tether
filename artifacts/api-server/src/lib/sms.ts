@@ -38,7 +38,10 @@ async function getCredentials() {
 
 async function getTwilioClient() {
   const { accountSid, apiKey, apiKeySecret } = await getCredentials();
-  return twilio(apiKey, apiKeySecret, { accountSid });
+  if (apiKey.startsWith("SK")) {
+    return twilio(apiKey, apiKeySecret, { accountSid });
+  }
+  return twilio(accountSid, apiKey);
 }
 
 async function getFromPhoneNumber(): Promise<string> {
