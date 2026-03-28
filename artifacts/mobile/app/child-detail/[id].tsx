@@ -18,6 +18,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { useChildDetail } from "@/hooks/useApiData";
 import { api } from "@/services/api";
 import type { UsageStats } from "@/services/api";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 
 const trustLevelDescriptions = [
   "",
@@ -50,6 +51,7 @@ export default function ChildDetailScreen() {
   const [dailyMsgLimit, setDailyMsgLimit] = useState(child?.dailyMessageLimit ?? 0);
   const [cooldown, setCooldown] = useState(child?.cooldownSeconds ?? 0);
   const [usage, setUsage] = useState<UsageStats | null>(null);
+  const { isSubscribed, requirePremium } = useSubscriptionGate();
 
   useEffect(() => {
     if (child) {
@@ -185,9 +187,16 @@ export default function ChildDetailScreen() {
               <Text style={styles.settingLabel}>Faith Mode</Text>
               <Text style={styles.settingSub}>Enable Christian values layer</Text>
             </View>
+            {!isSubscribed && (
+              <Pressable onPress={() => requirePremium("Faith Mode")} style={styles.premiumBadge}>
+                <Feather name="star" size={12} color={Colors.primary} />
+                <Text style={styles.premiumBadgeText}>Premium</Text>
+              </Pressable>
+            )}
             <Switch
               value={faithMode}
               onValueChange={(v) => {
+                if (!isSubscribed) { requirePremium("Faith Mode"); return; }
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setFaithMode(v);
                 updateSettings({ faithModeEnabled: v });
@@ -198,8 +207,16 @@ export default function ChildDetailScreen() {
           </View>
         </View>
 
-        <Text style={styles.sectionLabel}>ANTI-ADDICTION CONTROLS</Text>
-        <View style={styles.settingsGroup}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <Text style={styles.sectionLabel}>ANTI-ADDICTION CONTROLS</Text>
+          {!isSubscribed && (
+            <Pressable onPress={() => requirePremium("Anti-Addiction Controls")} style={[styles.premiumBadge, { marginRight: 16, marginTop: 16 }]}>
+              <Feather name="star" size={12} color={Colors.primary} />
+              <Text style={styles.premiumBadgeText}>Premium</Text>
+            </Pressable>
+          )}
+        </View>
+        <View style={[styles.settingsGroup, !isSubscribed && { opacity: 0.5 }]}>
           {usage && (
             <View style={styles.usageBar}>
               <View style={styles.usageStat}>
@@ -234,6 +251,7 @@ export default function ChildDetailScreen() {
                 key={val}
                 style={[styles.limitChip, dailyMsgLimit === val && styles.limitChipActive]}
                 onPress={() => {
+                  if (!isSubscribed) { requirePremium("Anti-Addiction Controls"); return; }
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setDailyMsgLimit(val);
                   updateSettings({ dailyMessageLimit: val });
@@ -263,6 +281,7 @@ export default function ChildDetailScreen() {
                 key={val}
                 style={[styles.limitChip, cooldown === val && styles.limitChipActive]}
                 onPress={() => {
+                  if (!isSubscribed) { requirePremium("Anti-Addiction Controls"); return; }
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setCooldown(val);
                   updateSettings({ cooldownSeconds: val });
@@ -292,6 +311,7 @@ export default function ChildDetailScreen() {
                 key={val}
                 style={[styles.limitChip, screenTimeLimit === val && styles.limitChipActive]}
                 onPress={() => {
+                  if (!isSubscribed) { requirePremium("Anti-Addiction Controls"); return; }
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setScreenTimeLimit(val);
                   updateSettings({ screenTimeLimitMinutes: val });
@@ -547,4 +567,19 @@ const styles = StyleSheet.create({
   convoName: { fontFamily: Fonts.bodySemiBold, fontSize: 14, color: Colors.text },
   convoPreview: { fontFamily: Fonts.body, fontSize: 12, color: Colors.textMid, marginTop: 1 },
   convoTime: { fontFamily: Fonts.body, fontSize: 11, color: Colors.sand },
+  premiumBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: `${Colors.primary}12`,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  premiumBadgeText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: 11,
+    color: Colors.primary,
+  },
 });

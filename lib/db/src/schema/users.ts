@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -26,8 +26,16 @@ export const usersTable = pgTable("users", {
   screenTimeLimitMinutes: integer("screen_time_limit_minutes").default(0),
   dailyMessageLimit: integer("daily_message_limit").default(0),
   cooldownSeconds: integer("cooldown_seconds").default(0),
+  subscriptionTier: text("subscription_tier"),
+  resetToken: text("reset_token"),
+  resetTokenExpires: timestamp("reset_token_expires"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("idx_users_parent_id").on(table.parentId),
+  index("idx_users_email").on(table.email),
+  index("idx_users_role").on(table.role),
+  index("idx_users_password_hash").on(table.passwordHash),
+]);
 
 export const insertUserSchema = createInsertSchema(usersTable).omit({ id: true, createdAt: true });
 export type InsertUser = z.infer<typeof insertUserSchema>;

@@ -16,7 +16,11 @@ export default function MessagesScreen() {
   const { children } = useDashboard();
 
   useFocusEffect(
-    React.useCallback(() => { refreshConvos(); }, [refreshConvos])
+    React.useCallback(() => {
+      refreshConvos();
+      const interval = setInterval(refreshConvos, 5000);
+      return () => clearInterval(interval);
+    }, [refreshConvos])
   );
   const [selectedChild, setSelectedChild] = useState<number | null>(null);
 

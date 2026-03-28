@@ -214,6 +214,35 @@ export default function SettingsScreen() {
           <Text style={styles.logoutText}>Sign Out</Text>
         </Pressable>
 
+        <Pressable
+          style={styles.deleteBtn}
+          onPress={() => {
+            Alert.alert(
+              "Delete Account",
+              "This will permanently delete your account and all children's accounts. This cannot be undone.",
+              [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Delete Everything",
+                  style: "destructive",
+                  onPress: async () => {
+                    try {
+                      await api.auth.deleteAccount();
+                      await logout();
+                      router.replace("/onboarding");
+                    } catch {
+                      Alert.alert("Error", "Failed to delete account. Please try again.");
+                    }
+                  },
+                },
+              ]
+            );
+          }}
+        >
+          <Feather name="trash-2" size={16} color={Colors.alert4} />
+          <Text style={styles.deleteText}>Delete Account</Text>
+        </Pressable>
+
         <Text style={styles.version}>Tether v1.0.0</Text>
       </ScrollView>
     </View>
@@ -390,6 +419,16 @@ const styles = StyleSheet.create({
     borderColor: `${Colors.alert4}20`,
   },
   logoutText: { fontFamily: Fonts.bodyBold, fontSize: 15, color: Colors.alert4 },
+  deleteBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 14,
+    marginHorizontal: 16,
+    marginTop: 12,
+  },
+  deleteText: { fontFamily: Fonts.body, fontSize: 13, color: Colors.alert4 },
   version: {
     fontFamily: Fonts.body,
     fontSize: 12,

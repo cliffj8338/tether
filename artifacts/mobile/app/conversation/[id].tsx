@@ -52,7 +52,11 @@ export default function ConversationScreen() {
   const convo = conversations.find((c) => c.id === convoId);
 
   useFocusEffect(
-    useCallback(() => { refreshMessages(); }, [refreshMessages])
+    useCallback(() => {
+      refreshMessages();
+      const interval = setInterval(refreshMessages, 3000);
+      return () => clearInterval(interval);
+    }, [refreshMessages])
   );
 
   const [inputText, setInputText] = useState("");

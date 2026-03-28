@@ -20,6 +20,7 @@ import { useAuth } from "@/context/AuthContext";
 import { TetherButton } from "@/components/ui/TetherButton";
 import { TetherInput } from "@/components/ui/TetherInput";
 import { api } from "@/services/api";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 
 const AVATAR_COLORS = [
   "#7B8EC4",
@@ -35,11 +36,15 @@ const AVATAR_COLORS = [
 export default function AddChildScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { canAddChild } = useSubscriptionGate();
+  const [existingChildCount, setExistingChildCount] = useState(0);
 
   React.useEffect(() => {
     if (user && user.role !== "parent") {
       router.back();
+      return;
     }
+    api.children.list().then((kids) => setExistingChildCount(kids.length)).catch(() => {});
   }, [user]);
 
   const [childName, setChildName] = useState("");
@@ -62,6 +67,7 @@ export default function AddChildScreen() {
   };
 
   const handleAddChild = async () => {
+    if (!canAddChild(existingChildCount)) return;
     if (!childName.trim()) {
       Alert.alert("Missing Name", "Please enter your child's name.");
       return;

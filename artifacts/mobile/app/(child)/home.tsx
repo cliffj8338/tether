@@ -25,6 +25,13 @@ export default function ChildHomeScreen() {
       if (user?.id) {
         api.children.usage(user.id).then(setUsage).catch(() => {});
       }
+      const interval = setInterval(() => {
+        refresh();
+        if (user?.id) {
+          api.children.usage(user.id).then(setUsage).catch(() => {});
+        }
+      }, 5000);
+      return () => clearInterval(interval);
     }, [refresh, user?.id])
   );
 

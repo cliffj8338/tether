@@ -43,7 +43,7 @@ const slides = [
   },
 ];
 
-type OnboardingStep = "slides" | "role" | "parent-signup" | "parent-login" | "child-method" | "child-login-code" | "child-login-email" | "child-join";
+type OnboardingStep = "slides" | "role" | "parent-signup" | "parent-login" | "forgot-password" | "reset-password" | "child-method" | "child-login-code" | "child-login-email" | "child-join";
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
@@ -62,6 +62,8 @@ export default function OnboardingScreen() {
   const [childPin, setChildPin] = useState("");
   const [childAge, setChildAge] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetCode, setResetCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   const handleSignup = async () => {
     if (!parentName.trim() || !email.trim() || !password.trim()) {
@@ -358,6 +360,118 @@ export default function OnboardingScreen() {
           />
           <View style={{ marginTop: 8 }}>
             <TetherButton title="Sign In" onPress={handleLogin} loading={loading} />
+          </View>
+          <Pressable onPress={() => setStep("forgot-password")} style={{ marginTop: 16, alignSelf: "center" }}>
+            <Text style={{ fontFamily: Fonts.bodySemiBold, fontSize: 14, color: Colors.accent }}>Forgot Password?</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
+  if (step === "forgot-password") {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
+        <View style={styles.formHeader}>
+          <Pressable onPress={() => setStep("parent-login")} style={styles.backBtn}>
+            <Feather name="arrow-left" size={22} color={Colors.text} />
+          </Pressable>
+          <Text style={styles.formTitle}>Reset Password</Text>
+          <Text style={styles.formSubtitle}>Enter your email and we'll send you a reset code</Text>
+        </View>
+        <View style={styles.formBody}>
+          <TetherInput
+            label="Email"
+            placeholder="you@example.com"
+            value={email}
+            onChangeText={setEmail}
+            icon="mail"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <View style={{ marginTop: 8 }}>
+            <TetherButton
+              title="Send Reset Code"
+              loading={loading}
+              onPress={async () => {
+                if (!email.trim()) {
+                  Alert.alert("Missing Info", "Please enter your email.");
+                  return;
+                }
+                setLoading(true);
+                try {
+                  await api.auth.forgotPassword(email.trim());
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  Alert.alert("Check Your Email", "We sent a reset code to your email.", [
+                    { text: "Enter Code", onPress: () => setStep("reset-password") },
+                  ]);
+                } catch {
+                  Alert.alert("Error", "Failed to send reset code. Try again.");
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  if (step === "reset-password") {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
+        <View style={styles.formHeader}>
+          <Pressable onPress={() => setStep("forgot-password")} style={styles.backBtn}>
+            <Feather name="arrow-left" size={22} color={Colors.text} />
+          </Pressable>
+          <Text style={styles.formTitle}>Enter Reset Code</Text>
+          <Text style={styles.formSubtitle}>Check your email for the 8-character code</Text>
+        </View>
+        <View style={styles.formBody}>
+          <TetherInput
+            label="Reset Code"
+            placeholder="ABCD1234"
+            value={resetCode}
+            onChangeText={setResetCode}
+            icon="key"
+            autoCapitalize="characters"
+          />
+          <TetherInput
+            label="New Password"
+            placeholder="At least 6 characters"
+            value={newPassword}
+            onChangeText={setNewPassword}
+            secureTextEntry
+            icon="lock"
+            autoCapitalize="none"
+          />
+          <View style={{ marginTop: 8 }}>
+            <TetherButton
+              title="Reset Password"
+              loading={loading}
+              onPress={async () => {
+                if (!resetCode.trim() || !newPassword.trim()) {
+                  Alert.alert("Missing Info", "Please enter the code and new password.");
+                  return;
+                }
+                if (newPassword.length < 6) {
+                  Alert.alert("Too Short", "Password must be at least 6 characters.");
+                  return;
+                }
+                setLoading(true);
+                try {
+                  const result = await api.auth.resetPassword(email.trim(), resetCode.trim(), newPassword);
+                  await login(result.token, result.user);
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  router.replace("/(parent)/dashboard" as any);
+                } catch (err: any) {
+                  Alert.alert("Error", err?.message || "Invalid or expired code.");
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            />
           </View>
         </View>
       </View>

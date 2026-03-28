@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, real, jsonb, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, real, jsonb, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -191,6 +191,7 @@ export const behavioralMetricsTable = pgTable("behavioral_metrics", {
 }, (table) => [
   index("idx_behavioral_user").on(table.userId),
   index("idx_behavioral_date").on(table.periodDate),
+  uniqueIndex("idx_behavioral_user_period").on(table.userId, table.periodDate),
 ]);
 
 export const networkGraphTable = pgTable("network_graph", {
@@ -231,6 +232,7 @@ export const churnPredictionsTable = pgTable("churn_predictions", {
   index("idx_churn_user").on(table.userId),
   index("idx_churn_risk").on(table.churnRiskScore),
   index("idx_churn_computed").on(table.computedAt),
+  uniqueIndex("idx_churn_user_unique").on(table.userId),
 ]);
 
 export const temporalAnomaliesTable = pgTable("temporal_anomalies", {

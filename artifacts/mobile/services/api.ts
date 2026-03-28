@@ -221,6 +221,9 @@ export const api = {
     approve(contactId: number): Promise<Contact> {
       return request(`/contacts/${contactId}/approve`, { method: "POST" });
     },
+    search(query: string): Promise<{ id: number; displayName: string; avatarColor: string }[]> {
+      return request(`/contacts/search?q=${encodeURIComponent(query)}`);
+    },
   },
 
   alerts: {
@@ -247,6 +250,24 @@ export const api = {
     },
     feed(): Promise<FeedItem[]> {
       return request("/dashboard/feed");
+    },
+  },
+
+  auth: {
+    forgotPassword(email: string): Promise<{ message: string }> {
+      return request("/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+    },
+    resetPassword(email: string, code: string, newPassword: string): Promise<{ message: string; token: string; user: any }> {
+      return request("/auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify({ email, code, newPassword }),
+      });
+    },
+    deleteAccount(): Promise<{ message: string }> {
+      return request("/users/me", { method: "DELETE" });
     },
   },
 };

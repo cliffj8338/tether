@@ -5,9 +5,10 @@ import { eq, and, sql } from "drizzle-orm";
 import { AddChildBody, UpdateChildBody, UpdateTrustLevelBody } from "@workspace/api-zod";
 import { getUserFromToken } from "../lib/auth";
 import crypto from "crypto";
+import bcrypt from "bcryptjs";
 
-function hashPassword(password: string): string {
-  return crypto.createHash("sha256").update(password).digest("hex");
+async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10);
 }
 
 const router: IRouter = Router();
@@ -56,6 +57,8 @@ router.get("/children", async (req, res) => {
   }
 });
 
+const FREE_CHILD_LIMIT = 1;
+
 router.post("/children", async (req, res) => {
   try {
     const user = await getUserFromToken(req);
@@ -63,12 +66,19 @@ router.post("/children", async (req, res) => {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
+
+    const existingChildren = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.parentId, user.id));
+    if (existingChildren.length >= FREE_CHILD_LIMIT && !user.subscriptionTier) {
+      res.status(403).json({ error: "Free accounts can add 1 child. Upgrade to premium for unlimited children." });
+      return;
+    }
+
     const body = AddChildBody.parse(req.body);
     const [child] = await db.insert(usersTable).values({
       displayName: body.displayName,
       role: "child",
       parentId: user.id,
-      pin: hashPassword(body.pin),
+      pin: await hashPassword(body.pin),
       grade: body.grade,
       age: body.age,
       avatarColor: body.avatarColor ?? "#7B8EC4",

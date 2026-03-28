@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -7,13 +7,15 @@ export const alertLevelEnum = pgEnum("alert_level", ["none", "level1", "level2",
 export const contactsTable = pgTable("contacts", {
   id: serial("id").primaryKey(),
   childId: integer("child_id").notNull(),
-  contactChildId: integer("contact_child_id").notNull(),
+  contactChildId: integer("contact_child_id"),
   contactName: text("contact_name").notNull(),
   avatarColor: text("avatar_color").default("#7B8EC4").notNull(),
   approvedByParent: boolean("approved_by_parent").default(false),
   parentIntroSent: boolean("parent_intro_sent").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("idx_contacts_child_id").on(table.childId),
+]);
 
 export const conversationsTable = pgTable("conversations", {
   id: serial("id").primaryKey(),
@@ -24,7 +26,10 @@ export const conversationsTable = pgTable("conversations", {
   unreadCount: integer("unread_count").default(0),
   isPaused: boolean("is_paused").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("idx_conversations_child_id").on(table.childId),
+  index("idx_conversations_contact_id").on(table.contactId),
+]);
 
 export const messagesTable = pgTable("messages", {
   id: serial("id").primaryKey(),
@@ -36,7 +41,11 @@ export const messagesTable = pgTable("messages", {
   isBlocked: boolean("is_blocked").default(false),
   isDelivered: boolean("is_delivered").default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("idx_messages_conversation_id").on(table.conversationId),
+  index("idx_messages_sender_id").on(table.senderId),
+  index("idx_messages_created_at").on(table.createdAt),
+]);
 
 export const alertsTable = pgTable("alerts", {
   id: serial("id").primaryKey(),
@@ -48,7 +57,11 @@ export const alertsTable = pgTable("alerts", {
   description: text("description"),
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("idx_alerts_parent_id").on(table.parentId),
+  index("idx_alerts_child_id").on(table.childId),
+  index("idx_alerts_created_at").on(table.createdAt),
+]);
 
 export const insertContactSchema = createInsertSchema(contactsTable).omit({ id: true, createdAt: true });
 export const insertConversationSchema = createInsertSchema(conversationsTable).omit({ id: true, createdAt: true });

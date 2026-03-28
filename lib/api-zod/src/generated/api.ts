@@ -258,6 +258,7 @@ export const GetContactsResponse = zod.array(GetContactsResponseItem);
 export const RequestContactBody = zod.object({
   childId: zod.number(),
   contactName: zod.string(),
+  contactChildId: zod.number().optional(),
 });
 
 /**

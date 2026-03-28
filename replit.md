@@ -178,7 +178,27 @@ Tether uses a strict two-layer data architecture to ensure PII can never co-ming
 
 ## Family Code Enrollment
 
-A system for child enrollment using unique family codes (`TETHER-XXXXXX`). Parents receive auto-generated family codes upon registration. Child enrollment supports joining via code, or logging in with code/parent email + PIN. All PINs are SHA-256 hashed.
+A system for child enrollment using unique family codes (`TETHER-XXXXXX`). Parents receive auto-generated family codes upon registration. Child enrollment supports joining via code, or logging in with code/parent email + PIN. All PINs are bcrypt hashed (10 rounds).
+
+## Security Hardening
+
+- **Password Hashing**: bcrypt (10 rounds) replaces SHA-256. Legacy SHA-256 hashes auto-upgrade on login.
+- **Auth Tokens**: Opaque tokens via `crypto.randomBytes(48).toString("base64url")` stored in `passwordHash` column. Dual-mode token lookup for backwards compat.
+- **Rate Limiting**: In-memory rate limiting on auth routes (login, register, child-login, forgot-password).
+- **Account Lifecycle**: Forgot password (email reset code via Resend), reset password, delete account (cascades to children).
+
+## Subscription Feature Gating
+
+- **Hook**: `useSubscriptionGate` in `hooks/useSubscriptionGate.ts`
+- **Free Tier**: 1 child, basic messaging
+- **Premium Tier**: Unlimited children, anti-addiction controls, Faith Mode, advanced alerts
+- **Paywall**: Premium badge on gated features, redirects to `/paywall` (RevenueCat integration)
+
+## Contact System
+
+- `contactChildId` is nullable (was formerly hardcoded to 0)
+- Search endpoint: `GET /contacts/search?q=` finds children by name or family code
+- Contacts start as pending, require parent approval before conversations are created
 
 # External Dependencies
 
