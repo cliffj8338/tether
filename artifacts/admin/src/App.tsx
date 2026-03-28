@@ -23,6 +23,7 @@ import VersionConfig from "@/pages/VersionConfig";
 import SystemStatus from "@/pages/SystemStatus";
 import PlatformCosts from "@/pages/PlatformCosts";
 import DemoData from "@/pages/DemoData";
+import DemoBanner from "@/components/DemoBanner";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },
@@ -220,6 +221,7 @@ function AuthenticatedApp() {
 
   return (
     <div className="min-h-screen bg-background">
+      <DemoBanner />
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
       <main className={`transition-all duration-200 ${collapsed ? "ml-16" : "ml-56"}`}>
         <div className="p-6 max-w-[1400px] mx-auto">
