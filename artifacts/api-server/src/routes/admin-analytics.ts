@@ -376,10 +376,28 @@ router.get("/admin/analytics/demographics", async (req, res) => {
       .from(usersTable)
       .where(eq(usersTable.isPaused, true));
 
+    const FEMALE_NAMES = new Set(["Olivia","Emma","Ava","Sophia","Isabella","Mia","Charlotte","Amelia","Harper","Evelyn","Abigail","Emily","Ella","Elizabeth","Sofia","Avery","Scarlett","Grace","Chloe","Riley","Layla","Zoey","Lily","Hannah","Nora","Lillian","Addison","Eleanor","Natalie","Luna","Savannah","Brooklyn","Leah","Zoe","Stella","Hazel","Ellie","Paisley","Audrey","Aria","Aurora","Bella","Camila","Claire","Daisy","Eden","Eliana","Faith","Gabriella","Gianna","Hailey","Isabel","Ivy","Jade","Jasmine","Julia","Keira","Kennedy","Kinsley","Kylie","Leila","Lyla","Mackenzie","Madison","Maya","Mila","Naomi","Nevaeh","Paige","Penelope","Piper","Quinn","Reagan","Rose","Ruby","Sadie","Sara","Skyler","Valentina","Victoria","Violet","Willow"]);
+    const childNames = await db
+      .select({ displayName: usersTable.displayName })
+      .from(usersTable)
+      .where(eq(usersTable.role, "child"));
+    let femaleCount = 0;
+    let maleCount = 0;
+    for (const c of childNames) {
+      const firstName = c.displayName.split(" ")[0];
+      if (FEMALE_NAMES.has(firstName)) femaleCount++;
+      else maleCount++;
+    }
+    const genderDistribution = [
+      { gender: "Male", count: maleCount },
+      { gender: "Female", count: femaleCount },
+    ];
+
     res.json({
       ageDistribution,
       gradeDistribution,
       trustLevelDistribution,
+      genderDistribution,
       faithMode: {
         enabled: faithModeStats?.enabled ?? 0,
         total: faithModeStats?.total ?? 0,

@@ -14,9 +14,12 @@ export default function Demographics() {
   if (isLoading) return <div className="p-8 text-muted-foreground">Loading demographics...</div>;
   if (!data) return <EmptyState message="No demographic data yet" />;
 
-  const { ageDistribution, gradeDistribution, trustLevelDistribution, faithMode, familySizeDistribution, avgChildrenPerFamily, pausedAccounts } = data;
+  const { ageDistribution, gradeDistribution, trustLevelDistribution, genderDistribution, faithMode, familySizeDistribution, avgChildrenPerFamily, pausedAccounts } = data;
 
   const familySizeData = Object.entries(familySizeDistribution).map(([size, count]) => ({ size: `${size} child${size === "1" ? "" : "ren"}`, count }));
+  const totalChildren = ageDistribution.reduce((s: number, a: any) => s + a.count, 0);
+  const maleCount = genderDistribution?.find((g: any) => g.gender === "Male")?.count ?? 0;
+  const femaleCount = genderDistribution?.find((g: any) => g.gender === "Female")?.count ?? 0;
 
   return (
     <div className="space-y-6">
@@ -25,11 +28,12 @@ export default function Demographics() {
         <p className="text-sm text-muted-foreground mt-1">User composition and behavioral patterns</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <KpiCard title="Total Children" value={totalChildren.toLocaleString()} icon={<span className="text-lg">C</span>} color="text-chart-2" />
+        <KpiCard title="Male / Female" value={`${totalChildren > 0 ? ((maleCount / totalChildren) * 100).toFixed(0) : 0}% / ${totalChildren > 0 ? ((femaleCount / totalChildren) * 100).toFixed(0) : 0}%`} subtitle={`${maleCount.toLocaleString()} / ${femaleCount.toLocaleString()}`} icon={<span className="text-lg">G</span>} color="text-chart-1" />
         <KpiCard title="Faith Mode" value={`${faithMode.adoptionRate}%`} subtitle={`${faithMode.enabled} of ${faithMode.total} children`} icon={<span className="text-lg">+</span>} color="text-chart-3" />
         <KpiCard title="Avg Family Size" value={avgChildrenPerFamily} subtitle="children per family" icon={<span className="text-lg">F</span>} />
         <KpiCard title="Paused Accounts" value={pausedAccounts} icon={<span className="text-lg">P</span>} color="text-chart-3" />
-        <KpiCard title="Total Children" value={ageDistribution.reduce((s, a) => s + a.count, 0)} icon={<span className="text-lg">C</span>} color="text-chart-2" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -64,11 +68,11 @@ export default function Demographics() {
         </ChartCard>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <ChartCard title="Grade Distribution" subtitle="Children by school grade">
           {gradeDistribution.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={gradeDistribution.filter(g => g.grade !== null)}>
+              <BarChart data={gradeDistribution.filter((g: any) => g.grade !== null)}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="grade" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
@@ -79,12 +83,26 @@ export default function Demographics() {
           ) : <EmptyState message="No grade data" />}
         </ChartCard>
 
+        <ChartCard title="Gender Distribution" subtitle="Estimated from name analysis">
+          {genderDistribution && genderDistribution.length > 0 ? (
+            <ResponsiveContainer width="100%" height={240}>
+              <PieChart>
+                <Pie data={genderDistribution} dataKey="count" nameKey="gender" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                  <Cell fill="hsl(var(--chart-1))" />
+                  <Cell fill="hsl(var(--chart-4))" />
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : <EmptyState message="No gender data" />}
+        </ChartCard>
+
         <ChartCard title="Family Size" subtitle="Distribution of children per family">
           {familySizeData.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
-                <Pie data={familySizeData} dataKey="count" nameKey="size" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                  {familySizeData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                <Pie data={familySizeData} dataKey="count" nameKey="size" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                  {familySizeData.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Tooltip />
               </PieChart>
