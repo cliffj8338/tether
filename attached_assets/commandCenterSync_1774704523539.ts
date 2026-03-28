@@ -73,17 +73,20 @@ export async function syncCommandCenter(updatedBy = 'admin'): Promise<void> {
     updatedAt: new Date().toISOString(),
   };
 
+  // Try PATCH first (update if exists), fall back to POST (create if not)
   const patchUrl = `${FIRESTORE_BASE}/commandcenter/tether?key=${BLUEPRINT_API_KEY}`;
   const postUrl  = `${FIRESTORE_BASE}/commandcenter?documentId=tether&key=${BLUEPRINT_API_KEY}`;
   const body     = buildBody(payload);
 
   try {
+    // Attempt PATCH (upsert)
     let res = await fetch(patchUrl, {
       method:  'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body,
     });
 
+    // If document doesn't exist yet, PATCH may 404 — use POST to create
     if (res.status === 404) {
       console.log('[CommandCenter] Document not found, creating via POST...');
       res = await fetch(postUrl, {
