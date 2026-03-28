@@ -23,14 +23,14 @@ export default function Engagement() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard title="Total Sessions" value={sessions.totalSessions ?? 0} icon={<span className="text-lg">S</span>} />
-        <KpiCard title="Avg Duration" value={sessions.avgDuration ? `${Math.round(sessions.avgDuration / 60)}m` : "—"} icon={<span className="text-lg">T</span>} color="text-chart-2" />
-        <KpiCard title="Avg Pages/Session" value={sessions.avgPages ? Number(sessions.avgPages).toFixed(1) : "—"} icon={<span className="text-lg">P</span>} color="text-chart-3" />
-        <KpiCard title="Avg Events/Session" value={sessions.avgEvents ? Number(sessions.avgEvents).toFixed(1) : "—"} icon={<span className="text-lg">E</span>} color="text-chart-4" />
+        <KpiCard title="Total Sessions" value={sessions.totalSessions ?? 0} icon={<span className="text-lg">S</span>} info="Total app sessions in the last 30 days. A session starts when a user opens the app and ends after inactivity." />
+        <KpiCard title="Avg Duration" value={sessions.avgDuration ? `${Math.round(sessions.avgDuration / 60)}m` : "—"} icon={<span className="text-lg">T</span>} color="text-chart-2" info="Average time users spend per session. Tether's anti-addiction design targets 10-15 minute healthy sessions." />
+        <KpiCard title="Avg Pages/Session" value={sessions.avgPages ? Number(sessions.avgPages).toFixed(1) : "—"} icon={<span className="text-lg">P</span>} color="text-chart-3" info="Average number of screens visited per session. Higher values indicate deeper engagement with features." />
+        <KpiCard title="Avg Events/Session" value={sessions.avgEvents ? Number(sessions.avgEvents).toFixed(1) : "—"} icon={<span className="text-lg">E</span>} color="text-chart-4" info="Average actions (taps, sends, opens) per session. Measures active engagement vs passive browsing." />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Messaging by Hour" subtitle="When are children most active?">
+        <ChartCard title="Messaging by Hour" subtitle="When are children most active?" info="Hourly message volume across all users. Helps identify peak usage times and whether children are messaging during school hours or late at night.">
           {messagingPatterns.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={messagingPatterns}>
@@ -44,7 +44,7 @@ export default function Engagement() {
           ) : <EmptyState message="No messaging pattern data" />}
         </ChartCard>
 
-        <ChartCard title="Day of Week" subtitle="Message volume by day">
+        <ChartCard title="Day of Week" subtitle="Message volume by day" info="Which days see the most messaging. Weekdays vs weekends can reveal school-related communication patterns.">
           {dayOfWeekPattern.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={dayOfWeekPattern.map(d => ({ ...d, day: DAY_NAMES[d.dow] ?? d.dow }))}>
@@ -59,7 +59,7 @@ export default function Engagement() {
         </ChartCard>
       </div>
 
-      <ChartCard title="Daily Sessions" subtitle="Session volume over 30 days">
+      <ChartCard title="Daily Sessions" subtitle="Session volume over 30 days" info="Day-by-day session count. Dips may indicate outages, school events, or holidays. Growth trends show adoption momentum.">
         {dailySessions.length > 0 ? (
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={dailySessions}>
@@ -74,7 +74,7 @@ export default function Engagement() {
       </ChartCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Sessions by Source" subtitle="App vs. web traffic">
+        <ChartCard title="Sessions by Source" subtitle="App vs. web traffic" info="Breakdown of sessions by platform — mobile app vs web. Helps prioritize development resources.">
           {sessionsBySource.length > 0 ? (
             <div className="space-y-3">
               {sessionsBySource.map((s, i) => (
@@ -92,7 +92,7 @@ export default function Engagement() {
           ) : <EmptyState message="No source data" />}
         </ChartCard>
 
-        <ChartCard title="Top Events" subtitle="Most frequent tracked events (30 days)">
+        <ChartCard title="Top Events" subtitle="Most frequent tracked events (30 days)" info="Most common user actions tracked in the app. Shows which features are used most and which may need attention.">
           {topEvents.length > 0 ? (
             <div className="space-y-2 max-h-[260px] overflow-y-auto">
               {topEvents.map((e, i) => (

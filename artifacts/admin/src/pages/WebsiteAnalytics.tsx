@@ -21,14 +21,14 @@ export default function WebsiteAnalytics() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard title="Total Sessions" value={webSessions.totalSessions ?? 0} icon={<span className="text-lg">S</span>} />
-        <KpiCard title="Avg Duration" value={webSessions.avgDuration ? `${Math.round(webSessions.avgDuration / 60)}m` : "—"} icon={<span className="text-lg">T</span>} color="text-chart-2" />
-        <KpiCard title="Pages/Session" value={webSessions.avgPages ? Number(webSessions.avgPages).toFixed(1) : "—"} icon={<span className="text-lg">P</span>} color="text-chart-3" />
-        <KpiCard title="Page Views" value={pageViews.reduce((s, p) => s + p.count, 0)} icon={<span className="text-lg">V</span>} color="text-chart-4" />
+        <KpiCard title="Total Sessions" value={webSessions.totalSessions ?? 0} icon={<span className="text-lg">S</span>} info="Total visits to the Tether marketing website (tetherapp.app) in the last 30 days." />
+        <KpiCard title="Avg Duration" value={webSessions.avgDuration ? `${Math.round(webSessions.avgDuration / 60)}m` : "—"} icon={<span className="text-lg">T</span>} color="text-chart-2" info="Average time visitors spend on the website per session. Longer sessions indicate stronger interest in the product." />
+        <KpiCard title="Pages/Session" value={webSessions.avgPages ? Number(webSessions.avgPages).toFixed(1) : "—"} icon={<span className="text-lg">P</span>} color="text-chart-3" info="Average number of pages viewed per website visit. Higher values mean visitors are exploring more content." />
+        <KpiCard title="Page Views" value={pageViews.reduce((s, p) => s + p.count, 0)} icon={<span className="text-lg">V</span>} color="text-chart-4" info="Total page views across the marketing website. Includes all pages: home, about, safety, research, etc." />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Daily Traffic" subtitle="Total events and unique visitors (30 days)">
+        <ChartCard title="Daily Traffic" subtitle="Total events and unique visitors (30 days)" info="Daily website traffic broken into total events (all actions) and unique visitors. A growing gap between the two means returning visitors.">
           {dailyTraffic.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={dailyTraffic}>
@@ -43,7 +43,7 @@ export default function WebsiteAnalytics() {
           ) : <EmptyState message="No traffic data" />}
         </ChartCard>
 
-        <ChartCard title="Waitlist Conversions" subtitle="Daily waitlist signups from website">
+        <ChartCard title="Waitlist Conversions" subtitle="Daily waitlist signups from website" info="Daily count of visitors who signed up for the Tether waitlist. This is the primary conversion metric for the marketing site.">
           {waitlistConversions.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={waitlistConversions}>
@@ -59,7 +59,7 @@ export default function WebsiteAnalytics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Top Pages" subtitle="Most viewed pages (30 days)">
+        <ChartCard title="Top Pages" subtitle="Most viewed pages (30 days)" info="Which website pages get the most views. Helps understand what content resonates with visitors and where to focus improvements.">
           {pageViews.length > 0 ? (
             <div className="space-y-2 max-h-[260px] overflow-y-auto">
               {pageViews.map((p, i) => (
@@ -72,7 +72,7 @@ export default function WebsiteAnalytics() {
           ) : <EmptyState message="No page view data" />}
         </ChartCard>
 
-        <ChartCard title="Top Referrers" subtitle="Where traffic comes from">
+        <ChartCard title="Top Referrers" subtitle="Where traffic comes from" info="Sources that send visitors to the website. Direct means typed URL or bookmark. Other sources show marketing channel effectiveness.">
           {referrers.length > 0 ? (
             <div className="space-y-2 max-h-[260px] overflow-y-auto">
               {referrers.map((r, i) => (

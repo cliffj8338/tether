@@ -42,14 +42,14 @@ export default function ConversationIntelligence() {
       {hasData ? (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <KpiCard title="Avg Words/Message" value={averages.avgWordCount ? Number(averages.avgWordCount).toFixed(1) : "—"} icon={<span className="text-lg">Aa</span>} />
-            <KpiCard title="Avg Sentiment" value={averages.avgSentiment ? Number(averages.avgSentiment).toFixed(2) : "—"} subtitle={Number(averages.avgSentiment) > 0 ? "Positive" : Number(averages.avgSentiment) < 0 ? "Negative" : "Neutral"} icon={<span className="text-lg">{Number(averages.avgSentiment) > 0 ? "+" : Number(averages.avgSentiment) < 0 ? "-" : "~"}</span>} color={Number(averages.avgSentiment) > 0 ? "text-chart-1" : "text-chart-5"} />
-            <KpiCard title="Emoji Usage" value={`${(Number(averages.emojiRate ?? 0) * 100).toFixed(0)}%`} icon={<span className="text-lg">:)</span>} color="text-chart-3" />
-            <KpiCard title="Vocabulary Level" value={`${(Number(averages.avgComplexity ?? 0) * 100).toFixed(0)}%`} subtitle="Complexity score" icon={<span className="text-lg">V</span>} color="text-chart-4" />
+            <KpiCard title="Avg Words/Message" value={averages.avgWordCount ? Number(averages.avgWordCount).toFixed(1) : "—"} icon={<span className="text-lg">Aa</span>} info="Average number of words per message across all conversations. A declining trend may signal disengagement or fatigue." />
+            <KpiCard title="Avg Sentiment" value={averages.avgSentiment ? Number(averages.avgSentiment).toFixed(2) : "—"} subtitle={Number(averages.avgSentiment) > 0 ? "Positive" : Number(averages.avgSentiment) < 0 ? "Negative" : "Neutral"} icon={<span className="text-lg">{Number(averages.avgSentiment) > 0 ? "+" : Number(averages.avgSentiment) < 0 ? "-" : "~"}</span>} color={Number(averages.avgSentiment) > 0 ? "text-chart-1" : "text-chart-5"} info="Overall emotional tone of messages (-1 to +1). Positive values mean mostly happy/friendly communication. Negative values warrant review." />
+            <KpiCard title="Emoji Usage" value={`${(Number(averages.emojiRate ?? 0) * 100).toFixed(0)}%`} icon={<span className="text-lg">:)</span>} color="text-chart-3" info="Percentage of messages that contain emoji. Normal range for kids 8-14 is 30-60%. Very high rates may indicate replacing words with emoji." />
+            <KpiCard title="Vocabulary Level" value={`${(Number(averages.avgComplexity ?? 0) * 100).toFixed(0)}%`} subtitle="Complexity score" icon={<span className="text-lg">V</span>} color="text-chart-4" info="Vocabulary sophistication score (0-100%). Higher scores indicate more diverse word usage and complex sentence structures." />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <ChartCard title="Topic Distribution" subtitle="What are children talking about?">
+            <ChartCard title="Topic Distribution" subtitle="What are children talking about?" info="AI-classified conversation topics. Shows what subjects dominate children's messaging — useful for understanding developmental interests.">
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie data={topicDistribution.map(t => ({ ...t, name: TOPIC_LABELS[t.topic] ?? t.topic }))} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={100} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
@@ -60,7 +60,7 @@ export default function ConversationIntelligence() {
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title="Emotional Tone Radar" subtitle="Distribution of emotional qualities">
+            <ChartCard title="Emotional Tone Radar" subtitle="Distribution of emotional qualities" info="Radar chart showing the balance of emotional tones (joy, sadness, anger, fear, etc.) across all messages. Healthy communication shows a diverse spread.">
               <ResponsiveContainer width="100%" height={300}>
                 <RadarChart data={emotionalToneDistribution.slice(0, 10).map(t => ({ tone: t.tone.charAt(0).toUpperCase() + t.tone.slice(1), count: t.count }))}>
                   <PolarGrid stroke="hsl(var(--border))" />
@@ -72,7 +72,7 @@ export default function ConversationIntelligence() {
             </ChartCard>
           </div>
 
-          <ChartCard title="Sentiment Trend" subtitle="Average sentiment score over time (-1 negative, +1 positive)">
+          <ChartCard title="Sentiment Trend" subtitle="Average sentiment score over time (-1 negative, +1 positive)" info="Daily average sentiment across all messages. Dips below zero may correlate with school events, holidays, or social conflicts.">
             {sentimentOverTime.length > 0 ? (
               <ResponsiveContainer width="100%" height={240}>
                 <LineChart data={sentimentOverTime}>
@@ -87,7 +87,7 @@ export default function ConversationIntelligence() {
           </ChartCard>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <ChartCard title="Vocabulary by Age Group" subtitle="Complexity and word count by age">
+            <ChartCard title="Vocabulary by Age Group" subtitle="Complexity and word count by age" info="Compares vocabulary sophistication and message length across age groups. Older children typically show higher complexity scores.">
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={vocabularyByAge.filter(v => v.ageGroup)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -100,7 +100,7 @@ export default function ConversationIntelligence() {
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title="Sentiment by Topic" subtitle="How positive/negative are different subjects?">
+            <ChartCard title="Sentiment by Topic" subtitle="How positive/negative are different subjects?" info="Average emotional tone for each conversation topic. Negative-sentiment topics (conflict, identity) may need content filter attention.">
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={sentimentByTopic.map(s => ({ ...s, topic: TOPIC_LABELS[s.topic] ?? s.topic }))}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />

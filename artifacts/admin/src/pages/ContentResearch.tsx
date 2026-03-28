@@ -24,7 +24,7 @@ export default function ContentResearch() {
         <p className="text-sm text-muted-foreground mt-1">Deep linguistic and thematic analysis of children's digital communication</p>
       </div>
 
-      <ChartCard title="Communication Complexity Over Time" subtitle="Word count and vocabulary sophistication trends">
+      <ChartCard title="Communication Complexity Over Time" subtitle="Word count and vocabulary sophistication trends" info="Tracks how children's writing evolves. Rising complexity suggests language development. Sudden drops may indicate distress or disengagement.">
         {communicationComplexity.length > 0 ? (
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={communicationComplexity}>
@@ -42,7 +42,7 @@ export default function ContentResearch() {
       </ChartCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Sentiment by Age Group" subtitle="Emotional valence distribution across age groups">
+        <ChartCard title="Sentiment by Age Group" subtitle="Emotional valence distribution across age groups" info="Shows the emotional tone of messages broken down by age. Younger children tend to be more positive; older children show more emotional range.">
           {sentimentByAge.length > 0 ? (
             <div className="space-y-4">
               {Object.entries(
@@ -83,7 +83,7 @@ export default function ContentResearch() {
           ) : <EmptyState message="No sentiment data" />}
         </ChartCard>
 
-        <ChartCard title="Emoji & Slang Usage by Age" subtitle="Digital communication style markers">
+        <ChartCard title="Emoji & Slang Usage by Age" subtitle="Digital communication style markers" info="How emoji and slang usage varies by age group. Higher slang rates in younger children may indicate exposure to older peer influences.">
           {emojiSlangUsage.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={emojiSlangUsage.filter(e => e.ageGroup)}>
@@ -99,7 +99,7 @@ export default function ContentResearch() {
         </ChartCard>
       </div>
 
-      <ChartCard title="Trending Keywords" subtitle="Anonymized topic keywords extracted from conversations (last 30 days)">
+      <ChartCard title="Trending Keywords" subtitle="Anonymized topic keywords extracted from conversations (last 30 days)" info="Most frequently used topic words across all conversations. Larger text = higher frequency. No message content is stored — only aggregated keyword counts.">
         {keywords.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {keywords.map((k, i) => (

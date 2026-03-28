@@ -40,16 +40,16 @@ export default function PredictiveAnalytics() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard title="High Risk" value={dist.high} icon={<span className="text-lg text-red-500">!</span>} color="text-red-500" />
-        <KpiCard title="Medium Risk" value={dist.medium} icon={<span className="text-lg text-amber-500">~</span>} color="text-amber-500" />
-        <KpiCard title="Low Risk" value={dist.low} icon={<span className="text-lg text-green-500">ok</span>} color="text-green-500" />
-        <KpiCard title="Anomalies" value={data?.anomalies?.length ?? 0} icon={<span className="text-lg">A</span>} color="text-chart-4" />
+        <KpiCard title="High Risk" value={dist.high} icon={<span className="text-lg text-red-500">!</span>} color="text-red-500" info="Users with >70% probability of leaving the platform within 30 days. Based on the Silence Gradient model analyzing declining activity patterns." />
+        <KpiCard title="Medium Risk" value={dist.medium} icon={<span className="text-lg text-amber-500">~</span>} color="text-amber-500" info="Users with 30-70% churn probability. Often show early warning signs like longer response times or shorter messages." />
+        <KpiCard title="Low Risk" value={dist.low} icon={<span className="text-lg text-green-500">ok</span>} color="text-green-500" info="Users with <30% churn probability. These children are actively engaged with healthy communication patterns." />
+        <KpiCard title="Anomalies" value={data?.anomalies?.length ?? 0} icon={<span className="text-lg">A</span>} color="text-chart-4" info="Unusual patterns detected — sudden spikes or drops in metrics that deviate significantly from baseline. May indicate events like school breaks or conflicts." />
       </div>
 
       {hasChurnData ? (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <ChartCard title="Churn Risk Distribution" subtitle="The Silence Gradient model predicts user departure">
+            <ChartCard title="Churn Risk Distribution" subtitle="The Silence Gradient model predicts user departure" info="The Silence Gradient model measures declining message frequency and shortening message length over time to predict which users may stop using the platform.">
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100}
@@ -64,7 +64,7 @@ export default function PredictiveAnalytics() {
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title="Risk Factor Frequency" subtitle="What signals predict churn?">
+            <ChartCard title="Risk Factor Frequency" subtitle="What signals predict churn?" info="The most common warning signals across at-risk users. Shrinking messages and slower responses are the strongest churn predictors.">
               {churn && churn.riskFactorFrequency.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={churn.riskFactorFrequency.map(f => ({ ...f, label: FACTOR_LABELS[f.factor] ?? f.factor }))}>
@@ -81,7 +81,7 @@ export default function PredictiveAnalytics() {
             </ChartCard>
           </div>
 
-          <ChartCard title="At-Risk Users" subtitle="Users with highest churn probability (Silence Gradient model)">
+          <ChartCard title="At-Risk Users" subtitle="Users with highest churn probability (Silence Gradient model)" info="Individual users most likely to churn. Risk Score is the probability (0-100%). Silence Gradient measures how quickly their activity is declining.">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -135,7 +135,7 @@ export default function PredictiveAnalytics() {
       )}
 
       {data?.anomalies && data.anomalies.length > 0 && (
-        <ChartCard title="Temporal Anomalies" subtitle="Black Swan events and unusual patterns detected">
+        <ChartCard title="Temporal Anomalies" subtitle="Black Swan events and unusual patterns detected" info="Statistically significant deviations from normal patterns. Severity measures how far the observed value is from baseline. Active anomalies may need investigation.">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

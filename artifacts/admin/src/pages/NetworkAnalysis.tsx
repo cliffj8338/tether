@@ -39,16 +39,16 @@ export default function NetworkAnalysis() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard title="Graph Density" value={kpis.graphDensity ? Number(kpis.graphDensity).toFixed(3) : "—"} icon={<span className="text-lg">G</span>} />
-        <KpiCard title="Topology" value={topologyLabel} icon={<span className="text-lg">T</span>} color={topologyColor} />
-        <KpiCard title="Total Nodes" value={kpis.totalNodes ?? 0} icon={<span className="text-lg">N</span>} color="text-chart-2" />
-        <KpiCard title="Avg Reciprocity" value={kpis.avgReciprocity ? Number(kpis.avgReciprocity).toFixed(2) : "—"} icon={<span className="text-lg">R</span>} color="text-chart-3" />
+        <KpiCard title="Graph Density" value={kpis.graphDensity ? Number(kpis.graphDensity).toFixed(3) : "—"} icon={<span className="text-lg">G</span>} info="How interconnected children are (0-1). Higher density means more kids talk to each other. Low density may indicate cliques or isolation." />
+        <KpiCard title="Topology" value={topologyLabel} icon={<span className="text-lg">T</span>} color={topologyColor} info="Network shape: Mesh (healthy, everyone connects), Clustered (friend groups with some bridges), Star (one child dominates communication)." />
+        <KpiCard title="Total Nodes" value={kpis.totalNodes ?? 0} icon={<span className="text-lg">N</span>} color="text-chart-2" info="Total children with at least one conversation in the social graph. Children with zero conversations are not counted." />
+        <KpiCard title="Avg Reciprocity" value={kpis.avgReciprocity ? Number(kpis.avgReciprocity).toFixed(2) : "—"} icon={<span className="text-lg">R</span>} color="text-chart-3" info="How balanced conversations are (0-1). High reciprocity means both sides reply equally. Low values may indicate one-sided or ignored messages." />
       </div>
 
       {hasData ? (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <ChartCard title="Network Role Distribution" subtitle="Who plays what role in the social graph?">
+            <ChartCard title="Network Role Distribution" subtitle="Who plays what role in the social graph?" info="Leaders connect many groups. Influencers trigger the most replies. Initiators start conversations. Observers mostly read. Participants reply but rarely start.">
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie
@@ -65,7 +65,7 @@ export default function NetworkAnalysis() {
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title="Top Influencers" subtitle="Users whose messages trigger the most downstream activity">
+            <ChartCard title="Top Influencers" subtitle="Users whose messages trigger the most downstream activity" info="Children whose messages generate the most replies and reactions. High influence can be positive (peer leaders) or concerning (social pressure).">
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={data.topInfluencers} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -78,7 +78,7 @@ export default function NetworkAnalysis() {
             </ChartCard>
           </div>
 
-          <ChartCard title="Influencer Details" subtitle="Detailed breakdown of top network nodes">
+          <ChartCard title="Influencer Details" subtitle="Detailed breakdown of top network nodes" info="Influence Score measures downstream message activity. Reply Trigger Rate is the % of messages that get responses. Connections is total unique contacts.">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
