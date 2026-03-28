@@ -1,0 +1,154 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isParent() {
+      return isAuthenticated() && getUserData().role == 'parent';
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && getUserData().isAdmin == true;
+    }
+
+    function isParentOf(childId) {
+      let childData = get(/databases/$(database)/documents/users/$(childId)).data;
+      return isAuthenticated() && childData.parentId == request.auth.uid;
+    }
+
+    function isParticipant(conversationData) {
+      return isAuthenticated() && request.auth.uid in conversationData.participants;
+    }
+
+    function isParentOfParticipant(conversationData) {
+      return isParent() && getUserData().childIds.hasAny(conversationData.participants);
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId)
+                   || isParentOf(userId)
+                   || isAdmin();
+
+      allow create: if isAuthenticated()
+                     && request.auth.uid == userId
+                     && request.resource.data.keys().hasAll(['role', 'displayName'])
+                     && request.resource.data.role in ['parent', 'child']
+                     && request.resource.data.isAdmin == false;
+
+      allow update: if (isOwner(userId)
+                        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isAdmin', 'parentId']))
+                     || (isParentOf(userId)
+                        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isAdmin', 'parentId']))
+                     || isAdmin();
+
+      allow delete: if isAdmin();
+    }
+
+    match /families/{familyId} {
+      allow read: if isAuthenticated()
+                   && request.auth.uid in resource.data.memberIds;
+
+      allow create: if isParent()
+                     && request.resource.data.ownerId == request.auth.uid;
+
+      allow update: if isAuthenticated()
+                     && resource.data.ownerId == request.auth.uid;
+
+      allow delete: if isAdmin();
+    }
+
+    match /conversations/{conversationId} {
+      allow read: if isParticipant(resource.data)
+                   || isParentOfParticipant(resource.data)
+                   || isAdmin();
+
+      allow create: if isAuthenticated()
+                     && request.auth.uid in request.resource.data.participants
+                     && request.resource.data.participants.size() >= 2;
+
+      allow update: if isParticipant(resource.data)
+                     || isParentOfParticipant(resource.data);
+
+      allow delete: if isAdmin();
+    }
+
+    match /messages/{messageId} {
+      allow read: if isAuthenticated()
+                   && (
+                     request.auth.uid in get(/databases/$(database)/documents/conversations/$(resource.data.conversationId)).data.participants
+                     || isParentOfParticipant(get(/databases/$(database)/documents/conversations/$(resource.data.conversationId)).data)
+                     || isAdmin()
+                   );
+
+      allow create: if isAuthenticated()
+                     && request.resource.data.senderId == request.auth.uid
+                     && request.auth.uid in get(/databases/$(database)/documents/conversations/$(request.resource.data.conversationId)).data.participants
+                     && request.resource.data.keys().hasAll(['conversationId', 'senderId', 'content', 'createdAt']);
+
+      allow update: if isAdmin();
+
+      allow delete: if isAdmin();
+    }
+
+    match /contacts/{contactId} {
+      allow read: if isAuthenticated()
+                   && (resource.data.childId == request.auth.uid
+                       || resource.data.contactChildId == request.auth.uid
+                       || isParentOf(resource.data.childId)
+                       || isAdmin());
+
+      allow create: if isAuthenticated()
+                     && request.resource.data.childId == request.auth.uid
+                     && request.resource.data.approvedByParent == false;
+
+      allow update: if isParentOf(resource.data.childId)
+                     || isAdmin();
+
+      allow delete: if isParentOf(resource.data.childId)
+                     || isAdmin();
+    }
+
+    match /alerts/{alertId} {
+      allow read: if isAuthenticated()
+                   && (resource.data.parentId == request.auth.uid
+                       || isAdmin());
+
+      allow update: if isAuthenticated()
+                     && resource.data.parentId == request.auth.uid
+                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead']);
+
+      allow create: if false;
+      allow delete: if isAdmin();
+    }
+
+    match /trust_events/{eventId} {
+      allow read: if isAuthenticated()
+                   && (isParentOf(resource.data.childId)
+                       || resource.data.childId == request.auth.uid
+                       || isAdmin());
+
+      allow create, update, delete: if false;
+    }
+
+    match /presence/{userId} {
+      allow read: if isAuthenticated();
+
+      allow write: if isOwner(userId);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

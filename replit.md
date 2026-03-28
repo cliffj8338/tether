@@ -90,6 +90,28 @@ All auth is handled through Firebase Authentication. The system supports Google 
 - Checks (in order): X-Admin-Key header → Firebase ID token → legacy token
 - All three admin route files use the shared middleware
 
+## Firestore Security Rules
+
+Firestore security rules are defined in `firestore.rules` at the project root, with composite indexes in `firestore.indexes.json` and configuration in `firebase.json`.
+
+### Collections & Access Control
+- **users/{userId}** — Read: self, parent, admin. Create: authenticated (own doc, no self-admin). Update: self or parent (cannot change role/isAdmin/parentId), admin (unrestricted). Delete: admin only.
+- **families/{familyId}** — Read: members only. Create: parents (as owner). Update: owner only. Delete: admin only.
+- **conversations/{conversationId}** — Read: participants, parents of participants, admin. Create: authenticated (must be in participants, min 2 participants). Update: participants or parents. Delete: admin only.
+- **messages/{messageId}** — Read: conversation participants, parents of participants, admin. Create: sender must be self and in conversation. Update/Delete: admin only.
+- **contacts/{contactId}** — Read: involved children, parent of child, admin. Create: child (own contact, unapproved). Update/Delete: parent of child or admin.
+- **alerts/{alertId}** — Read: target parent or admin. Update: parent (isRead only). Create: server-side only. Delete: admin only.
+- **trust_events/{eventId}** — Read: parent of child, child self, admin. Write: server-side only.
+- **presence/{userId}** — Read: any authenticated. Write: self only.
+- **Default** — All other documents: deny all.
+
+### Key Security Principles
+- No user can self-grant admin privileges
+- Children's data is only accessible by their linked parent
+- Contacts require parental approval before activation
+- Alerts are created server-side only, parents can only mark as read
+- Trust events are immutable from the client
+
 ## Shared Libraries
 
 ### `db` (`@workspace/db`)
