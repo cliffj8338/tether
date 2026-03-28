@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
@@ -13,7 +14,11 @@ import { useConversations } from "@/hooks/useApiData";
 export default function ChildHomeScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const { conversations } = useConversations();
+  const { conversations, refresh } = useConversations();
+
+  useFocusEffect(
+    React.useCallback(() => { refresh(); }, [refresh])
+  );
 
   const myConvos = conversations;
 

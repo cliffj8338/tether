@@ -1,6 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
+import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
@@ -10,8 +12,12 @@ import { useContacts, useDashboard } from "@/hooks/useApiData";
 
 export default function CommunityScreen() {
   const insets = useSafeAreaInsets();
-  const { contacts, approve } = useContacts();
+  const { contacts, approve, refresh: refreshContacts } = useContacts();
   const { children } = useDashboard();
+
+  useFocusEffect(
+    React.useCallback(() => { refreshContacts(); }, [refreshContacts])
+  );
 
   const pendingContacts = contacts.filter((c) => !c.approvedByParent);
   const approvedContacts = contacts.filter((c) => c.approvedByParent);
@@ -20,7 +26,10 @@ export default function CommunityScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Community</Text>
-        <Pressable style={styles.addBtn}>
+        <Pressable style={styles.addBtn} onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          router.push("/add-contact");
+        }}>
           <Feather name="plus" size={20} color={Colors.white} />
         </Pressable>
       </View>

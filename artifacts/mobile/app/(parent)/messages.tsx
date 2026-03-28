@@ -2,18 +2,22 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/typography";
 import { Avatar } from "@/components/ui/Avatar";
-import { useConversations } from "@/hooks/useApiData";
-import { useDashboard } from "@/hooks/useApiData";
+import { useConversations, useDashboard } from "@/hooks/useApiData";
 
 export default function MessagesScreen() {
   const insets = useSafeAreaInsets();
-  const { conversations } = useConversations();
+  const { conversations, refresh: refreshConvos } = useConversations();
   const { children } = useDashboard();
+
+  useFocusEffect(
+    React.useCallback(() => { refreshConvos(); }, [refreshConvos])
+  );
   const [selectedChild, setSelectedChild] = useState<number | null>(null);
 
   const filtered = selectedChild

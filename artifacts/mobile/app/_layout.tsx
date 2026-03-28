@@ -85,6 +85,7 @@ function RootLayoutNav() {
         <Stack.Screen name="child-detail/[id]" options={{ animation: "slide_from_right" }} />
         <Stack.Screen name="alert-detail/[id]" options={{ animation: "slide_from_right" }} />
         <Stack.Screen name="add-child" options={{ animation: "slide_from_bottom", presentation: "modal" }} />
+        <Stack.Screen name="add-contact" options={{ animation: "slide_from_bottom", presentation: "modal" }} />
         <Stack.Screen name="paywall" options={{ animation: "slide_from_bottom", presentation: "modal" }} />
       </Stack>
     </>

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -20,16 +21,37 @@ import { Avatar } from "@/components/ui/Avatar";
 import { useMessages, useConversations } from "@/hooks/useApiData";
 import { EmojiPicker } from "@/components/EmojiPicker";
 
+function formatTime(iso: string): string {
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    const now = new Date();
+    const diff = now.getTime() - d.getTime();
+    if (diff < 60000) return "Just now";
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (d.toDateString() === now.toDateString()) {
+      return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    }
+    return d.toLocaleDateString([], { month: "short", day: "numeric" });
+  } catch {
+    return "";
+  }
+}
+
 export default function ConversationScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const convoId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { conversations } = useConversations();
-  const { messages, send } = useMessages(convoId);
+  const { messages, send, refresh: refreshMessages } = useMessages(convoId);
   const isChild = user?.role === "child";
 
   const convo = conversations.find((c) => c.id === convoId);
+
+  useFocusEffect(
+    useCallback(() => { refreshMessages(); }, [refreshMessages])
+  );
 
   const [inputText, setInputText] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
@@ -105,7 +127,7 @@ export default function ConversationScreen() {
                   {item.isBlocked ? "[Message blocked by content filter]" : item.content}
                 </Text>
                 <Text style={[styles.bubbleTime, item.isMine && styles.bubbleTimeMine]}>
-                  {item.createdAt}
+                  {formatTime(item.createdAt)}
                 </Text>
               </View>
             </View>

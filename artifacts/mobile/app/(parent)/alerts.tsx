@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
@@ -22,14 +23,24 @@ function getAlertColor(level: string): string {
 
 export default function AlertsScreen() {
   const insets = useSafeAreaInsets();
-  const { alerts, markRead } = useAlerts();
+  const { alerts, markRead, refresh } = useAlerts();
+
+  useFocusEffect(
+    React.useCallback(() => { refresh(); }, [refresh])
+  );
+
+  const markAllRead = async () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    const unread = alerts.filter((a) => !a.isRead);
+    await Promise.all(unread.map((a) => markRead(a.id)));
+  };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Alerts</Text>
         <View style={styles.headerRight}>
-          <Pressable style={styles.markAllBtn}>
+          <Pressable style={styles.markAllBtn} onPress={markAllRead}>
             <Text style={styles.markAllText}>Mark all read</Text>
           </Pressable>
         </View>
