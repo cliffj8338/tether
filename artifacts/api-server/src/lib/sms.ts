@@ -1,18 +1,8 @@
 import twilio from "twilio";
 
-interface TwilioCredentials {
-  accountSid: string;
-  apiKeySid?: string;
-  apiKeySecret?: string;
-  authToken?: string;
-  phoneNumber: string;
-}
+let connectionSettings: any;
 
-let cachedCredentials: TwilioCredentials | null = null;
-
-async function getCredentials(): Promise<TwilioCredentials> {
-  if (cachedCredentials) return cachedCredentials;
-
+async function getCredentials() {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? "repl " + process.env.REPL_IDENTITY
@@ -20,11 +10,11 @@ async function getCredentials(): Promise<TwilioCredentials> {
       ? "depl " + process.env.WEB_REPL_RENEWAL
       : null;
 
-  if (!xReplitToken || !hostname) {
-    throw new Error("Twilio credentials not available");
+  if (!xReplitToken) {
+    throw new Error("X-Replit-Token not found for repl/depl");
   }
 
-  const res = await fetch(
+  connectionSettings = await fetch(
     "https://" + hostname + "/api/v2/connection?include_secrets=true&connector_names=twilio",
     {
       headers: {
@@ -32,46 +22,23 @@ async function getCredentials(): Promise<TwilioCredentials> {
         "X-Replit-Token": xReplitToken,
       },
     }
-  );
+  ).then(res => res.json()).then((data: any) => data.items?.[0]);
 
-  const data = (await res.json()) as { items?: Array<{ settings: Record<string, string> }> };
-  const connection = data.items?.[0];
-
-  if (!connection) {
+  if (!connectionSettings || (!connectionSettings.settings.account_sid || !connectionSettings.settings.api_key || !connectionSettings.settings.api_key_secret)) {
     throw new Error("Twilio not connected");
   }
 
-  const s = connection.settings;
-
-  const accountSid = s.account_sid;
-  if (!accountSid || !accountSid.startsWith("AC")) {
-    throw new Error(
-      "Twilio Account SID (starts with AC) not found in connector. " +
-      "Please update your Twilio integration: put your Account SID (AC...) in the Account SID field."
-    );
-  }
-
-  const apiKey = s.api_key;
-  const apiKeySecret = s.api_key_secret;
-  const useApiKey = apiKey && apiKey.startsWith("SK") && apiKeySecret;
-
-  cachedCredentials = {
-    accountSid,
-    ...(useApiKey
-      ? { apiKeySid: apiKey, apiKeySecret }
-      : { authToken: apiKey || apiKeySecret }),
-    phoneNumber: s.phone_number,
+  return {
+    accountSid: connectionSettings.settings.account_sid as string,
+    apiKey: connectionSettings.settings.api_key as string,
+    apiKeySecret: connectionSettings.settings.api_key_secret as string,
+    phoneNumber: connectionSettings.settings.phone_number as string,
   };
-
-  return cachedCredentials;
 }
 
 async function getTwilioClient() {
-  const creds = await getCredentials();
-  if (creds.apiKeySid && creds.apiKeySecret) {
-    return twilio(creds.apiKeySid, creds.apiKeySecret, { accountSid: creds.accountSid });
-  }
-  return twilio(creds.accountSid, creds.authToken!);
+  const { accountSid, apiKey, apiKeySecret } = await getCredentials();
+  return twilio(apiKey, apiKeySecret, { accountSid });
 }
 
 async function getFromPhoneNumber(): Promise<string> {
