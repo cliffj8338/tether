@@ -15,6 +15,8 @@ const About = lazy(() => import("./pages/About"));
 const Waitlist = lazy(() => import("./pages/Waitlist"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const NotFound = lazy(() => import("./pages/not-found"));
 
 import { PageLayout } from "./components/layout/PageLayout";
@@ -63,6 +65,8 @@ function Router() {
         <Route path="/waitlist" component={Waitlist} />
         <Route path="/blog" component={Blog} />
         <Route path="/blog/:slug" component={BlogPost} />
+        <Route path="/privacy" component={PrivacyPolicy} />
+        <Route path="/terms" component={TermsOfService} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

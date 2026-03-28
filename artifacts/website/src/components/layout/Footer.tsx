@@ -60,6 +60,10 @@ export function Footer() {
           <p className="text-text-light text-sm">
             &copy; {new Date().getFullYear()} Tether App, Inc. All rights reserved.
           </p>
+          <div className="flex items-center gap-6">
+            <Link href="/privacy" className="text-text-light text-sm hover:text-primary transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="text-text-light text-sm hover:text-primary transition-colors">Terms of Service</Link>
+          </div>
           <div className="flex items-center gap-2 text-sm text-text-light font-medium bg-surface px-4 py-2 rounded-full">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             No ads. No PII sold. Only parents see their child's data.
