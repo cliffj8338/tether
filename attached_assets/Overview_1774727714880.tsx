@@ -18,8 +18,9 @@ export default function Overview() {
 
   useEffect(() => {
     if (!data) return;
+    // Fire and forget — sync live stats + live costs to Build Control
     syncCommandCenter(adminUser?.email ?? 'admin', data);
-  }, [data]);
+  }, [data]); // Re-fires whenever live data refreshes
 
   if (isLoading) return <div className="p-8 text-muted-foreground">Loading analytics...</div>;
   if (!data) return <EmptyState message="No data available yet" submessage="Start using Tether to see analytics" />;
@@ -44,7 +45,7 @@ export default function Overview() {
         <KpiCard title="New Users (7d)" value={kpis.newUsers7d} icon={<Icon d="M16 21v-2a4 4 0 00-4-4H6" />} />
         <KpiCard title="Conversations" value={kpis.totalConversations} icon={<Icon d="M21 11.5a8.38 8.38 0 01-.9 3.8" />} color="text-chart-2" />
         <KpiCard title="Faith Mode" value={kpis.faithModeUsers} subtitle="users enabled" icon={<Icon d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5" />} color="text-chart-4" />
-        <KpiCard title="Block Rate" value={kpis.blockRate} icon={<Icon d="M18.36 6.64A9 9 0 015.64 19.36" />} color="text-chart-5" />
+        <KpiCard title="Block Rate" value={kpis.blockRate} icon={<Icon d="M18.36 6.64A9 9 0 115.64 19.36" />} color="text-chart-5" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

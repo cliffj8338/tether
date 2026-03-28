@@ -1,5 +1,6 @@
 /**
  * commandCenterSync.ts
+ * Drop into: apps/admin/src/lib/commandCenterSync.ts
  *
  * Pulls live data from two sources:
  *   1. Tether API — /api/platform-costs (live vendor costs)
@@ -17,6 +18,9 @@ const FIRESTORE_BASE       =
 
 const TETHER_API = 'https://tether-connect-cliffj8338.replit.app';
 
+// ── Static facts (update when codebase grows) ────────────────────────
+// These are code-level facts that don't live in any database.
+// Update per session same as bumping BP_VERSION in Blueprint.
 const STATIC = {
   lineCount:    30800,
   fileCount:    184,
@@ -30,6 +34,7 @@ const STATIC = {
   ],
 };
 
+// ── Types ────────────────────────────────────────────────────────────
 interface OverviewData {
   kpis: {
     totalUsers:       number;
@@ -59,6 +64,7 @@ interface CostResponse {
   lastUpdated: string;
 }
 
+// ── Firestore REST serializer ────────────────────────────────────────
 type FV =
   | { nullValue: null }
   | { booleanValue: boolean }
@@ -89,6 +95,7 @@ function buildBody(data: Record<string, unknown>): string {
   return JSON.stringify({ fields });
 }
 
+// ── Fetch live costs from Tether API ────────────────────────────────
 async function fetchLiveCosts(): Promise<{ monthlyTotal: number; categories: Record<string, number>; lastUpdated: string } | null> {
   try {
     const res = await fetch(`${TETHER_API}/api/platform-costs`, {
@@ -101,6 +108,7 @@ async function fetchLiveCosts(): Promise<{ monthlyTotal: number; categories: Rec
     }
     const data: CostResponse = await res.json();
 
+    // Use the most recent month's data for monthly total + category breakdown
     const latest = data.months?.[data.months.length - 1];
     return {
       monthlyTotal: latest?.total ?? data.grandTotal ?? 0,
@@ -113,16 +121,30 @@ async function fetchLiveCosts(): Promise<{ monthlyTotal: number; categories: Rec
   }
 }
 
+// ── Main sync ────────────────────────────────────────────────────────
+/**
+ * Call this from Overview.tsx, passing the live query data:
+ *
+ *   useEffect(() => {
+ *     if (data) syncCommandCenter(adminUser?.email ?? 'admin', data);
+ *   }, [data]);
+ *
+ * All numbers come from live sources — nothing hardcoded except
+ * the static code facts (lineCount, fileCount, featureCount).
+ */
 export async function syncCommandCenter(
   updatedBy = 'admin',
   overviewData?: OverviewData
 ): Promise<void> {
 
+  // Fetch live costs in parallel — non-blocking if it fails
   const costs = await fetchLiveCosts();
 
   const payload: Record<string, unknown> = {
+    // Static code facts
     ...STATIC,
 
+    // Live platform metrics (from overview API)
     ...(overviewData ? {
       users: {
         total:    overviewData.kpis.totalUsers,
@@ -142,6 +164,7 @@ export async function syncCommandCenter(
       faithModeUsers: overviewData.kpis.faithModeUsers,
     } : {}),
 
+    // Live costs (from /api/platform-costs)
     ...(costs ? {
       monthlyTotal:     costs.monthlyTotal,
       costCategories:   costs.categories,
@@ -177,7 +200,7 @@ export async function syncCommandCenter(
       return;
     }
 
-    console.log('[CommandCenter] Tether synced', {
+    console.log('[CommandCenter] Tether synced ✓', {
       users:       overviewData?.kpis.totalUsers ?? '—',
       monthlyBurn: costs ? `$${costs.monthlyTotal.toFixed(2)}` : 'cost API unavailable',
     });
