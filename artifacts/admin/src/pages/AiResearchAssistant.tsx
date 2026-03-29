@@ -212,21 +212,26 @@ export default function AiResearchAssistant() {
               </div>
             )}
             <div className={`max-w-[85%] space-y-3 ${msg.role === "user" ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2" : ""}`}>
-              <p className="text-sm">{msg.content}</p>
+              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
               {msg.data && msg.data.data && msg.data.data.length > 0 && (
                 <div className="bg-card rounded-lg border border-border p-4">
-                  {msg.data.thinking && (
-                    <p className="text-xs text-muted-foreground mb-3 italic">{msg.data.thinking}</p>
-                  )}
                   <DynamicChart response={msg.data} />
                   <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
                     <span>{msg.data.rowCount} row{msg.data.rowCount !== 1 ? "s" : ""}</span>
-                    {msg.data.sql && (
-                      <details className="cursor-pointer">
-                        <summary className="hover:text-foreground">View SQL</summary>
-                        <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-x-auto">{msg.data.sql}</pre>
-                      </details>
-                    )}
+                    <div className="flex gap-3">
+                      {msg.data.thinking && (
+                        <details className="cursor-pointer">
+                          <summary className="hover:text-foreground">Reasoning</summary>
+                          <p className="mt-2 p-2 bg-muted rounded text-xs">{msg.data.thinking}</p>
+                        </details>
+                      )}
+                      {msg.data.sql && (
+                        <details className="cursor-pointer">
+                          <summary className="hover:text-foreground">View SQL</summary>
+                          <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-x-auto max-h-40 overflow-y-auto">{msg.data.sql}</pre>
+                        </details>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

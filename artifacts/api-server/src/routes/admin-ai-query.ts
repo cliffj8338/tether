@@ -123,7 +123,7 @@ router.post("/admin/analytics/query", async (req, res) => {
 
     const response = await anthropic.messages.create({
       model: "claude-haiku-4-5",
-      max_tokens: 1024,
+      max_tokens: 2048,
       system: SCHEMA_CONTEXT,
       messages: [{ role: "user", content: question }],
     });
@@ -131,15 +131,19 @@ router.post("/admin/analytics/query", async (req, res) => {
     let text = response.content[0].type === "text" ? response.content[0].text : "";
     text = text.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
 
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) text = jsonMatch[0];
+
     let parsed;
     try {
       parsed = JSON.parse(text);
     } catch {
+      req.log.warn({ rawResponse: text.slice(0, 500) }, "Failed to parse AI response as JSON");
       res.json({
-        thinking: "I could not generate a structured query for this question.",
+        thinking: "",
         data: [],
         chartType: "none",
-        summary: text,
+        summary: "I wasn't able to generate a structured analysis for that question. Please try rephrasing it, or ask a more specific question about the data.",
       });
       return;
     }
