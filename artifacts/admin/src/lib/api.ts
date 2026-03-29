@@ -239,14 +239,12 @@ export interface PredictionsData {
 }
 
 export interface AiQueryResponse {
-  thinking: string;
   data: Record<string, unknown>[];
   chartType: string;
   chartConfig?: { xKey?: string; yKey?: string; label?: string };
   summary: string;
   sql?: string;
   rowCount?: number;
-  error?: string;
 }
 
 export interface WaitlistData {

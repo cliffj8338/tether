@@ -218,25 +218,14 @@ export default function AiResearchAssistant() {
                   <DynamicChart response={msg.data} />
                   <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
                     <span>{msg.data.rowCount} row{msg.data.rowCount !== 1 ? "s" : ""}</span>
-                    <div className="flex gap-3">
-                      {msg.data.thinking && (
-                        <details className="cursor-pointer">
-                          <summary className="hover:text-foreground">Reasoning</summary>
-                          <p className="mt-2 p-2 bg-muted rounded text-xs">{msg.data.thinking}</p>
-                        </details>
-                      )}
-                      {msg.data.sql && (
-                        <details className="cursor-pointer">
-                          <summary className="hover:text-foreground">View SQL</summary>
-                          <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-x-auto max-h-40 overflow-y-auto">{msg.data.sql}</pre>
-                        </details>
-                      )}
-                    </div>
+                    {msg.data.sql && (
+                      <details className="cursor-pointer">
+                        <summary className="hover:text-foreground">&#9654; View SQL</summary>
+                        <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-x-auto max-h-40 overflow-y-auto">{msg.data.sql}</pre>
+                      </details>
+                    )}
                   </div>
                 </div>
-              )}
-              {msg.data?.error && (
-                <p className="text-xs text-red-500 mt-1">Query error: {msg.data.error}</p>
               )}
             </div>
             {msg.role === "user" && (
@@ -252,8 +241,8 @@ export default function AiResearchAssistant() {
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
               <Loader2 className="w-4 h-4 text-primary animate-spin" />
             </div>
-            <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-2">
-              <p className="text-sm text-muted-foreground">Analyzing your question...</p>
+            <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3">
+              <p className="text-sm text-muted-foreground">Analyzing your question, generating query, and preparing results...</p>
             </div>
           </div>
         )}
