@@ -1,15 +1,32 @@
 import { useState, useRef, useEffect } from "react";
 import { api, type AiQueryResponse } from "../lib/api";
-import { ChartCard } from "../components/ChartCard";
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
-import { Send, Bot, User, Loader2, Sparkles, MessageSquare, Shield, Users, Brain, Activity, TrendingUp, BarChart3, Globe } from "lucide-react";
+import {
+  Send, Bot, User, Loader2, Sparkles, MessageSquare, Shield, Users, Brain,
+  Activity, TrendingUp, Globe, ArrowLeft, Save, RefreshCw, Download,
+  Clock, Trash2, FolderOpen,
+} from "lucide-react";
 
 const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-  data?: AiQueryResponse;
+interface SavedReport {
+  id: string;
+  question: string;
+  summary: string;
+  data: AiQueryResponse;
+  savedAt: string;
+}
+
+const STORAGE_KEY = "tether-saved-reports";
+
+function loadSavedReports(): SavedReport[] {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  } catch { return []; }
+}
+
+function persistReports(reports: SavedReport[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
 }
 
 const REPORT_CATEGORIES = [
@@ -167,7 +184,7 @@ function DynamicChart({ response }: { response: AiQueryResponse }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b text-muted-foreground">
-            {keys.map(k => <th key={k} className="text-left py-2 px-3">{k}</th>)}
+            {keys.map(k => <th key={k} className="text-left py-2 px-3">{k.replace(/_/g, " ")}</th>)}
           </tr>
         </thead>
         <tbody>
@@ -182,38 +199,93 @@ function DynamicChart({ response }: { response: AiQueryResponse }) {
   );
 }
 
+function exportCsv(data: Record<string, unknown>[], question: string) {
+  if (!data.length) return;
+  const keys = Object.keys(data[0]);
+  const header = keys.join(",");
+  const rows = data.map(row => keys.map(k => {
+    const v = row[k];
+    const s = String(v ?? "");
+    return s.includes(",") || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s;
+  }).join(","));
+  const csv = [header, ...rows].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `tether-report-${question.slice(0, 40).replace(/[^a-z0-9]/gi, "-")}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+type View = "catalog" | "report" | "saved";
+
 export default function AiResearchAssistant() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [view, setView] = useState<View>("catalog");
+  const [currentQuestion, setCurrentQuestion] = useState("");
+  const [currentResult, setCurrentResult] = useState<AiQueryResponse | null>(null);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [computing, setComputing] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [savedReports, setSavedReports] = useState<SavedReport[]>(loadSavedReports);
+  const [saveToast, setSaveToast] = useState("");
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const handleSubmit = async (question?: string) => {
-    const q = question ?? input.trim();
-    if (!q || loading) return;
-    setInput("");
-    setMessages(prev => [...prev, { role: "user", content: q }]);
+  const runReport = async (question: string) => {
+    setCurrentQuestion(question);
+    setCurrentResult(null);
+    setView("report");
     setLoading(true);
 
     try {
-      const response = await api.aiQuery(q);
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: response.summary ?? "Here are the results:",
-        data: response,
-      }]);
-    } catch (e) {
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: "Sorry, I encountered an error processing that query. Try rephrasing your question.",
-      }]);
+      const response = await api.aiQuery(question);
+      setCurrentResult(response);
+    } catch {
+      setCurrentResult({
+        data: [],
+        chartType: "none",
+        summary: "Sorry, I encountered an error processing that query. Try rephrasing your question.",
+        rowCount: 0,
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    if (currentQuestion) runReport(currentQuestion);
+  };
+
+  const handleSave = () => {
+    if (!currentResult || !currentQuestion) return;
+    const report: SavedReport = {
+      id: Date.now().toString(),
+      question: currentQuestion,
+      summary: currentResult.summary,
+      data: currentResult,
+      savedAt: new Date().toISOString(),
+    };
+    const updated = [report, ...savedReports];
+    setSavedReports(updated);
+    persistReports(updated);
+    setSaveToast("Report saved!");
+    setTimeout(() => setSaveToast(""), 2000);
+  };
+
+  const handleDeleteSaved = (id: string) => {
+    const updated = savedReports.filter(r => r.id !== id);
+    setSavedReports(updated);
+    persistReports(updated);
+  };
+
+  const handleLoadSaved = (report: SavedReport) => {
+    setCurrentQuestion(report.question);
+    setCurrentResult(report.data);
+    setView("report");
+  };
+
+  const handleExport = () => {
+    if (currentResult?.data?.length) {
+      exportCsv(currentResult.data, currentQuestion);
     }
   };
 
@@ -221,39 +293,66 @@ export default function AiResearchAssistant() {
     setComputing(true);
     try {
       await api.computeMetrics();
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: "Behavioral metrics, network analysis, and churn predictions have been computed for all users. You can now query the latest data.",
-      }]);
+      setSaveToast("Advanced metrics computed successfully!");
+      setTimeout(() => setSaveToast(""), 3000);
     } catch {
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: "Failed to compute metrics. Please try again.",
-      }]);
+      setSaveToast("Failed to compute metrics.");
+      setTimeout(() => setSaveToast(""), 3000);
     } finally {
       setComputing(false);
     }
   };
 
+  const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const q = input.trim();
+    if (!q || loading) return;
+    setInput("");
+    runReport(q);
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)]">
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold text-foreground">AI Research Assistant</h1>
-        <p className="text-sm text-muted-foreground mt-1">Ask questions about your data in plain English — get dynamic reports and visualizations</p>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">AI Research Assistant</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {view === "catalog" ? "25 pre-built reports — click to run, or ask your own question" :
+             view === "saved" ? "Your saved reports" : currentQuestion}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {view !== "catalog" && (
+            <button
+              onClick={() => setView("catalog")}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-muted/50 transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Reports
+            </button>
+          )}
+          <button
+            onClick={() => setView(view === "saved" ? "catalog" : "saved")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-lg transition-colors ${
+              view === "saved" ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted/50"
+            }`}
+          >
+            <FolderOpen className="w-3.5 h-3.5" />
+            Saved ({savedReports.length})
+          </button>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-4 pb-4">
-        {messages.length === 0 && (
-          <div className="space-y-6 py-4">
-            <div className="text-center">
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                <Sparkles className="w-7 h-7 text-primary" />
-              </div>
-              <h2 className="text-lg font-semibold">25 Pre-Built Research Reports</h2>
-              <p className="text-sm text-muted-foreground mt-1">Click any report below, or type your own question</p>
-            </div>
+      {saveToast && (
+        <div className="mb-3 px-4 py-2 bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 rounded-lg text-sm font-medium text-center">
+          {saveToast}
+        </div>
+      )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-6xl mx-auto">
+      <div className="flex-1 overflow-y-auto pb-4">
+        {view === "catalog" && (
+          <div className="space-y-6 py-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-6xl">
               {REPORT_CATEGORIES.map((cat) => {
                 const Icon = cat.icon;
                 return (
@@ -266,7 +365,7 @@ export default function AiResearchAssistant() {
                       {cat.questions.map((q, i) => (
                         <button
                           key={i}
-                          onClick={() => handleSubmit(q)}
+                          onClick={() => runReport(q)}
                           className="w-full text-left px-2 py-1.5 rounded text-xs hover:bg-muted/50 transition-colors text-foreground/80 hover:text-foreground"
                         >
                           {q}
@@ -278,7 +377,7 @@ export default function AiResearchAssistant() {
               })}
             </div>
 
-            <div className="text-center">
+            <div className="text-center pt-2">
               <button
                 onClick={handleCompute}
                 disabled={computing}
@@ -290,57 +389,121 @@ export default function AiResearchAssistant() {
           </div>
         )}
 
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}>
-            {msg.role === "assistant" && (
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Bot className="w-4 h-4 text-primary" />
+        {view === "saved" && (
+          <div className="space-y-2">
+            {savedReports.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <FolderOpen className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                <p className="text-sm">No saved reports yet. Run a report and click Save to add it here.</p>
               </div>
-            )}
-            <div className={`max-w-[85%] space-y-3 ${msg.role === "user" ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2" : ""}`}>
-              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-              {msg.data && msg.data.data && msg.data.data.length > 0 && (
-                <div className="bg-card rounded-lg border border-border p-4">
-                  <DynamicChart response={msg.data} />
-                  <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
-                    <span>{msg.data.rowCount} row{msg.data.rowCount !== 1 ? "s" : ""}</span>
-                    {msg.data.sql && (
-                      <details className="cursor-pointer">
-                        <summary className="hover:text-foreground">&#9654; View SQL</summary>
-                        <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-x-auto max-h-40 overflow-y-auto">{msg.data.sql}</pre>
-                      </details>
-                    )}
+            ) : (
+              savedReports.map((report) => (
+                <div
+                  key={report.id}
+                  className="border border-border rounded-lg p-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <button
+                      onClick={() => handleLoadSaved(report)}
+                      className="flex-1 text-left"
+                    >
+                      <h3 className="text-sm font-medium text-foreground">{report.question}</h3>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{report.summary}</p>
+                      <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                        <Clock className="w-3 h-3" />
+                        <span>{new Date(report.savedAt).toLocaleString()}</span>
+                        <span className="text-border">|</span>
+                        <span>{report.data.rowCount ?? 0} rows</span>
+                        <span className="text-border">|</span>
+                        <span>{report.data.chartType}</span>
+                      </div>
+                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => { handleLoadSaved(report); setTimeout(handleRefresh, 100); }}
+                        className="p-1.5 rounded hover:bg-muted transition-colors"
+                        title="Re-run with fresh data"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5 text-muted-foreground" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSaved(report.id)}
+                        className="p-1.5 rounded hover:bg-red-500/10 transition-colors"
+                        title="Delete saved report"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-red-500" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
-            {msg.role === "user" && (
-              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                <User className="w-4 h-4" />
-              </div>
+              ))
             )}
-          </div>
-        ))}
-
-        {loading && (
-          <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <Loader2 className="w-4 h-4 text-primary animate-spin" />
-            </div>
-            <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3">
-              <p className="text-sm text-muted-foreground">Analyzing your question, generating query, and preparing results...</p>
-            </div>
           </div>
         )}
 
-        <div ref={messagesEndRef} />
+        {view === "report" && (
+          <div className="space-y-4">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-16 gap-4">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <p className="text-sm text-muted-foreground">Analyzing your question, generating query, and preparing results...</p>
+              </div>
+            ) : currentResult ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    onClick={handleRefresh}
+                    disabled={loading}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-muted/50 transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Refresh
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    Save Report
+                  </button>
+                  {currentResult.data && currentResult.data.length > 0 && (
+                    <button
+                      onClick={handleExport}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Export CSV
+                    </button>
+                  )}
+                  {currentResult.sql && (
+                    <details className="text-xs text-muted-foreground cursor-pointer ml-auto">
+                      <summary className="hover:text-foreground px-2 py-1.5">View SQL</summary>
+                      <pre className="mt-2 p-3 bg-muted rounded text-xs overflow-x-auto max-h-40 overflow-y-auto absolute right-6 z-10 border border-border shadow-lg max-w-lg">
+                        {currentResult.sql}
+                      </pre>
+                    </details>
+                  )}
+                </div>
+
+                <div className="bg-card rounded-lg border border-border p-5">
+                  <p className="text-sm text-foreground leading-relaxed mb-4">{currentResult.summary}</p>
+                  {currentResult.data && currentResult.data.length > 0 && (
+                    <>
+                      <DynamicChart response={currentResult} />
+                      <div className="mt-3 text-xs text-muted-foreground">
+                        {currentResult.rowCount} row{currentResult.rowCount !== 1 ? "s" : ""} returned
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
 
       <div className="border-t pt-4">
-        <form
-          onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
-          className="flex gap-2"
-        >
+        <form onSubmit={handleSubmit} className="flex gap-2">
           <input
             type="text"
             value={input}
