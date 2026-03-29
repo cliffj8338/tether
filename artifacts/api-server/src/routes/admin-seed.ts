@@ -667,34 +667,26 @@ router.delete("/admin/ops/seed-demo", async (_req, res) => {
 
   seedLock = true;
   try {
-    await db.execute(sql`
-      BEGIN;
-      DELETE FROM churn_predictions;
-      DELETE FROM network_graph;
-      DELETE FROM behavioral_metrics;
-      DELETE FROM interest_graph;
-      DELETE FROM temporal_anomalies;
-      DELETE FROM keyword_trends;
-      DELETE FROM conversation_insights;
-      DELETE FROM safety_analytics;
-      DELETE FROM demographic_snapshots;
-      DELETE FROM message_analytics;
-      DELETE FROM analytics_events;
-      DELETE FROM session_tracking;
-      DELETE FROM alerts;
-      DELETE FROM messages;
-      DELETE FROM conversations;
-      DELETE FROM contacts WHERE child_id IN (SELECT id FROM users WHERE role='child' AND parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app'));
-      DELETE FROM waitlist WHERE email LIKE '%@example.com';
-      DELETE FROM users WHERE role='child' AND parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app');
-      DELETE FROM users WHERE email LIKE '%@demo.tether.app';
-      COMMIT;
-    `);
+    console.log("[Clear] Starting nuclear clear of all demo data...");
+    const startTime = Date.now();
+
+    await db.execute(sql`TRUNCATE TABLE churn_predictions, network_graph, behavioral_metrics, interest_graph, temporal_anomalies, keyword_trends, conversation_insights, safety_analytics, demographic_snapshots, message_analytics, analytics_events, session_tracking CASCADE`);
+    console.log("[Clear] Truncated analytics tables");
+
+    await db.execute(sql`TRUNCATE TABLE alerts, messages, conversations, contacts CASCADE`);
+    console.log("[Clear] Truncated messages/alerts/conversations/contacts");
+
+    await db.execute(sql`DELETE FROM waitlist WHERE email LIKE '%@example.com'`);
+    await db.execute(sql`DELETE FROM users WHERE role='child' AND parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app')`);
+    await db.execute(sql`DELETE FROM users WHERE email LIKE '%@demo.tether.app'`);
+    console.log("[Clear] Deleted demo users and waitlist");
+
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    console.log(`[Clear] DONE in ${elapsed}s`);
 
     res.json({ ok: true, message: "Demo data cleared successfully" });
   } catch (err: any) {
     console.error("Clear demo data error:", err);
-    try { await db.execute(sql`ROLLBACK`); } catch (_) {}
     res.status(500).json({ error: err.message });
   } finally {
     seedLock = false;
