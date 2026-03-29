@@ -56,7 +56,7 @@ export default function DemoData() {
   useEffect(() => { fetchStats(); }, [fetchStats]);
 
   const handleSeed = async () => {
-    if (!confirm("This will generate ~10,000 demo users with full analytics data. This may take up to 2 minutes. Continue?")) return;
+    if (!confirm("This will generate ~1,500 demo users with full analytics data. Takes about 30 seconds. Continue?")) return;
     setSeeding(true);
     setError(null);
     setMessage(null);
@@ -75,13 +75,15 @@ export default function DemoData() {
         return;
       }
       setMessage(data.message || "Seeding started!");
-      setSeedProgress("Generating users, conversations, messages, analytics... This takes about 60-90 seconds.");
+      setSeedProgress("Generating users, conversations, messages, analytics... This takes about 30 seconds.");
 
       let attempts = 0;
       const poll = setInterval(async () => {
         attempts++;
         await fetchStats();
-        if (attempts >= 30) {
+        const statusRes = await fetch(`${API_BASE}/admin/ops/seed-demo`, { headers: await getAuthHeaders() });
+        const statusData = await statusRes.json();
+        if (!statusData.isRunning || attempts >= 20) {
           clearInterval(poll);
           setSeeding(false);
           setSeedProgress(null);
@@ -145,7 +147,7 @@ export default function DemoData() {
         </h1>
         <p style={{ color: "#666", fontSize: 14, lineHeight: 1.6 }}>
           Load realistic demo data to showcase all analytics, intelligence, and reporting features.
-          Generates ~10,000 users (parents, children, communities), conversations, messages with full
+          Generates ~1,500 users (500 parents + ~1,000 children), conversations, messages with full
           NLP analytics, behavioral metrics, network graphs, churn predictions, and more.
         </p>
       </div>
@@ -276,10 +278,10 @@ export default function DemoData() {
           <div style={{ marginTop: 32, padding: "20px 24px", background: "#f8fafc", borderRadius: 10, border: "1px solid #e2e8f0" }}>
             <h3 style={{ fontSize: 14, fontWeight: 600, color: "#374151", marginBottom: 12 }}>What gets generated</h3>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 8, fontSize: 13, color: "#4b5563" }}>
-              <div>~3,200 parent accounts across diverse families</div>
-              <div>~7,000+ children (ages 6-16, grades K-8th)</div>
+              <div>~500 parent accounts across diverse families</div>
+              <div>~1,000 children (ages 6-16, grades K-8th)</div>
               <div>Schools, churches, faith-based & secular communities</div>
-              <div>Thousands of conversations with realistic messages</div>
+              <div>Conversations with realistic messages (~5K)</div>
               <div>Full NLP analytics (sentiment, topics, vocabulary)</div>
               <div>Behavioral metrics with weekly trends</div>
               <div>Network graph with roles & clusters</div>
@@ -288,7 +290,7 @@ export default function DemoData() {
               <div>Interest graphs by age group</div>
               <div>Keyword trends across demographics</div>
               <div>Web + app session tracking & events</div>
-              <div>800 waitlist signups (parents, schools, churches)</div>
+              <div>200 waitlist signups (parents, schools, churches)</div>
               <div>Faith Mode adoption data (~40% of users)</div>
             </div>
           </div>

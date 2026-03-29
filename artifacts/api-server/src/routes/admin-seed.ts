@@ -90,37 +90,45 @@ function ageGroup(age: number) {
   return "15+";
 }
 
+let seedLock = false;
+
 router.get("/admin/ops/seed-demo", async (_req, res) => {
   try {
     const result = await db.execute(sql`SELECT count(*)::int AS c FROM users WHERE email LIKE '%@demo.tether.app'`);
     const demoCount = (result.rows[0] as any).c;
-    res.json({ isDemoLoaded: demoCount > 100, demoUserCount: demoCount });
+    res.json({ isDemoLoaded: demoCount > 100, demoUserCount: demoCount, isRunning: seedLock });
   } catch (err: any) {
-    res.json({ isDemoLoaded: false, demoUserCount: 0 });
+    res.json({ isDemoLoaded: false, demoUserCount: 0, isRunning: seedLock });
   }
 });
 
 router.post("/admin/ops/seed-demo", async (_req, res) => {
+  if (seedLock) {
+    return res.status(409).json({ error: "A seed or clear operation is already in progress. Please wait." });
+  }
+
   try {
     const existingCount = await db.select({ c: sql<number>`count(*)::int` }).from(usersTable);
     if (existingCount[0].c > 100) {
       return res.status(400).json({ error: "Database already has significant data. Clear demo data first before re-seeding." });
     }
 
-    const NUM_PARENTS = 3200;
-    const NUM_WAITLIST = 800;
+    seedLock = true;
+    const NUM_PARENTS = 500;
+    const NUM_WAITLIST = 200;
 
-    res.json({ status: "seeding", message: "Demo data seeding started. This runs in background — check the Demo Data page for progress." });
+    res.json({ status: "seeding", message: "Demo data seeding started (~5,000 records). Check the Demo Data page for progress." });
 
     (async () => {
       try {
-        console.log("[Seed] Starting demo data generation...");
+        console.log("[Seed] Starting demo data generation (lite ~5K)...");
         const startTime = Date.now();
 
         const parentIds: number[] = [];
         const childIds: number[] = [];
         const childParentMap: Record<number, number> = {};
         const childAges: Record<number, number> = {};
+        const childGenders: Record<number, string> = {};
 
         for (let batch = 0; batch < NUM_PARENTS; batch += 200) {
           const batchSize = Math.min(200, NUM_PARENTS - batch);
@@ -171,15 +179,17 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
                 createdAt: recentDate(300),
                 _parentId: parentId,
                 _age: age,
+                _gender: isFemale ? "female" : "male",
               });
             }
           }
-          const cleanRows = childRows.map(({ _parentId, _age, ...r }) => r);
+          const cleanRows = childRows.map(({ _parentId, _age, _gender, ...r }) => r);
           const inserted = await db.insert(usersTable).values(cleanRows).returning({ id: usersTable.id });
           inserted.forEach((r, idx) => {
             childIds.push(r.id);
             childParentMap[r.id] = childRows[idx]._parentId;
             childAges[r.id] = childRows[idx]._age;
+            childGenders[r.id] = childRows[idx]._gender;
           });
         }
         console.log(`[Seed] Created ${childIds.length} children`);
@@ -191,7 +201,7 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
           const contactRows: any[] = [];
           for (let i = 0; i < batchSize; i++) {
             const childId = childIds[batch + i];
-            const numContacts = rand(1, 5);
+            const numContacts = rand(1, 3);
             for (let c = 0; c < numContacts; c++) {
               const contactChild = pick(childIds.filter(id => id !== childId && childParentMap[id] !== childParentMap[childId]));
               if (!contactChild) continue;
@@ -250,7 +260,7 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
           for (let i = 0; i < batchSize; i++) {
             const convoId = convoIds[batch + i];
             const childId = convoChildMap[convoId];
-            const numMsgs = rand(3, 25);
+            const numMsgs = rand(2, 8);
             for (let m = 0; m < numMsgs; m++) {
               const alertRoll = Math.random();
               let alertLevel: "none"|"level1"|"level2"|"level3"|"level4"|"level5" = "none";
@@ -274,7 +284,7 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
           }
           const cleanRows = msgRows.map(({ _convoId, ...r }) => r);
           const inserted = await db.insert(messagesTable).values(cleanRows).returning({ id: messagesTable.id, conversationId: messagesTable.conversationId, senderId: messagesTable.senderId, createdAt: messagesTable.createdAt });
-          inserted.forEach((r, idx) => {
+          inserted.forEach((r) => {
             messageInsertedIds.push({ id: r.id, convoId: r.conversationId, senderId: r.senderId, createdAt: r.createdAt });
           });
           totalMessages += inserted.length;
@@ -306,7 +316,7 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
         console.log(`[Seed] Created ${alertRows.length} alerts`);
 
         const analyticsRows = [];
-        const analyticsBatchSize = Math.min(50000, messageInsertedIds.length);
+        const analyticsBatchSize = Math.min(5000, messageInsertedIds.length);
         for (let i = 0; i < analyticsBatchSize; i++) {
           const msg = messageInsertedIds[i];
           const childId = convoChildMap[msg.convoId];
@@ -344,7 +354,7 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
         }
         console.log(`[Seed] Created ${analyticsRows.length} message analytics`);
 
-        const sampledChildren = pickN(childIds, Math.min(2000, childIds.length));
+        const sampledChildren = pickN(childIds, Math.min(500, childIds.length));
         const ageGroups = ["6-8","9-11","12-14","15+"];
 
         try {
@@ -407,7 +417,7 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
 
         try {
         const churnRows = [];
-        for (const childId of pickN(childIds, Math.min(1500, childIds.length))) {
+        for (const childId of pickN(childIds, Math.min(400, childIds.length))) {
           const risk = Math.random();
           churnRows.push({
             userId: childId,
@@ -431,7 +441,7 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
 
         try {
         const anomalyRows = [];
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 20; i++) {
           anomalyRows.push({
             anomalyType: pick(["volume_spike","sentiment_shift","new_topic_emergence","unusual_activity_time","connection_surge","vocabulary_change","emoji_surge"]),
             severity: Math.random(),
@@ -494,7 +504,7 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
 
         try {
         const convoInsightRows = [];
-        for (const convoId of convoIds.slice(0, 3000)) {
+        for (const convoId of convoIds.slice(0, 1000)) {
           convoInsightRows.push({
             conversationId: convoId,
             analyzedAt: recentDate(7),
@@ -523,18 +533,18 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
         for (let w = 0; w < 12; w++) {
           const pStart = daysAgo((w + 1) * 7);
           const pEnd = daysAgo(w * 7);
-          const total = rand(5000, 15000);
+          const total = rand(500, 2000);
           safetyRows.push({
             periodStart: pStart,
             periodEnd: pEnd,
             totalMessages: total,
-            totalFlagged: rand(100, 800),
-            level1Count: rand(50, 300),
-            level2Count: rand(30, 150),
-            level3Count: rand(10, 60),
-            level4Count: rand(2, 20),
-            level5Count: rand(0, 5),
-            blockedCount: rand(5, 40),
+            totalFlagged: rand(20, 150),
+            level1Count: rand(10, 60),
+            level2Count: rand(5, 30),
+            level3Count: rand(2, 15),
+            level4Count: rand(0, 5),
+            level5Count: rand(0, 2),
+            blockedCount: rand(1, 10),
             avgResponseTimeMinutes: rand(1, 30),
             falsePositiveRate: Math.random() * 0.2,
             topFlagCategories: pickN(["profanity","bullying","personal_info","inappropriate_content","violence","self_harm"], 3).map(c => ({ category: c, count: rand(5, 80) })),
@@ -549,21 +559,21 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
         try {
         const demoSnapshots = [];
         for (let w = 0; w < 12; w++) {
-          const totalC = childIds.length - w * rand(50, 200);
-          const totalP = parentIds.length - w * rand(20, 80);
+          const totalC = childIds.length - w * rand(10, 40);
+          const totalP = parentIds.length - w * rand(5, 20);
           demoSnapshots.push({
             snapshotDate: daysAgo(w * 7),
             totalFamilies: totalP,
             totalParents: totalP,
-            totalChildren: Math.max(totalC, 1000),
-            ageDistribution: { "6-8": rand(1000, 2000), "9-11": rand(1500, 2500), "12-14": rand(1500, 2500), "15+": rand(500, 1500) },
-            gradeDistribution: Object.fromEntries(GRADES.map(g => [g, rand(200, 1000)])),
+            totalChildren: Math.max(totalC, 200),
+            ageDistribution: { "6-8": rand(200, 400), "9-11": rand(300, 500), "12-14": rand(300, 500), "15+": rand(100, 300) },
+            gradeDistribution: Object.fromEntries(GRADES.map(g => [g, rand(50, 200)])),
             faithModeAdoption: 0.35 + Math.random() * 0.15,
             avgChildrenPerFamily: 2.1 + Math.random() * 0.6,
-            trustLevelDistribution: { "1": rand(500, 1500), "2": rand(800, 2000), "3": rand(1000, 2500), "4": rand(600, 1500), "5": rand(200, 800) },
-            activeUsersLast7d: rand(3000, 6000),
-            activeUsersLast30d: rand(6000, 9000),
-            newSignupsLast7d: rand(50, 300),
+            trustLevelDistribution: { "1": rand(100, 300), "2": rand(200, 400), "3": rand(200, 500), "4": rand(100, 300), "5": rand(50, 150) },
+            activeUsersLast7d: rand(600, 1200),
+            activeUsersLast30d: rand(1000, 1800),
+            newSignupsLast7d: rand(10, 60),
             retentionRate7d: 0.7 + Math.random() * 0.2,
             retentionRate30d: 0.5 + Math.random() * 0.3,
           });
@@ -576,7 +586,7 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
         const eventRows = [];
         const webPages = ["/","/how-it-works","/pricing","/about","/faith-mode","/for-schools","/for-churches","/waitlist","/blog","/terms","/privacy"];
         const referrers = ["google.com","facebook.com","instagram.com","twitter.com","direct","tiktok.com","youtube.com","reddit.com"];
-        for (let i = 0; i < 5000; i++) {
+        for (let i = 0; i < 1500; i++) {
           const isWeb = Math.random() < 0.6;
           eventRows.push({
             source: isWeb ? "web" as const : "app" as const,
@@ -595,7 +605,7 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
 
         try {
         const sessionRows = [];
-        for (let i = 0; i < 3000; i++) {
+        for (let i = 0; i < 800; i++) {
           const isWeb = Math.random() < 0.5;
           const dur = rand(30, 1800);
           const startedAt = recentDate(90);
@@ -640,46 +650,54 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
         console.log(`[Seed] DONE — demo data fully loaded in ${elapsed}s!`);
       } catch (err) {
         console.error("[Seed] Error during seeding:", err);
+      } finally {
+        seedLock = false;
       }
     })();
   } catch (err: any) {
+    seedLock = false;
     res.status(500).json({ error: err.message });
   }
 });
 
 router.delete("/admin/ops/seed-demo", async (_req, res) => {
+  if (seedLock) {
+    return res.status(409).json({ error: "A seed or clear operation is already in progress. Please wait." });
+  }
+
+  seedLock = true;
   try {
-    const demoChildIds = sql`(SELECT id FROM users WHERE parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app'))`;
-    const demoParentIds = sql`(SELECT id FROM users WHERE email LIKE '%@demo.tether.app')`;
-    const demoAllIds = sql`(SELECT id FROM users WHERE email LIKE '%@demo.tether.app' OR parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app'))`;
-
-    await db.execute(sql`DELETE FROM churn_predictions WHERE user_id IN ${demoAllIds}`);
-    await db.execute(sql`DELETE FROM network_graph WHERE user_id IN ${demoAllIds}`);
-    await db.execute(sql`DELETE FROM behavioral_metrics WHERE user_id IN ${demoAllIds}`);
-    await db.execute(sql`DELETE FROM interest_graph`);
-    await db.execute(sql`DELETE FROM temporal_anomalies`);
-    await db.execute(sql`DELETE FROM keyword_trends`);
-    await db.execute(sql`DELETE FROM conversation_insights`);
-    await db.execute(sql`DELETE FROM safety_analytics`);
-    await db.execute(sql`DELETE FROM demographic_snapshots`);
-
-    await db.execute(sql`DELETE FROM message_analytics WHERE conversation_id IN (SELECT id FROM conversations WHERE child_id IN ${demoChildIds})`);
-    await db.execute(sql`DELETE FROM analytics_events`);
-    await db.execute(sql`DELETE FROM session_tracking`);
-
-    await db.execute(sql`DELETE FROM alerts WHERE parent_id IN ${demoParentIds}`);
-    await db.execute(sql`DELETE FROM messages WHERE conversation_id IN (SELECT id FROM conversations WHERE child_id IN ${demoChildIds})`);
-    await db.execute(sql`DELETE FROM conversations WHERE child_id IN ${demoChildIds}`);
-    await db.execute(sql`DELETE FROM contacts WHERE child_id IN ${demoChildIds}`);
-
-    await db.execute(sql`DELETE FROM waitlist WHERE email LIKE '%@example.com'`);
-    await db.execute(sql`DELETE FROM users WHERE parent_id IN ${demoParentIds}`);
-    await db.execute(sql`DELETE FROM users WHERE email LIKE '%@demo.tether.app'`);
+    await db.execute(sql`
+      BEGIN;
+      DELETE FROM churn_predictions;
+      DELETE FROM network_graph;
+      DELETE FROM behavioral_metrics;
+      DELETE FROM interest_graph;
+      DELETE FROM temporal_anomalies;
+      DELETE FROM keyword_trends;
+      DELETE FROM conversation_insights;
+      DELETE FROM safety_analytics;
+      DELETE FROM demographic_snapshots;
+      DELETE FROM message_analytics;
+      DELETE FROM analytics_events;
+      DELETE FROM session_tracking;
+      DELETE FROM alerts;
+      DELETE FROM messages;
+      DELETE FROM conversations;
+      DELETE FROM contacts WHERE child_id IN (SELECT id FROM users WHERE role='child' AND parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app'));
+      DELETE FROM waitlist WHERE email LIKE '%@example.com';
+      DELETE FROM users WHERE role='child' AND parent_id IN (SELECT id FROM users WHERE email LIKE '%@demo.tether.app');
+      DELETE FROM users WHERE email LIKE '%@demo.tether.app';
+      COMMIT;
+    `);
 
     res.json({ ok: true, message: "Demo data cleared successfully" });
   } catch (err: any) {
     console.error("Clear demo data error:", err);
+    try { await db.execute(sql`ROLLBACK`); } catch (_) {}
     res.status(500).json({ error: err.message });
+  } finally {
+    seedLock = false;
   }
 });
 
