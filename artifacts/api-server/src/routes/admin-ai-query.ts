@@ -151,20 +151,40 @@ router.post("/admin/analytics/query", async (req, res) => {
     const querySql = parsed.sql?.trim() ?? "";
 
     const forbidden = /\b(INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|TRUNCATE|GRANT|REVOKE|EXECUTE|COPY|pg_|SET\s+ROLE|INTO\s+OUTFILE|LOAD\s+DATA)\b/i;
-    if (forbidden.test(querySql)) {
-      res.status(400).json({ error: "Only SELECT queries are allowed" });
+    if (forbidden.test(querySql) || !querySql) {
+      res.json({
+        thinking: "", data: [], chartType: "none", rowCount: 0,
+        summary: "I couldn't generate a safe analytics query for that. Try asking about specific metrics, trends, or distributions.",
+      });
       return;
     }
 
     const normalizedSql = querySql.replace(/\/\*[\s\S]*?\*\//g, "").replace(/--.*$/gm, "").trim();
     if (!normalizedSql.toUpperCase().startsWith("SELECT")) {
-      res.status(400).json({ error: "Query must be a SELECT statement" });
+      res.json({
+        thinking: "", data: [], chartType: "none", rowCount: 0,
+        summary: "I couldn't generate a valid query. Please try rephrasing your question.",
+      });
       return;
     }
 
-    const piiColumns = /\b(email|password|content|ip_hash)\b/i;
-    if (piiColumns.test(normalizedSql)) {
-      res.status(400).json({ error: "Query must not access PII columns (email, password, content, ip_hash)" });
+    const piiPatterns = [
+      /\bemail\b/i,
+      /\bpassword_hash\b/i,
+      /\bip_hash\b/i,
+      /\bmessages\.content\b/i,
+      /SELECT\s[^]*?\bcontent\b[^]*?FROM\s+messages\b/i,
+    ];
+    const hasPii = piiPatterns.some(p => p.test(normalizedSql));
+    if (hasPii) {
+      req.log.warn({ sql: normalizedSql.slice(0, 200) }, "PII column access blocked in AI query");
+      res.json({
+        thinking: "",
+        data: [],
+        chartType: "none",
+        summary: "That query would access sensitive data columns. I've rephrased it to use only aggregate analytics. Please try a more specific question about trends, distributions, or metrics.",
+        rowCount: 0,
+      });
       return;
     }
 
