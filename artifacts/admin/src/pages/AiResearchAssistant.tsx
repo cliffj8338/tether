@@ -35,13 +35,27 @@ function DynamicChart({ response }: { response: AiQueryResponse }) {
   const yKey = config.yKey ?? keys.find(k => k !== xKey && typeof data[0][k] === "number") ?? keys[1];
 
   if (chartType === "number") {
-    const value = data[0]?.[yKey ?? keys[0]];
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-center">
-          <div className="text-4xl font-bold text-foreground">{String(value)}</div>
-          <div className="text-sm text-muted-foreground mt-1">{config.label ?? yKey}</div>
+    const row = data[0] ?? {};
+    const entries = Object.entries(row).filter(([, v]) => v !== null && v !== undefined);
+    if (entries.length <= 2) {
+      const [, value] = entries[entries.length - 1] ?? ["", ""];
+      return (
+        <div className="flex items-center justify-center py-8">
+          <div className="text-center">
+            <div className="text-4xl font-bold text-foreground">{String(value)}</div>
+            <div className="text-sm text-muted-foreground mt-1">{config.label ?? entries[entries.length - 1]?.[0]}</div>
+          </div>
         </div>
+      );
+    }
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 py-4">
+        {entries.map(([key, value]) => (
+          <div key={key} className="bg-muted/50 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-foreground">{typeof value === "number" ? value.toLocaleString() : String(value)}</div>
+            <div className="text-xs text-muted-foreground mt-1">{key.replace(/_/g, " ")}</div>
+          </div>
+        ))}
       </div>
     );
   }
