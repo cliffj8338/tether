@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { api, type AiQueryResponse } from "../lib/api";
 import { ChartCard } from "../components/ChartCard";
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
-import { Send, Bot, User, Loader2, Sparkles } from "lucide-react";
+import { Send, Bot, User, Loader2, Sparkles, MessageSquare, Shield, Users, Brain, Activity, TrendingUp, BarChart3, Globe } from "lucide-react";
 
 const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
@@ -12,15 +12,74 @@ interface Message {
   data?: AiQueryResponse;
 }
 
-const EXAMPLE_QUESTIONS = [
-  "What topics are children talking about most this week?",
-  "Show me sentiment trends by age group",
-  "Which hours have the highest alert rates?",
-  "How many waitlist signups per day this month?",
-  "What's the average response time by age group?",
-  "Which children have the most conversations?",
-  "Show me vocabulary complexity trends over time",
-  "What percentage of messages contain emoji vs slang?",
+const REPORT_CATEGORIES = [
+  {
+    label: "Content & Communication",
+    icon: MessageSquare,
+    questions: [
+      "What topics are children talking about most?",
+      "What topics do different age groups talk about?",
+      "What percentage of messages contain emoji vs slang?",
+      "What are the trending keywords?",
+      "Show me the emotional tone distribution",
+      "Show me vocabulary complexity trends over time",
+    ],
+  },
+  {
+    label: "Safety & Alerts",
+    icon: Shield,
+    questions: [
+      "Which hours have the highest alert rates?",
+      "Show me the alert severity breakdown",
+      "Give me a safety overview",
+      "Show me conversation health scores",
+    ],
+  },
+  {
+    label: "Sentiment & Wellbeing",
+    icon: Brain,
+    questions: [
+      "Show me sentiment trends by age group",
+      "What are the anxiety and wellbeing indicators?",
+    ],
+  },
+  {
+    label: "Engagement & Activity",
+    icon: Activity,
+    questions: [
+      "Which children have the most conversations?",
+      "What's the average response time by age group?",
+      "Show me message volume over time",
+      "Show me session engagement stats",
+    ],
+  },
+  {
+    label: "Demographics & Growth",
+    icon: Users,
+    questions: [
+      "Show me the platform growth overview",
+      "What's the children age distribution?",
+      "Show me trust level distribution",
+      "What's the faith mode adoption rate?",
+    ],
+  },
+  {
+    label: "Behavioral Intelligence",
+    icon: TrendingUp,
+    questions: [
+      "Show me churn risk distribution",
+      "What are the social network roles?",
+      "Show me the interest clusters",
+    ],
+  },
+  {
+    label: "Waitlist & Marketing",
+    icon: Globe,
+    questions: [
+      "How many waitlist signups per day?",
+      "Show me waitlist breakdown by role",
+    ],
+  },
 ];
 
 function DynamicChart({ response }: { response: AiQueryResponse }) {
@@ -185,25 +244,38 @@ export default function AiResearchAssistant() {
 
       <div className="flex-1 overflow-y-auto space-y-4 pb-4">
         {messages.length === 0 && (
-          <div className="space-y-6 py-8">
+          <div className="space-y-6 py-4">
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-8 h-8 text-primary" />
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <Sparkles className="w-7 h-7 text-primary" />
               </div>
-              <h2 className="text-lg font-semibold">What would you like to know?</h2>
-              <p className="text-sm text-muted-foreground mt-1">I can query your analytics database and generate charts from natural language</p>
+              <h2 className="text-lg font-semibold">25 Pre-Built Research Reports</h2>
+              <p className="text-sm text-muted-foreground mt-1">Click any report below, or type your own question</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-w-2xl mx-auto">
-              {EXAMPLE_QUESTIONS.map((q, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSubmit(q)}
-                  className="text-left px-4 py-3 rounded-lg border border-border hover:bg-muted/50 text-sm transition-colors"
-                >
-                  {q}
-                </button>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-6xl mx-auto">
+              {REPORT_CATEGORIES.map((cat) => {
+                const Icon = cat.icon;
+                return (
+                  <div key={cat.label} className="border border-border rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Icon className="w-4 h-4 text-primary" />
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{cat.label}</h3>
+                    </div>
+                    <div className="space-y-1">
+                      {cat.questions.map((q, i) => (
+                        <button
+                          key={i}
+                          onClick={() => handleSubmit(q)}
+                          className="w-full text-left px-2 py-1.5 rounded text-xs hover:bg-muted/50 transition-colors text-foreground/80 hover:text-foreground"
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="text-center">

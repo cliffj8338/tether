@@ -5,7 +5,6 @@ const API_BASE = "/api";
 
 export default function DemoBanner() {
   const [isDemoLoaded, setIsDemoLoaded] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     const check = async () => {
@@ -27,43 +26,32 @@ export default function DemoBanner() {
     return () => clearInterval(interval);
   }, []);
 
-  if (!isDemoLoaded || dismissed) return null;
+  if (!isDemoLoaded) return null;
 
   return (
     <div style={{
       background: "linear-gradient(90deg, #f59e0b, #d97706)",
       color: "white",
-      padding: "8px 20px",
+      padding: "10px 20px",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      gap: 12,
+      gap: 10,
       fontSize: 13,
       fontWeight: 600,
-      position: "relative",
-      zIndex: 100,
+      position: "sticky",
+      top: 0,
+      zIndex: 1000,
+      boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
     }}>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+        <line x1="12" y1="9" x2="12" y2="13" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
       </svg>
       <span>
-        DEMO MODE — This dashboard contains simulated data for demonstration purposes only. Not real user data.
+        DEMO DATA ACTIVE — This dashboard is displaying simulated data for demonstration purposes. No real user data is shown.
       </span>
-      <button
-        onClick={() => setDismissed(true)}
-        style={{
-          background: "rgba(255,255,255,0.2)",
-          border: "none",
-          color: "white",
-          borderRadius: 4,
-          padding: "2px 8px",
-          cursor: "pointer",
-          fontSize: 12,
-          marginLeft: 8,
-        }}
-      >
-        Dismiss
-      </button>
     </div>
   );
 }
