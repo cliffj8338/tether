@@ -295,7 +295,7 @@ router.get("/admin/ops/stats", async (_req, res) => {
         (SELECT count(*)::int FROM temporal_anomalies) AS anomalies,
         (SELECT count(*)::int FROM interest_graph) AS interest_graph,
         (SELECT count(*)::int FROM keyword_trends) AS keyword_trends,
-        (SELECT count(*)::int FROM session_tracking) AS sessions,
+        (SELECT count(*)::int FROM session_tracking) AS session_count,
         (SELECT count(*)::int FROM analytics_events) AS events
     `);
     const r = result.rows[0] as any;
@@ -313,7 +313,7 @@ router.get("/admin/ops/stats", async (_req, res) => {
       anomalies: r.anomalies,
       interestGraph: r.interest_graph,
       keywordTrends: r.keyword_trends,
-      sessions: r.sessions,
+      sessions: r.session_count,
       events: r.events,
     });
   } catch (err: any) {
