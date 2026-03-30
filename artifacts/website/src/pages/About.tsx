@@ -17,7 +17,7 @@ export default function About() {
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h1 className="text-5xl md:text-6xl font-display font-bold mb-6">Our Story</h1>
           <p className="text-xl text-white/80 leading-relaxed">
-            Tether was not conceived in a boardroom. It was born from a&nbsp;father's frustration&nbsp;— and a&nbsp;family's&nbsp;faith.
+            Tether was not conceived in a boardroom. It was born from a&nbsp;father's frustration&nbsp;— and a&nbsp;family's&nbsp;conviction that children deserve better.
           </p>
         </div>
       </section>
@@ -70,7 +70,7 @@ export default function About() {
             </ul>
             <h3 className="text-xl font-heading font-bold text-text-dark mb-3">Communication with Intent</h3>
             <p className="text-lg text-text-mid leading-relaxed">
-              We built Tether because families deserve a digital environment where communication isn't left to chance. By weaving Christian values into the platform's core—not as a marketing layer, but as a functional feature—we've created a space where structure, safety, and grace are the default, providing children with a framework to learn how to interact with the world.
+              We built Tether because every family — regardless of background or belief system — deserves a digital environment where communication isn't left to chance. Structure, safety, and accountability are the defaults for everyone. For families of faith, an optional Faith Mode adds values-aligned moderation and scripture prompts. But the core platform is built for all families who believe children deserve supervised independence in their digital lives.
             </p>
           </div>
         </div>
@@ -117,8 +117,8 @@ export default function About() {
               },
               {
                 icon: BookOpen,
-                title: "Faith as a foundation",
-                desc: "For Cliff and his family, faith is not a feature — it's the reason the company exists. The conviction that children are worth protecting, that accountability builds character, and that communities thrive when adults take responsibility."
+                title: "Values as a foundation",
+                desc: "Tether is built on the conviction that children are worth protecting, that accountability builds character, and that communities thrive when adults take responsibility. For Cliff's family, that conviction is rooted in faith — which inspired the optional Faith Mode. But the mission is universal: every child deserves adults who are paying attention."
               },
               {
                 icon: Cpu,

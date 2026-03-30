@@ -74,8 +74,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "faith-mode-why-it-matters",
-    title: "Faith Mode: Why Values-Aligned Moderation Matters",
-    excerpt: "Faith Mode is not a content filter with a Christian label. It's a fundamentally different approach to AI moderation — one that understands the difference between safety and values.",
+    title: "Faith Mode: An Optional Layer for Faith-Based Families",
+    excerpt: "Tether is built for all families. Faith Mode is an optional enhancement that adds values-aligned moderation for Christian communities — on top of the same safety platform everyone uses.",
     date: "2026-02-28",
     author: "Tether Team",
     category: "faith",

@@ -16,7 +16,7 @@ const COMPARISON = [
 
 export default function FaithMode() {
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
-  useSEO({ title: "Faith Mode — Values-Aligned Messaging for Christian Families", description: "Faith Mode is not a filter. It's a foundation. Tether's dedicated mode for Christian Protestant and Evangelical communities brings values-aligned moderation, scripture prompts, and curated content." });
+  useSEO({ title: "Faith Mode — Optional Values-Aligned Messaging", description: "Tether works for all families. Faith Mode is an optional enhancement for Christian communities — adding values-aligned moderation, scripture prompts, and curated content on top of Tether's universal safety platform." });
 
   return (
     <div className="overflow-hidden">
@@ -31,8 +31,11 @@ export default function FaithMode() {
               🕊️ Faith Mode
             </div>
             <h1 className="text-5xl md:text-6xl font-display font-bold mb-6">Not a filter. A foundation.</h1>
-            <p className="text-xl text-text-mid leading-relaxed max-w-3xl mx-auto">
-              Faith Mode is Tether's dedicated experience for Christian Protestant and Evangelical communities. It doesn't just remove harmful content — it reinforces the values your family already lives.
+            <p className="text-xl text-text-mid leading-relaxed max-w-3xl mx-auto mb-4">
+              Tether is built for every family. Faith Mode is an optional enhancement for Christian Protestant and Evangelical communities — adding values-aligned moderation on top of the same safety platform all families use.
+            </p>
+            <p className="text-sm text-text-light max-w-2xl mx-auto">
+              Don't need Faith Mode? No problem. Tether's core platform provides supervised messaging, graduated trust, and AI safety for all families regardless of background.
             </p>
           </motion.div>
         </div>
@@ -114,15 +117,15 @@ export default function FaithMode() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-16">
             <div className="lg:w-1/2">
-              <h2 className="text-4xl font-display font-bold mb-6">Built by a family of faith</h2>
+              <h2 className="text-4xl font-display font-bold mb-6">Built by a family of faith — for families everywhere</h2>
               <p className="text-lg text-text-mid leading-relaxed mb-6">
-                Faith Mode was not built by a product team studying the Christian market. It was built by a founder whose faith is central to his family's daily life — a father who wanted his own children to have a digital space that reflected the values they practice at home and at church.
+                Tether's founder built this platform because his own family needed it. His faith shaped the vision — and inspired Faith Mode as a dedicated feature. But the core mission is universal: every child deserves a supervised digital space where they learn to communicate with accountability and care.
               </p>
               <p className="text-lg text-text-mid leading-relaxed mb-6">
-                The moderation layer understands the difference between secular safety and values-aligned guidance. It knows the difference between a child being unkind and a child being dishonest. Between a conversation that drifts and one that contradicts what a family believes. These distinctions matter to parents raising children with intention.
+                For families who share these values, Faith Mode adds depth. The moderation layer understands the difference between standard safety and values-aligned guidance — between a child being unkind and a child being dishonest. These distinctions matter to parents raising children with intention.
               </p>
               <p className="text-text-mid leading-relaxed">
-                Faith Mode is not a marketing feature. It is the reason the company exists.
+                Faith Mode is an optional layer. Tether's safety, structure, and trust architecture work for everyone.
               </p>
             </div>
 

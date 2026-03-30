@@ -332,7 +332,7 @@ export default function HowItWorks() {
                 "Go Live" Suggestions
               </h3>
               <p className="text-white/60 text-sm mb-6 relative z-10">
-                When limits are reached, Tether doesn't just lock children out — it redirects them to the real world. Faith Mode includes all standard suggestions plus faith-specific activities:
+                When limits are reached, Tether doesn't just lock children out — it redirects them to the real world. Families using the optional Faith Mode also see faith-specific activities:
               </p>
               <div className="space-y-3 relative z-10">
                 {[
