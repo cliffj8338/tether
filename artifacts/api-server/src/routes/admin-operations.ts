@@ -2,12 +2,12 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { usersTable, waitlistTable } from "@workspace/db";
 import { desc, count, eq, sql, ilike, or, and, type SQL } from "drizzle-orm";
-import { requireAdmin } from "../lib/require-admin";
+import { requireAdmin, blockShowcaseWrites } from "../lib/require-admin";
 import { sendTestSMS } from "../lib/sms";
 
 const router: IRouter = Router();
 
-router.use("/admin/ops", requireAdmin);
+router.use("/admin/ops", requireAdmin, blockShowcaseWrites);
 
 router.get("/admin/ops/waitlist", async (req, res) => {
   try {

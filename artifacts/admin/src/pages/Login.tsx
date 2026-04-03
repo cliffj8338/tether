@@ -1,7 +1,16 @@
+import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 
 export default function Login() {
-  const { signInWithGoogle, loading, error, configured } = useAuth();
+  const { signInWithGoogle, showcaseLogin, loading, error, configured } = useAuth();
+  const [showShowcase, setShowShowcase] = useState(false);
+  const [accessCode, setAccessCode] = useState("");
+
+  const handleShowcaseSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!accessCode.trim()) return;
+    await showcaseLogin(accessCode.trim());
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -56,6 +65,59 @@ export default function Login() {
               )}
               {loading ? "Signing in..." : "Sign in with Google"}
             </button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">or</span>
+              </div>
+            </div>
+
+            {!showShowcase ? (
+              <button
+                onClick={() => setShowShowcase(true)}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-indigo-50 border border-indigo-200 rounded-xl text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition-colors disabled:opacity-50"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                Explore Demo Dashboard
+              </button>
+            ) : (
+              <form onSubmit={handleShowcaseSubmit} className="space-y-3">
+                <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
+                  <p className="text-xs text-indigo-700 mb-3 font-medium">Enter the showcase access code to explore the dashboard in view-only mode.</p>
+                  <input
+                    type="text"
+                    value={accessCode}
+                    onChange={(e) => setAccessCode(e.target.value)}
+                    placeholder="Access code"
+                    autoFocus
+                    className="w-full px-3 py-2 bg-white border border-indigo-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setShowShowcase(false); setAccessCode(""); }}
+                    className="flex-1 px-4 py-2.5 bg-white border border-border rounded-lg text-sm font-medium text-muted-foreground hover:bg-accent transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading || !accessCode.trim()}
+                    className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? "Verifying..." : "Enter Dashboard"}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
 
           {error && (

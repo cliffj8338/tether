@@ -2,7 +2,13 @@ import { auth } from "./firebase";
 
 const API_BASE = "/api";
 
+const SHOWCASE_STORAGE_KEY = "tether_showcase_token";
+
 async function getAuthHeaders(): Promise<Record<string, string>> {
+  const showcaseToken = sessionStorage.getItem(SHOWCASE_STORAGE_KEY);
+  if (showcaseToken) {
+    return { "x-showcase-token": showcaseToken };
+  }
   const user = auth.currentUser;
   if (user) {
     const idToken = await user.getIdToken();

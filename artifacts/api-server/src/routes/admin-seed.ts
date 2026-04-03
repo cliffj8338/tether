@@ -9,11 +9,11 @@ import {
   sessionTrackingTable, safetyAnalyticsTable, demographicSnapshotsTable,
 } from "@workspace/db";
 import { sql } from "drizzle-orm";
-import { requireAdmin } from "../lib/require-admin";
+import { requireAdmin, blockShowcaseWrites } from "../lib/require-admin";
 import crypto from "crypto";
 
 const router: IRouter = Router();
-router.use("/admin/ops/seed-demo", requireAdmin);
+router.use("/admin/ops/seed-demo", requireAdmin, blockShowcaseWrites);
 
 const FIRST_NAMES_M = ["Liam","Noah","Oliver","James","Elijah","William","Henry","Lucas","Benjamin","Jack","Alexander","Daniel","Matthew","Sebastian","Joseph","Samuel","David","Carter","Wyatt","Jayden","Luke","Owen","Caleb","Isaac","Ryan","Nathan","Adrian","Eli","Nolan","Christian","Aaron","Ezra","Colton","Landon","Hunter","Jordan","Nicholas","Dominic","Austin","Mason","Logan","Aiden","Jackson","Dylan","Gavin","Miles","Parker","Asher","Brody","Camden","Chase","Cole","Connor","Cooper","Easton","Evan","Grant","Hudson","Ian","Jace","Jake","Jason","Jesse","Joshua","Justin","Kyle","Leo","Lincoln","Luca","Marcus","Max","Micah","Miles","Oscar","Peyton","Quinn","Reid","Rowan","Silas","Spencer","Tyler","Vincent","Wesley","Xander","Zachary"];
 const FIRST_NAMES_F = ["Olivia","Emma","Ava","Sophia","Isabella","Mia","Charlotte","Amelia","Harper","Evelyn","Abigail","Emily","Ella","Elizabeth","Sofia","Avery","Scarlett","Grace","Chloe","Riley","Layla","Zoey","Lily","Hannah","Nora","Lillian","Addison","Eleanor","Natalie","Luna","Savannah","Brooklyn","Leah","Zoe","Stella","Hazel","Ellie","Paisley","Audrey","Aria","Aurora","Bella","Camila","Claire","Daisy","Eden","Eliana","Faith","Gabriella","Gianna","Hailey","Isabel","Ivy","Jade","Jasmine","Julia","Keira","Kennedy","Kinsley","Kylie","Leila","Lyla","Mackenzie","Madison","Maya","Mila","Naomi","Nevaeh","Paige","Penelope","Piper","Quinn","Reagan","Rose","Ruby","Sadie","Sara","Skyler","Valentina","Victoria","Violet","Willow"];

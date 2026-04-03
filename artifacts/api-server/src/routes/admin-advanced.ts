@@ -6,12 +6,12 @@ import {
   usersTable, messagesTable,
 } from "@workspace/db";
 import { eq, desc, sql, gte, and, count } from "drizzle-orm";
-import { requireAdmin } from "../lib/require-admin";
+import { requireAdmin, blockShowcaseWrites } from "../lib/require-admin";
 import { runAllComputations } from "../lib/behavioral-engine";
 
 const router: IRouter = Router();
 
-router.use("/admin/analytics", requireAdmin);
+router.use("/admin/analytics", requireAdmin, blockShowcaseWrites);
 
 router.post("/admin/analytics/compute", async (req, res) => {
   try {

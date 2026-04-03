@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { auth } from "../lib/firebase";
 
 const API_BASE = "/api";
+const SHOWCASE_STORAGE_KEY = "tether_showcase_token";
 
 export default function DemoBanner() {
   const [isDemoLoaded, setIsDemoLoaded] = useState(false);
@@ -9,12 +10,17 @@ export default function DemoBanner() {
   useEffect(() => {
     const check = async () => {
       try {
-        const user = auth.currentUser;
-        if (!user) return;
-        const idToken = await user.getIdToken();
-        const res = await fetch(`${API_BASE}/admin/ops/seed-demo`, {
-          headers: { Authorization: `Bearer ${idToken}` },
-        });
+        const headers: Record<string, string> = {};
+        const showcaseToken = sessionStorage.getItem(SHOWCASE_STORAGE_KEY);
+        if (showcaseToken) {
+          headers["x-showcase-token"] = showcaseToken;
+        } else {
+          const user = auth.currentUser;
+          if (!user) return;
+          const idToken = await user.getIdToken();
+          headers["Authorization"] = `Bearer ${idToken}`;
+        }
+        const res = await fetch(`${API_BASE}/admin/ops/seed-demo`, { headers });
         if (res.ok) {
           const data = await res.json();
           setIsDemoLoaded(data.isDemoLoaded);

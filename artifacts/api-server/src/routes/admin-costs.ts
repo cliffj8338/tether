@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { platformCostsTable } from "@workspace/db";
 import { eq, desc, sql } from "drizzle-orm";
-import { requireAdmin } from "../lib/require-admin";
+import { requireAdmin, blockShowcaseWrites } from "../lib/require-admin";
 
 const router: IRouter = Router();
 
@@ -36,7 +36,7 @@ router.get("/platform-costs", async (_req, res) => {
   }
 });
 
-router.use("/admin/ops/costs", requireAdmin);
+router.use("/admin/ops/costs", requireAdmin, blockShowcaseWrites);
 
 router.get("/admin/ops/costs", async (_req, res) => {
   try {

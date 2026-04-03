@@ -60,8 +60,37 @@ function NavIcon({ d }: { d: string }) {
   );
 }
 
+function ShowcaseBanner() {
+  const { isShowcase } = useAuth();
+  if (!isShowcase) return null;
+
+  return (
+    <div style={{
+      background: "linear-gradient(90deg, #6366f1, #4f46e5)",
+      color: "white",
+      padding: "8px 20px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      fontSize: 13,
+      fontWeight: 600,
+      position: "sticky",
+      top: 0,
+      zIndex: 1001,
+      boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+    }}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+      <span>SHOWCASE MODE — View-only access. Data modifications are disabled.</span>
+    </div>
+  );
+}
+
 function UserMenu() {
-  const { adminUser, firebaseUser, logout } = useAuth();
+  const { adminUser, firebaseUser, logout, isShowcase } = useAuth();
   const [open, setOpen] = useState(false);
 
   return (
@@ -70,16 +99,23 @@ function UserMenu() {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-sidebar-accent/50 transition-colors w-full"
       >
-        {firebaseUser?.photoURL ? (
+        {!isShowcase && firebaseUser?.photoURL ? (
           <img src={firebaseUser.photoURL} alt="" className="w-7 h-7 rounded-full" />
         ) : (
-          <div className="w-7 h-7 rounded-full bg-sidebar-primary flex items-center justify-center text-xs font-bold text-white">
-            {(adminUser?.displayName || "A")[0].toUpperCase()}
+          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white ${isShowcase ? "bg-indigo-500" : "bg-sidebar-primary"}`}>
+            {isShowcase ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            ) : (
+              (adminUser?.displayName || "A")[0].toUpperCase()
+            )}
           </div>
         )}
         <div className="flex-1 text-left min-w-0">
-          <div className="text-xs font-medium text-sidebar-foreground truncate">{adminUser?.displayName || "Admin"}</div>
-          <div className="text-[10px] text-sidebar-foreground/50 truncate">{adminUser?.email}</div>
+          <div className="text-xs font-medium text-sidebar-foreground truncate">{isShowcase ? "Showcase Viewer" : adminUser?.displayName || "Admin"}</div>
+          <div className="text-[10px] text-sidebar-foreground/50 truncate">{isShowcase ? "View-only access" : adminUser?.email}</div>
         </div>
       </button>
       {open && (
@@ -90,7 +126,7 @@ function UserMenu() {
               onClick={() => { logout(); setOpen(false); }}
               className="w-full px-3 py-2 text-left text-sm text-destructive hover:bg-accent transition-colors"
             >
-              Sign out
+              {isShowcase ? "Exit Showcase" : "Sign out"}
             </button>
           </div>
         </>
@@ -99,8 +135,12 @@ function UserMenu() {
   );
 }
 
+const SHOWCASE_HIDDEN_PATHS = ["/demo-data", "/users"];
+
 function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const [location] = useLocation();
+  const { isShowcase } = useAuth();
+  const filteredItems = isShowcase ? NAV_ITEMS.filter(item => !SHOWCASE_HIDDEN_PATHS.includes(item.path)) : NAV_ITEMS;
 
   return (
     <aside className={`fixed top-0 left-0 h-full bg-sidebar text-sidebar-foreground transition-all duration-200 z-50 flex flex-col ${collapsed ? "w-16" : "w-56"}`}>
@@ -123,9 +163,9 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
       </div>
 
       <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
-        {NAV_ITEMS.map((item, idx) => {
+        {filteredItems.map((item, idx) => {
           const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
-          const prevSection = idx > 0 ? NAV_ITEMS[idx - 1].section : null;
+          const prevSection = idx > 0 ? filteredItems[idx - 1].section : null;
           const showSection = item.section !== prevSection;
           return (
             <div key={item.path}>
@@ -221,6 +261,7 @@ function AuthenticatedApp() {
 
   return (
     <div className="min-h-screen bg-background">
+      <ShowcaseBanner />
       <DemoBanner />
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
       <main className={`transition-all duration-200 ${collapsed ? "ml-16" : "ml-56"}`}>
