@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "MZ1mbsueYkNzlzvdATq42"
+uri = "file://.local/testing-checklist.md"
+type = "text"
+title = "Tether — Full Testing Checklist (~170 items)"
