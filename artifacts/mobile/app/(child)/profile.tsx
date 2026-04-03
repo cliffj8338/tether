@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -7,6 +7,7 @@ import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/typography";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar } from "@/components/ui/Avatar";
+import { api } from "@/services/api";
 
 const trustLevelLabels = [
   "",
@@ -20,6 +21,23 @@ const trustLevelLabels = [
 export default function ChildProfileScreen() {
   const insets = useSafeAreaInsets();
   const { user, logout } = useAuth();
+  const [messageCount, setMessageCount] = useState(0);
+  const [friendCount, setFriendCount] = useState(0);
+
+  const loadStats = useCallback(async () => {
+    if (!user) return;
+    try {
+      const [contacts, conversations] = await Promise.all([
+        api.contacts.list(user.id),
+        api.conversations.list(user.id),
+      ]);
+      setFriendCount(contacts.filter(c => c.approvedByParent).length);
+      const usage = await api.children.usage(user.id);
+      setMessageCount(usage.messagesToday);
+    } catch {}
+  }, [user]);
+
+  useEffect(() => { loadStats(); }, [loadStats]);
 
   const handleLogout = () => {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
@@ -55,12 +73,12 @@ export default function ChildProfileScreen() {
 
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>14</Text>
-            <Text style={styles.statLabel}>Messages</Text>
+            <Text style={styles.statValue}>{messageCount}</Text>
+            <Text style={styles.statLabel}>Today</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>2</Text>
+            <Text style={styles.statValue}>{friendCount}</Text>
             <Text style={styles.statLabel}>Friends</Text>
           </View>
           <View style={styles.statDivider} />
@@ -71,18 +89,21 @@ export default function ChildProfileScreen() {
         </View>
 
         <View style={styles.group}>
-          <Pressable style={styles.row}>
-            <View style={[styles.rowIcon, { backgroundColor: `${Colors.accent}16` }]}>
-              <Feather name="smile" size={18} color={Colors.accent} />
-            </View>
-            <Text style={styles.rowLabel}>My Stickers</Text>
-            <Feather name="chevron-right" size={18} color={Colors.sand} />
-          </Pressable>
-          <Pressable style={styles.row}>
+          <Pressable style={styles.row} onPress={() => {
+            Alert.alert(
+              "Safety Tips",
+              "Remember these tips to stay safe online:\n\n" +
+              "\u2022 Never share your password with anyone\n" +
+              "\u2022 Only chat with approved contacts\n" +
+              "\u2022 Tell a parent if something makes you uncomfortable\n" +
+              "\u2022 Be kind in your messages\n" +
+              "\u2022 Take breaks from screen time"
+            );
+          }}>
             <View style={[styles.rowIcon, { backgroundColor: `${Colors.primary}16` }]}>
               <Feather name="shield" size={18} color={Colors.primary} />
             </View>
-            <Text style={styles.rowLabel}>Safety Info</Text>
+            <Text style={styles.rowLabel}>Safety Tips</Text>
             <Feather name="chevron-right" size={18} color={Colors.sand} />
           </Pressable>
         </View>

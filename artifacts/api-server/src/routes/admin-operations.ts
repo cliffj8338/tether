@@ -129,10 +129,10 @@ router.get("/admin/ops/users", async (req, res) => {
 router.post("/admin/ops/users/:id/toggle-admin", async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
-    if (isNaN(userId) || userId <= 0) return res.status(400).json({ error: "Invalid user ID" });
+    if (isNaN(userId) || userId <= 0) { res.status(400).json({ error: "Invalid user ID" }); return; }
 
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
 
     await db.update(usersTable).set({ isAdmin: !user.isAdmin }).where(eq(usersTable.id, userId));
     res.json({ ok: true, isAdmin: !user.isAdmin });
@@ -144,10 +144,10 @@ router.post("/admin/ops/users/:id/toggle-admin", async (req, res) => {
 router.post("/admin/ops/users/:id/toggle-pause", async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
-    if (isNaN(userId) || userId <= 0) return res.status(400).json({ error: "Invalid user ID" });
+    if (isNaN(userId) || userId <= 0) { res.status(400).json({ error: "Invalid user ID" }); return; }
 
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
 
     await db.update(usersTable).set({ isPaused: !user.isPaused }).where(eq(usersTable.id, userId));
     res.json({ ok: true, isPaused: !user.isPaused });

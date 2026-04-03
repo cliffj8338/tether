@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
+import { View, Text, StyleSheet, FlatList, Pressable, Alert } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
@@ -12,7 +12,7 @@ import { useContacts, useDashboard } from "@/hooks/useApiData";
 
 export default function CommunityScreen() {
   const insets = useSafeAreaInsets();
-  const { contacts, approve, refresh: refreshContacts } = useContacts();
+  const { contacts, approve, reject, refresh: refreshContacts } = useContacts();
   const { children } = useDashboard();
 
   useFocusEffect(
@@ -94,7 +94,23 @@ export default function CommunityScreen() {
                   >
                     <Feather name="check" size={16} color={Colors.white} />
                   </Pressable>
-                  <Pressable style={styles.rejectBtn}>
+                  <Pressable style={styles.rejectBtn} onPress={() => {
+                    Alert.alert(
+                      "Reject Contact",
+                      `Are you sure you want to reject ${contact.contactName}? This will remove them from your child's contact list.`,
+                      [
+                        { text: "Cancel", style: "cancel" },
+                        {
+                          text: "Reject",
+                          style: "destructive",
+                          onPress: () => {
+                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+                            reject(contact.id);
+                          },
+                        },
+                      ]
+                    );
+                  }}>
                     <Feather name="x" size={16} color={Colors.alert4} />
                   </Pressable>
                 </View>

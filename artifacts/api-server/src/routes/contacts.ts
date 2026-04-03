@@ -199,4 +199,40 @@ router.post("/contacts/:contactId/approve", async (req, res) => {
   }
 });
 
+router.delete("/contacts/:contactId", async (req, res) => {
+  try {
+    const user = await getUserFromToken(req);
+    if (!user || user.role !== "parent") {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    const contactId = parseInt(req.params.contactId);
+
+    const [existingContact] = await db.select().from(contactsTable).where(eq(contactsTable.id, contactId));
+    if (!existingContact) {
+      res.status(404).json({ error: "Contact not found" });
+      return;
+    }
+
+    const ownedIds = await getOwnedChildIds(user.id);
+    if (!ownedIds.has(existingContact.childId)) {
+      res.status(403).json({ error: "Not your child's contact" });
+      return;
+    }
+
+    await db.delete(conversationsTable).where(
+      and(
+        eq(conversationsTable.childId, existingContact.childId),
+        eq(conversationsTable.contactId, contactId)
+      )
+    );
+    await db.delete(contactsTable).where(eq(contactsTable.id, contactId));
+
+    res.json({ ok: true });
+  } catch (error) {
+    req.log.error(error, "Failed to reject contact");
+    res.status(500).json({ error: "Failed to reject contact" });
+  }
+});
+
 export default router;

@@ -162,6 +162,7 @@ export interface DemographicsData {
   ageDistribution: { age: number; count: number }[];
   gradeDistribution: { grade: string; count: number }[];
   trustLevelDistribution: { level: number; count: number }[];
+  genderDistribution: { gender: string; count: number }[];
   faithMode: { enabled: number; total: number; adoptionRate: string };
   familySizeDistribution: Record<string, number>;
   avgChildrenPerFamily: string;

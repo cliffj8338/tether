@@ -54,7 +54,8 @@ router.post("/admin/ops/costs", async (req, res) => {
   try {
     const { month, category, amount, notes } = req.body;
     if (!month || !category || amount == null) {
-      return res.status(400).json({ error: "month, category, and amount are required" });
+      res.status(400).json({ error: "month, category, and amount are required" });
+      return;
     }
     const [entry] = await db.insert(platformCostsTable).values({
       month,
@@ -82,7 +83,7 @@ router.patch("/admin/ops/costs/:id", async (req, res) => {
       .set(updates)
       .where(eq(platformCostsTable.id, id))
       .returning();
-    if (!entry) return res.status(404).json({ error: "Not found" });
+    if (!entry) { res.status(404).json({ error: "Not found" }); return; }
     res.json(entry);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -95,7 +96,7 @@ router.delete("/admin/ops/costs/:id", async (req, res) => {
     const [entry] = await db.delete(platformCostsTable)
       .where(eq(platformCostsTable.id, id))
       .returning();
-    if (!entry) return res.status(404).json({ error: "Not found" });
+    if (!entry) { res.status(404).json({ error: "Not found" }); return; }
     res.json({ ok: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

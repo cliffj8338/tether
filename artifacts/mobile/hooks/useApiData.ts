@@ -113,6 +113,16 @@ export function useContacts(childId?: number) {
     }
   }, [load]);
 
+  const reject = useCallback(async (contactId: number) => {
+    try {
+      await api.contacts.reject(contactId);
+      await load();
+    } catch (err) {
+      console.warn("Reject contact error:", err);
+      throw err;
+    }
+  }, [load]);
+
   const add = useCallback(async (data: { childId: number; contactName: string }) => {
     try {
       await api.contacts.add(data);
@@ -125,7 +135,7 @@ export function useContacts(childId?: number) {
 
   useEffect(() => { load(); }, [load]);
 
-  return { contacts, isLoading, refresh: load, approve, add };
+  return { contacts, isLoading, refresh: load, approve, reject, add };
 }
 
 export function useAlerts() {

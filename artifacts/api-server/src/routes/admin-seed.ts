@@ -104,13 +104,15 @@ router.get("/admin/ops/seed-demo", async (_req, res) => {
 
 router.post("/admin/ops/seed-demo", async (_req, res) => {
   if (seedLock) {
-    return res.status(409).json({ error: "A seed or clear operation is already in progress. Please wait." });
+    res.status(409).json({ error: "A seed or clear operation is already in progress. Please wait." });
+    return;
   }
 
   try {
     const existingCount = await db.select({ c: sql<number>`count(*)::int` }).from(usersTable);
     if (existingCount[0].c > 100) {
-      return res.status(400).json({ error: "Database already has significant data. Clear demo data first before re-seeding." });
+      res.status(400).json({ error: "Database already has significant data. Clear demo data first before re-seeding." });
+      return;
     }
 
     seedLock = true;
@@ -275,7 +277,7 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
                 senderId: childId,
                 content: pick(MESSAGES_POOL),
                 alertLevel,
-                isBlocked: alertLevel === "level4" || alertLevel === "level5" ? Math.random() < 0.6 : false,
+                isBlocked: (alertLevel as string) === "level4" || (alertLevel as string) === "level5" ? Math.random() < 0.6 : false,
                 isDelivered: true,
                 createdAt,
                 _convoId: convoId,
@@ -662,7 +664,8 @@ router.post("/admin/ops/seed-demo", async (_req, res) => {
 
 router.delete("/admin/ops/seed-demo", async (_req, res) => {
   if (seedLock) {
-    return res.status(409).json({ error: "A seed or clear operation is already in progress. Please wait." });
+    res.status(409).json({ error: "A seed or clear operation is already in progress. Please wait." });
+    return;
   }
 
   seedLock = true;

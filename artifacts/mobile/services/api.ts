@@ -236,6 +236,9 @@ export const api = {
     approve(contactId: number): Promise<Contact> {
       return request(`/contacts/${contactId}/approve`, { method: "POST" });
     },
+    reject(contactId: number): Promise<{ ok: boolean }> {
+      return request(`/contacts/${contactId}`, { method: "DELETE" });
+    },
     search(query: string): Promise<{ id: number; displayName: string; avatarColor: string }[]> {
       return request(`/contacts/search?q=${encodeURIComponent(query)}`);
     },

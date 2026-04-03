@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
+import React, { useState, useRef } from "react";
+import { View, Text, StyleSheet, FlatList, Pressable, TextInput } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
@@ -23,19 +23,57 @@ export default function MessagesScreen() {
     }, [refreshConvos])
   );
   const [selectedChild, setSelectedChild] = useState<number | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchRef = useRef<TextInput>(null);
 
-  const filtered = selectedChild
-    ? conversations.filter((c) => c.childId === selectedChild)
-    : conversations;
+  const filtered = conversations.filter((c) => {
+    if (selectedChild && c.childId !== selectedChild) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return c.contactName.toLowerCase().includes(q) || c.lastMessage.toLowerCase().includes(q);
+    }
+    return true;
+  });
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Messages</Text>
-        <Pressable style={styles.searchBtn}>
-          <Feather name="search" size={20} color={Colors.textMid} />
+        <Pressable style={[styles.searchBtn, searchOpen && { backgroundColor: Colors.primary, borderColor: Colors.primary }]} onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          if (searchOpen) {
+            setSearchOpen(false);
+            setSearchQuery("");
+          } else {
+            setSearchOpen(true);
+            setTimeout(() => searchRef.current?.focus(), 100);
+          }
+        }}>
+          <Feather name={searchOpen ? "x" : "search"} size={20} color={searchOpen ? Colors.white : Colors.textMid} />
         </Pressable>
       </View>
+
+      {searchOpen && (
+        <View style={styles.searchRow}>
+          <Feather name="search" size={16} color={Colors.sand} />
+          <TextInput
+            ref={searchRef}
+            style={styles.searchInput}
+            placeholder="Search contacts or messages..."
+            placeholderTextColor={Colors.sand}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          {searchQuery.length > 0 && (
+            <Pressable onPress={() => setSearchQuery("")}>
+              <Feather name="x-circle" size={16} color={Colors.sand} />
+            </Pressable>
+          )}
+        </View>
+      )}
 
       <View style={styles.filterRow}>
         <Pressable
@@ -124,6 +162,26 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     alignItems: "center",
     justifyContent: "center",
+  },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 20,
+    marginBottom: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: Colors.white,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    gap: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: Fonts.body,
+    fontSize: 14,
+    color: Colors.text,
+    padding: 0,
   },
   filterRow: {
     flexDirection: "row",
