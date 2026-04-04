@@ -82,9 +82,9 @@ export async function aiScanContent(
   } catch (error) {
     console.error("AI content filter error:", error);
     return {
-      alertLevel: "none",
-      reason: null,
-      title: "Clean",
+      alertLevel: "level2",
+      reason: "AI filter unavailable — flagged for manual review",
+      title: "Review Needed — AI Unavailable",
     };
   }
 }

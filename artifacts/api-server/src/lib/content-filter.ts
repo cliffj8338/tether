@@ -1,85 +1,108 @@
-type AlertLevel = "none" | "level1" | "level2" | "level3" | "level4" | "level5";
+import { CONTENT_DICTIONARY, type AlertLevel, type DictionaryEntry } from "./content-dictionary";
 
 interface ScanResult {
   alertLevel: AlertLevel;
   reason: string | null;
   title: string;
+  category?: string;
 }
 
-const LEVEL5_PATTERNS = [
-  /https?:\/\/[^\s]+\.(xxx|porn|adult)/i,
-  /\b(nude|naked|sex|porn)\b/i,
-  /meet\s*(me|up)\s*(alone|secret|private)/i,
-];
+const TITLES: Record<AlertLevel, string> = {
+  none: "Clean",
+  level1: "Soft Flag — Tone",
+  level2: "Mild Language Noted",
+  level3: "Unkind Language Detected",
+  level4: "High Priority — Review Required",
+  level5: "Critical — Message Blocked",
+};
 
-const LEVEL4_PATTERNS = [
-  /\b(kill|murder|suicide|die|dead)\b/i,
-  /\b(drugs?|weed|cocaine|meth)\b/i,
-  /\bgun\b/i,
-];
+const LEET_MAP: Record<string, string> = {
+  "0": "o",
+  "1": "i",
+  "3": "e",
+  "4": "a",
+  "5": "s",
+  "7": "t",
+  "8": "b",
+  "@": "a",
+  "$": "s",
+  "!": "i",
+  "+": "t",
+  "*": "",
+  "#": "",
+};
 
-const LEVEL3_PATTERNS = [
-  /\b(stupid|idiot|dumb|loser|ugly|fat)\b/i,
-  /\b(hate|shut\s*up)\b/i,
-  /\bsuck(s)?\b/i,
-];
+function normalizeLeetSpeak(text: string): string {
+  let result = "";
+  for (const ch of text) {
+    result += LEET_MAP[ch] ?? ch;
+  }
+  return result;
+}
 
-const LEVEL2_PATTERNS = [
-  /\b(crap|butt|pee|poop|fart)\b/i,
-  /\b(heck|darn|dang|gosh)\b/i,
-];
+function removeSpacingEvasion(text: string): string {
+  return text.replace(/(\w)\s+(?=\w(?:\s+\w)*\b)/g, (match) => {
+    const collapsed = match.replace(/\s+/g, "");
+    if (collapsed.length <= 8) return collapsed;
+    return match;
+  });
+}
 
-const LEVEL1_PATTERNS = [
-  /\b(whatever|idc|idk|bruh)\b/i,
-];
+function normalizeRepeats(text: string): string {
+  return text.replace(/(.)\1{2,}/g, "$1$1");
+}
+
+function normalizeUnicode(text: string): string {
+  return text
+    .replace(/[\u0430]/g, "a") // Cyrillic а
+    .replace(/[\u0435]/g, "e") // Cyrillic е
+    .replace(/[\u043E]/g, "o") // Cyrillic о
+    .replace(/[\u0440]/g, "p") // Cyrillic р
+    .replace(/[\u0441]/g, "c") // Cyrillic с
+    .replace(/[\u0445]/g, "x") // Cyrillic х
+    .replace(/[\u0443]/g, "y") // Cyrillic у
+    .replace(/[\u200B-\u200D\uFEFF]/g, ""); // zero-width chars
+}
+
+function prepareVariants(content: string): string[] {
+  const original = content;
+  const lower = content.toLowerCase();
+  const noSpecial = lower.replace(/[.\-_~*#@!$%^&()]/g, "");
+  const leetDecoded = normalizeLeetSpeak(lower);
+  const noSpacing = removeSpacingEvasion(lower);
+  const noRepeats = normalizeRepeats(lower);
+  const unicodeNorm = normalizeUnicode(lower);
+  const combined = normalizeRepeats(normalizeLeetSpeak(removeSpacingEvasion(normalizeUnicode(lower))));
+
+  const variants = new Set([original, lower, noSpecial, leetDecoded, noSpacing, noRepeats, unicodeNorm, combined]);
+  return Array.from(variants);
+}
+
+function matchDictionary(variants: string[], entries: DictionaryEntry[]): DictionaryEntry | null {
+  for (const entry of entries) {
+    for (const variant of variants) {
+      if (entry.pattern.test(variant)) {
+        return entry;
+      }
+    }
+  }
+  return null;
+}
 
 export function scanContent(content: string): ScanResult {
-  for (const pattern of LEVEL5_PATTERNS) {
-    if (pattern.test(content)) {
-      return {
-        alertLevel: "level5",
-        reason: "Explicit or dangerous content detected. Message blocked.",
-        title: "Critical — Message Blocked",
-      };
-    }
-  }
+  const variants = prepareVariants(content);
 
-  for (const pattern of LEVEL4_PATTERNS) {
-    if (pattern.test(content)) {
-      return {
-        alertLevel: "level4",
-        reason: "High-priority content flagged for immediate review.",
-        title: "High Priority — Review Required",
-      };
-    }
-  }
+  const levels: AlertLevel[] = ["level5", "level4", "level3", "level2", "level1"];
 
-  for (const pattern of LEVEL3_PATTERNS) {
-    if (pattern.test(content)) {
+  for (const level of levels) {
+    const entries = CONTENT_DICTIONARY.filter(e => e.alertLevel === level);
+    const match = matchDictionary(variants, entries);
+    if (match) {
       return {
-        alertLevel: "level3",
-        reason: "Unkind or inappropriate language detected.",
-        title: "Unkind Language Detected",
-      };
-    }
-  }
-
-  for (const pattern of LEVEL2_PATTERNS) {
-    if (pattern.test(content)) {
-      return {
-        alertLevel: "level2",
-        reason: "Mild language flagged for awareness.",
-        title: "Mild Language Noted",
-      };
-    }
-  }
-
-  for (const pattern of LEVEL1_PATTERNS) {
-    if (pattern.test(content)) {
-      return {
-        alertLevel: "level1",
-        reason: "Casual tone detected. Message delivered.",
-        title: "Soft Flag — Tone",
+        alertLevel: match.alertLevel,
+        reason: match.reason,
+        title: TITLES[match.alertLevel],
+        category: match.category,
       };
     }
   }
@@ -87,6 +110,6 @@ export function scanContent(content: string): ScanResult {
   return {
     alertLevel: "none",
     reason: null,
-    title: "Clean",
+    title: TITLES.none,
   };
 }

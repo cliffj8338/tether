@@ -96,6 +96,16 @@ The contact system allows children to have contacts that are initially pending a
 # External Dependencies
 
 - **Anthropic AI**: Via Replit AI Integrations proxy, using `claude-haiku-4-5` for content moderation.
+
+## Content Moderation (Two-Pass Hybrid)
+
+Tether uses a two-pass hybrid content filtering system for all child messages:
+
+**Pass 1 — Pattern-based dictionary** (`content-dictionary.ts` + `content-filter.ts`): 131 curated regex entries across 5 severity tiers covering sexual/explicit content, grooming patterns, violence/weapons, self-harm/suicide, drugs/alcohol/vaping, racial/ethnic/homophobic slurs, bullying/insults, cyberbullying tactics, peer pressure, profanity, crude humor, and trending youth slang. Includes evasion detection: leetspeak decoding, spacing normalization, repeated character collapsing, and Unicode homoglyph normalization.
+
+**Pass 2 — AI analysis** (`ai-content-filter.ts`): Claude Haiku contextual analysis for nuance, slang interpretation, subtle bullying, and grooming pattern detection. Includes optional Faith Mode layer. On AI failure, defaults to level2 (flagged for review) instead of passing messages through.
+
+The final verdict uses the higher severity from either pass. Level 5 messages are blocked (never delivered); Level 4+ triggers push + SMS alerts to parents.
 - **Expo Notifications**: For push notifications to mobile devices.
 - **Twilio**: Via Replit connector (`conn_twilio_01KMC6SHEP3313FJVQE7HJXC92`) for SMS alerts.
 - **RevenueCat**: Via Replit connector ("Tether" project `projd5c73dce`) for subscription management, utilizing `react-native-purchases`.
