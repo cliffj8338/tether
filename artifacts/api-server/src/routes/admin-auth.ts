@@ -1,11 +1,20 @@
 import { Router, type IRouter } from "express";
 import crypto from "crypto";
+import rateLimit from "express-rate-limit";
 import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { verifyFirebaseToken } from "../lib/firebase-admin";
 
 const router: IRouter = Router();
+
+const showcaseLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many login attempts. Try again in 15 minutes." },
+});
 
 const SHOWCASE_TOKEN = `showcase_${crypto.randomBytes(24).toString("hex")}`;
 
@@ -73,7 +82,7 @@ router.post("/admin/auth/verify", async (req, res) => {
   }
 });
 
-router.post("/admin/auth/showcase", async (req, res) => {
+router.post("/admin/auth/showcase", showcaseLoginLimiter, async (req, res) => {
   try {
     const { accessCode } = req.body;
     const expectedCode = process.env.SHOWCASE_ACCESS_CODE;

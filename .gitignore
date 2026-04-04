@@ -47,3 +47,6 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Firebase service account keys (use env vars instead)
+attached_assets/*firebase*.json

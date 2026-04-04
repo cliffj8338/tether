@@ -70,7 +70,16 @@ A system for child enrollment using unique `TETHER-XXXXXX` family codes. Parents
 
 ## Security Hardening
 
-Security measures include bcrypt hashing for passwords (10 rounds), opaque auth tokens, in-memory rate limiting on authentication routes, and comprehensive account lifecycle management (forgot password, reset password, delete account).
+Security measures include:
+- **Helmet**: Full security header suite (X-Content-Type-Options, HSTS, X-Frame-Options, etc.) with CSP disabled for SPA compatibility
+- **CORS**: Origin-restricted to `*.replit.dev`, `*.replit.app`, `localhost`, and `tetherapp.app` (no wildcard)
+- **Rate Limiting**: Global (500 req/15min), analytics (60 req/min), showcase login (10 req/15min), auth routes (in-memory per-IP)
+- **IDOR Prevention**: Conversation ownership verified on GET/POST messages; parent→child relationship verified on childId queries
+- **Password Reset**: Timing-safe comparison on reset codes; rate-limited reset attempts
+- **Bcrypt**: 10 rounds for password hashing with opaque auth tokens
+- **Firebase Credentials**: Service account key stored in Replit Secrets only (JSON files removed from attached_assets, gitignored)
+- **Blueprint API Key**: Moved from hardcoded to `VITE_BLUEPRINT_API_KEY` environment variable
+- **AI Query Sandboxing**: SQL sanitization with forbidden keyword list, PII pattern detection, forced LIMIT 25, SELECT-only enforcement
 
 ## Subscription Feature Gating
 

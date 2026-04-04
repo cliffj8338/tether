@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { conversationsTable, contactsTable, usersTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { getUserFromToken } from "../lib/auth";
 
 const router: IRouter = Router();
@@ -17,6 +17,18 @@ router.get("/conversations", async (req, res) => {
     let convos;
     if (req.query.childId) {
       const childId = parseInt(req.query.childId as string);
+      if (user.role === "parent") {
+        const [child] = await db.select({ id: usersTable.id }).from(usersTable).where(
+          and(eq(usersTable.id, childId), eq(usersTable.parentId, user.id))
+        );
+        if (!child) {
+          res.status(403).json({ error: "Not your child" });
+          return;
+        }
+      } else if (user.role === "child" && user.id !== childId) {
+        res.status(403).json({ error: "Forbidden" });
+        return;
+      }
       convos = await db.select().from(conversationsTable).where(
         eq(conversationsTable.childId, childId)
       );

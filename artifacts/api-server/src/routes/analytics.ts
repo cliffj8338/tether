@@ -1,9 +1,19 @@
 import { Router, type IRouter } from "express";
+import rateLimit from "express-rate-limit";
 import { db, analyticsEventsTable, sessionTrackingTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import crypto from "crypto";
 
 const router: IRouter = Router();
+
+const analyticsLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Rate limit exceeded" },
+});
+router.use(analyticsLimiter);
 
 function hashIp(ip: string): string {
   return crypto.createHash("sha256").update(ip + "tether-salt").digest("hex").slice(0, 16);

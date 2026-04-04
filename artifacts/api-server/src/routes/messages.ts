@@ -12,6 +12,19 @@ import { analyzeMessage } from "../lib/message-intelligence";
 
 const router: IRouter = Router();
 
+async function verifyConversationAccess(userId: number, userRole: string, conversationId: number): Promise<boolean> {
+  const [convo] = await db.select({ childId: conversationsTable.childId }).from(conversationsTable).where(eq(conversationsTable.id, conversationId));
+  if (!convo) return false;
+  if (userRole === "child") return convo.childId === userId;
+  if (userRole === "parent") {
+    const [child] = await db.select({ id: usersTable.id }).from(usersTable).where(
+      and(eq(usersTable.id, convo.childId), eq(usersTable.parentId, userId))
+    );
+    return !!child;
+  }
+  return false;
+}
+
 router.get("/conversations/:conversationId/messages", async (req, res) => {
   try {
     const user = await getUserFromToken(req);
@@ -20,6 +33,12 @@ router.get("/conversations/:conversationId/messages", async (req, res) => {
       return;
     }
     const conversationId = parseInt(req.params.conversationId);
+
+    if (!(await verifyConversationAccess(user.id, user.role, conversationId))) {
+      res.status(403).json({ error: "Access denied" });
+      return;
+    }
+
     const limit = parseInt(req.query.limit as string) || 50;
     const before = req.query.before ? parseInt(req.query.before as string) : undefined;
 
@@ -63,6 +82,12 @@ router.post("/conversations/:conversationId/messages", async (req, res) => {
       return;
     }
     const conversationId = parseInt(req.params.conversationId);
+
+    if (!(await verifyConversationAccess(user.id, user.role, conversationId))) {
+      res.status(403).json({ error: "Access denied" });
+      return;
+    }
+
     const { content } = req.body;
     if (!content || typeof content !== "string") {
       res.status(400).json({ error: "content is required" });

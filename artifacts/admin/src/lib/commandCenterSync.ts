@@ -11,7 +11,7 @@
  */
 
 const BLUEPRINT_PROJECT_ID = 'work-blueprint';
-const BLUEPRINT_API_KEY    = 'AIzaSyBO703p11FdLojH6ogB50XrxoFVy_7bHLE';
+const BLUEPRINT_API_KEY    = import.meta.env.VITE_BLUEPRINT_API_KEY || '';
 const FIRESTORE_BASE       =
   `https://firestore.googleapis.com/v1/projects/${BLUEPRINT_PROJECT_ID}/databases/(default)/documents`;
 

@@ -366,12 +366,12 @@ router.post("/auth/reset-password", async (req, res) => {
       return;
     }
 
-    if (!user.resetToken.startsWith(code.toLowerCase().slice(0, 8))) {
-      const upperMatch = user.resetToken.slice(0, 8).toUpperCase() === code.toUpperCase();
-      if (!upperMatch) {
-        res.status(400).json({ error: "Invalid reset code" });
-        return;
-      }
+    const codeNormalized = code.toUpperCase().trim();
+    const expectedCode = user.resetToken.slice(0, 8).toUpperCase();
+    if (codeNormalized.length !== expectedCode.length ||
+        !crypto.timingSafeEqual(Buffer.from(codeNormalized), Buffer.from(expectedCode))) {
+      res.status(400).json({ error: "Invalid reset code" });
+      return;
     }
 
     const hashedPassword = await hashPassword(newPassword);
