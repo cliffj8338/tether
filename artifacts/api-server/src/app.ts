@@ -8,6 +8,10 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+// Running behind Replit's reverse proxy — trust the first hop so
+// express-rate-limit keys on the real client IP, not the proxy's.
+app.set("trust proxy", 1);
+
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
@@ -38,7 +42,7 @@ const allowedOriginPatterns = [
   /^https?:\/\/[^/]*\.replit\.app(:\d+)?$/,
   /^https?:\/\/localhost(:\d+)?$/,
   /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
-  /^https?:\/\/[^/]*\.tetherapp\.app(:\d+)?$/,
+  /^https?:\/\/([^/]*\.)?tetherapp\.app(:\d+)?$/,
 ];
 app.use(cors({
   origin: (origin, callback) => {

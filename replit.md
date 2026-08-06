@@ -64,6 +64,10 @@ A research-grade analytics platform integrated into the API server. It includes 
 
 Tether employs a dual-layer data architecture to prevent PII co-mingling with analytics data. The **PII Layer** contains identifiable data, accessible only by the child's parent, with strong encryption and no admin access. The **Anonymized Intelligence Layer** strips all PII, ensuring no foreign keys or reverse-lookups to the PII layer, and is used for platform health and research. An automated PII firewall audit system verifies no cross-layer links and blocks violations. Parents can opt-in to contribute anonymized data.
 
+## Evergreen Demo Data
+
+Demo data is seeded with timestamps relative to seed time, so time-windowed dashboard metrics go stale. `lib/demo-refresh.ts` auto-rolls all demo timestamps forward when drift exceeds 24h (checked at boot and every 6h; manual trigger via `POST /api/admin/ops/seed-demo/refresh`). It runs as a single atomic PL/pgSQL block guarded by a Postgres advisory lock, only when >100 demo users exist, scoped to demo-owned rows (`%@demo.tether.app` parents and their children); aggregate seed-only tables use a past-only guard so real recent rows are never rewritten.
+
 ## Family Code Enrollment
 
 A system for child enrollment using unique `TETHER-XXXXXX` family codes. Parents receive codes upon registration, and children can join via code or parent email + PIN (bcrypt hashed).
